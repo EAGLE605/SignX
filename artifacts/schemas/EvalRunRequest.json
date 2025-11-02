@@ -1,0 +1,24 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "suite": {
+      "description": "Name of the golden test suite to run",
+      "title": "Suite",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "title": "Params",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "suite"
+  ],
+  "title": "EvalRunRequest",
+  "type": "object"
+}

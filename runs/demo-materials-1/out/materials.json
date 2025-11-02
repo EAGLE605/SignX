@@ -1,0 +1,193 @@
+{
+  "assumptions": [],
+  "blob_refs": [],
+  "confidence": 0.88,
+  "data_sha256": "492382bfe4873acd23cbdf3c58f0d6f40631bed28049a7f2ba2758cf773f205a",
+  "provenance": {
+    "agent": "materials",
+    "code_sha": "dev",
+    "finished_at": 1761960239.5874927,
+    "hostname": "CNC-1",
+    "inputs_hash": "a86fa44d0a4179e001046dce2858786fb4bb885bb2794ab727648cb7801f7c78",
+    "monotonic_ms": 0.03980001201853156,
+    "pid": 27516,
+    "queue_version": null,
+    "schema_version": "resp-1.0",
+    "started_at": 1761960239.5874176,
+    "version": "0.1.0"
+  },
+  "result": {
+    "caveats": [
+      "Using synthesized material dataset; results illustrative."
+    ],
+    "confidence": 0.88,
+    "contributions": [
+      {
+        "contribution": 50.0,
+        "normalized_value": 100.0,
+        "property": "strength",
+        "weight": 0.5
+      },
+      {
+        "contribution": 0.0,
+        "normalized_value": 0.0,
+        "property": "cost",
+        "weight": 0.3
+      },
+      {
+        "contribution": 13.333,
+        "normalized_value": 66.667,
+        "property": "corrosion",
+        "weight": 0.2
+      }
+    ],
+    "provenance": [
+      "synth"
+    ],
+    "task_id": "demo-materials-1",
+    "top_recommendations": [
+      {
+        "constraints_satisfied": [
+          "min_yield_mpa",
+          "corrosion_considered"
+        ],
+        "material": "Ti-6Al-4V",
+        "reason": "weighted sum of normalized properties",
+        "score": 63.333
+      },
+      {
+        "constraints_satisfied": [
+          "min_yield_mpa",
+          "corrosion_considered"
+        ],
+        "material": "7075-T6 Al",
+        "reason": "weighted sum of normalized properties",
+        "score": 51.629
+      },
+      {
+        "constraints_satisfied": [
+          "min_yield_mpa",
+          "corrosion_considered"
+        ],
+        "material": "6061-T6 Al",
+        "reason": "weighted sum of normalized properties",
+        "score": 44.621
+      },
+      {
+        "constraints_satisfied": [
+          "corrosion_considered"
+        ],
+        "material": "316L SS",
+        "reason": "weighted sum of normalized properties",
+        "score": 42.5
+      },
+      {
+        "constraints_satisfied": [
+          "corrosion_considered"
+        ],
+        "material": "304 SS",
+        "reason": "weighted sum of normalized properties",
+        "score": 40.742
+      }
+    ]
+  },
+  "schema_version": "resp-1.0",
+  "trace": {
+    "code_version": {
+      "build_id": null,
+      "dirty": false,
+      "git_sha": "dev"
+    },
+    "data": {
+      "inputs": {},
+      "intermediates": {},
+      "outputs": {
+        "caveats": [
+          "Using synthesized material dataset; results illustrative."
+        ],
+        "confidence": 0.88,
+        "contributions": [
+          {
+            "contribution": 50.0,
+            "normalized_value": 100.0,
+            "property": "strength",
+            "weight": 0.5
+          },
+          {
+            "contribution": 0.0,
+            "normalized_value": 0.0,
+            "property": "cost",
+            "weight": 0.3
+          },
+          {
+            "contribution": 13.333,
+            "normalized_value": 66.667,
+            "property": "corrosion",
+            "weight": 0.2
+          }
+        ],
+        "provenance": [
+          "synth"
+        ],
+        "task_id": "demo-materials-1",
+        "top_recommendations": [
+          {
+            "constraints_satisfied": [
+              "min_yield_mpa",
+              "corrosion_considered"
+            ],
+            "material": "Ti-6Al-4V",
+            "reason": "weighted sum of normalized properties",
+            "score": 63.333
+          },
+          {
+            "constraints_satisfied": [
+              "min_yield_mpa",
+              "corrosion_considered"
+            ],
+            "material": "7075-T6 Al",
+            "reason": "weighted sum of normalized properties",
+            "score": 51.629
+          },
+          {
+            "constraints_satisfied": [
+              "min_yield_mpa",
+              "corrosion_considered"
+            ],
+            "material": "6061-T6 Al",
+            "reason": "weighted sum of normalized properties",
+            "score": 44.621
+          },
+          {
+            "constraints_satisfied": [
+              "corrosion_considered"
+            ],
+            "material": "316L SS",
+            "reason": "weighted sum of normalized properties",
+            "score": 42.5
+          },
+          {
+            "constraints_satisfied": [
+              "corrosion_considered"
+            ],
+            "material": "304 SS",
+            "reason": "weighted sum of normalized properties",
+            "score": 40.742
+          }
+        ]
+      }
+    },
+    "ids": {
+      "parent_span_id": null,
+      "span_id": "492382bfe4873acd",
+      "trace_id": "a86fa44d0a4179e0"
+    },
+    "model_config": {
+      "max_tokens": 1,
+      "model": "materials",
+      "provider": "apex",
+      "seed": 0,
+      "temperature": 0.0
+    }
+  }
+}

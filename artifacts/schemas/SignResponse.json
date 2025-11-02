@@ -1,0 +1,396 @@
+{
+  "$defs": {
+    "BomItem": {
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "quantity": {
+          "default": 1.0,
+          "title": "Quantity",
+          "type": "number"
+        },
+        "unit": {
+          "default": "ea",
+          "title": "Unit",
+          "type": "string"
+        },
+        "manufacturer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manufacturer"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "ul_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ul Category"
+        },
+        "ul_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ul File"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ],
+      "title": "BomItem",
+      "type": "object"
+    },
+    "ComplianceFinding": {
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "requirement": {
+          "title": "Requirement",
+          "type": "string"
+        },
+        "satisfied": {
+          "title": "Satisfied",
+          "type": "boolean"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        }
+      },
+      "required": [
+        "source",
+        "requirement",
+        "satisfied"
+      ],
+      "title": "ComplianceFinding",
+      "type": "object"
+    },
+    "ElectricalSpec": {
+      "properties": {
+        "disconnect": {
+          "title": "Disconnect",
+          "type": "string"
+        },
+        "max_input_current_A": {
+          "title": "Max Input Current A",
+          "type": "number"
+        },
+        "branch_circuit_A": {
+          "title": "Branch Circuit A",
+          "type": "number"
+        },
+        "listing_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Listing Category"
+        },
+        "required_field_labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Field Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "disconnect",
+        "max_input_current_A",
+        "branch_circuit_A"
+      ],
+      "title": "ElectricalSpec",
+      "type": "object"
+    },
+    "GraphicsSpec": {
+      "properties": {
+        "legend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Legend"
+        },
+        "letter_height_mm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Letter Height Mm"
+        },
+        "contrast": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contrast"
+        },
+        "format_standard": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Format Standard"
+        }
+      },
+      "title": "GraphicsSpec",
+      "type": "object"
+    },
+    "MechanicalSpec": {
+      "properties": {
+        "mounting_pattern": {
+          "title": "Mounting Pattern",
+          "type": "string"
+        },
+        "min_fastener_grade": {
+          "title": "Min Fastener Grade",
+          "type": "string"
+        },
+        "sealants": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sealants",
+          "type": "array"
+        },
+        "gasket_material": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gasket Material"
+        }
+      },
+      "required": [
+        "mounting_pattern",
+        "min_fastener_grade"
+      ],
+      "title": "MechanicalSpec",
+      "type": "object"
+    },
+    "RiskItem": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "mitigation": {
+          "title": "Mitigation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "severity",
+        "mitigation"
+      ],
+      "title": "RiskItem",
+      "type": "object"
+    },
+    "Spec": {
+      "properties": {
+        "materials": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Materials",
+          "type": "array"
+        },
+        "finishes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Finishes",
+          "type": "array"
+        },
+        "ip_rating_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ip Rating Target"
+        },
+        "enclosure_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enclosure Class"
+        }
+      },
+      "required": [
+        "materials",
+        "finishes"
+      ],
+      "title": "Spec",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "spec": {
+      "$ref": "#/$defs/Spec"
+    },
+    "electrical_spec": {
+      "$ref": "#/$defs/ElectricalSpec"
+    },
+    "mechanical_spec": {
+      "$ref": "#/$defs/MechanicalSpec"
+    },
+    "graphics_spec": {
+      "$ref": "#/$defs/GraphicsSpec"
+    },
+    "bom": {
+      "items": {
+        "$ref": "#/$defs/BomItem"
+      },
+      "title": "Bom",
+      "type": "array"
+    },
+    "cad_macro": {
+      "title": "Cad Macro",
+      "type": "string"
+    },
+    "install_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Install Notes",
+      "type": "array"
+    },
+    "compliance": {
+      "items": {
+        "$ref": "#/$defs/ComplianceFinding"
+      },
+      "title": "Compliance",
+      "type": "array"
+    },
+    "risks": {
+      "items": {
+        "$ref": "#/$defs/RiskItem"
+      },
+      "title": "Risks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "spec",
+    "electrical_spec",
+    "mechanical_spec",
+    "graphics_spec",
+    "bom",
+    "cad_macro",
+    "install_notes",
+    "compliance",
+    "risks"
+  ],
+  "title": "SignResponse",
+  "type": "object"
+}

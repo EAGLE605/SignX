@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "query": {
+      "description": "Natural language part query",
+      "title": "Query",
+      "type": "string"
+    },
+    "hard_constraints": {
+      "additionalProperties": true,
+      "title": "Hard Constraints",
+      "type": "object"
+    },
+    "soft_constraints": {
+      "additionalProperties": true,
+      "title": "Soft Constraints",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "query"
+  ],
+  "title": "PartsQueryRequest",
+  "type": "object"
+}

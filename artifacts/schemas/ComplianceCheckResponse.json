@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "severity": {
+      "title": "Severity",
+      "type": "string"
+    },
+    "required_actions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Actions",
+      "type": "array"
+    },
+    "audit_trail": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Audit Trail",
+      "type": "array"
+    },
+    "signed_checksum": {
+      "title": "Signed Checksum",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "flags",
+    "severity",
+    "required_actions",
+    "audit_trail",
+    "signed_checksum"
+  ],
+  "title": "ComplianceCheckResponse",
+  "type": "object"
+}

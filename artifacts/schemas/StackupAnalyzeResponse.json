@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "HistogramBucket": {
+      "properties": {
+        "bin_center": {
+          "title": "Bin Center",
+          "type": "number"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bin_center",
+        "count"
+      ],
+      "title": "HistogramBucket",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "mean": {
+      "title": "Mean",
+      "type": "number"
+    },
+    "sigma": {
+      "title": "Sigma",
+      "type": "number"
+    },
+    "cpk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cpk"
+    },
+    "ppk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ppk"
+    },
+    "pass_prob": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pass Prob"
+    },
+    "histogram": {
+      "items": {
+        "$ref": "#/$defs/HistogramBucket"
+      },
+      "title": "Histogram",
+      "type": "array"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "task_id",
+    "mean",
+    "sigma",
+    "histogram",
+    "confidence"
+  ],
+  "title": "StackupAnalyzeResponse",
+  "type": "object"
+}

@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "WeightVector": {
+      "description": "Weights for scoring properties. Must sum to 1.0 in the agent.\n\nValues are floats in [0, 1]. The agent will normalize if slightly off due to\nrounding; the orchestrator does not compute domain logic.",
+      "properties": {
+        "cost": {
+          "default": 0.0,
+          "description": "Weight for cost (lower is better)",
+          "title": "Cost",
+          "type": "number"
+        },
+        "strength": {
+          "default": 0.0,
+          "description": "Weight for strength/yield",
+          "title": "Strength",
+          "type": "number"
+        },
+        "corrosion": {
+          "default": 0.0,
+          "description": "Weight for corrosion resistance",
+          "title": "Corrosion",
+          "type": "number"
+        }
+      },
+      "title": "WeightVector",
+      "type": "object"
+    }
+  },
+  "description": "Request to select materials based on weighted criteria.",
+  "properties": {
+    "task_id": {
+      "description": "Unique task identifier",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "application": {
+      "description": "Short description of the part/use",
+      "title": "Application",
+      "type": "string"
+    },
+    "key_requirements": {
+      "description": "List of qualitative requirements",
+      "items": {
+        "type": "string"
+      },
+      "title": "Key Requirements",
+      "type": "array"
+    },
+    "min_yield_mpa": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Minimum required yield strength in MPa",
+      "title": "Min Yield Mpa"
+    },
+    "weights": {
+      "$ref": "#/$defs/WeightVector",
+      "description": "Weights for scoring"
+    }
+  },
+  "required": [
+    "task_id",
+    "application",
+    "weights"
+  ],
+  "title": "MaterialPickRequest",
+  "type": "object"
+}

@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "description": {
+      "description": "Part/process description",
+      "title": "Description",
+      "type": "string"
+    },
+    "process": {
+      "description": "Process type, e.g., 'sheet_metal' | 'machining' | '3dp'",
+      "title": "Process",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "description": "Process-specific params",
+      "title": "Params",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "description",
+    "process"
+  ],
+  "title": "DFMAEvaluateRequest",
+  "type": "object"
+}

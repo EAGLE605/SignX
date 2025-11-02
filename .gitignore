@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Envs
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# Docker
+**/requirements.txt
+**/.python_packages/
+
+# Misc
+.DS_Store
+.env
+.env.*
+**/.ipynb_checkpoints/
+
+
+nul

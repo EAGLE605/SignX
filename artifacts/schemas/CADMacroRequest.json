@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "target": {
+      "enum": [
+        "freecad",
+        "solidworks"
+      ],
+      "title": "Target",
+      "type": "string"
+    },
+    "primitives": {
+      "description": "Operations in order, e.g., pad, pocket, fillet",
+      "items": {
+        "type": "string"
+      },
+      "title": "Primitives",
+      "type": "array"
+    },
+    "constraints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraints",
+      "type": "array"
+    },
+    "dims": {
+      "additionalProperties": true,
+      "description": "Dimension map with units",
+      "title": "Dims",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "target",
+    "primitives"
+  ],
+  "title": "CADMacroRequest",
+  "type": "object"
+}

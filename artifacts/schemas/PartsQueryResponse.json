@@ -1,0 +1,79 @@
+{
+  "$defs": {
+    "PartMatch": {
+      "properties": {
+        "part_id": {
+          "title": "Part Id",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "specs": {
+          "additionalProperties": true,
+          "title": "Specs",
+          "type": "object"
+        },
+        "dataset_path": {
+          "title": "Dataset Path",
+          "type": "string"
+        },
+        "row_id": {
+          "title": "Row Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "part_id",
+        "score",
+        "specs",
+        "dataset_path",
+        "row_id"
+      ],
+      "title": "PartMatch",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "top_matches": {
+      "items": {
+        "$ref": "#/$defs/PartMatch"
+      },
+      "title": "Top Matches",
+      "type": "array"
+    },
+    "normalized_spec": {
+      "additionalProperties": true,
+      "title": "Normalized Spec",
+      "type": "object"
+    },
+    "retrieval_provenance": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Retrieval Provenance",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "task_id",
+    "top_matches",
+    "normalized_spec",
+    "confidence"
+  ],
+  "title": "PartsQueryResponse",
+  "type": "object"
+}

@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "context": {
+      "description": "Textual description or artifact refs",
+      "title": "Context",
+      "type": "string"
+    },
+    "inputs": {
+      "additionalProperties": true,
+      "title": "Inputs",
+      "type": "object"
+    },
+    "outputs": {
+      "additionalProperties": true,
+      "title": "Outputs",
+      "type": "object"
+    }
+  },
+  "required": [
+    "task_id",
+    "context"
+  ],
+  "title": "ComplianceCheckRequest",
+  "type": "object"
+}

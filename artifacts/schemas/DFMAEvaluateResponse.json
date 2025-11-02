@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "CostBreakdown": {
+      "properties": {
+        "material_cost": {
+          "title": "Material Cost",
+          "type": "number"
+        },
+        "process_cost": {
+          "title": "Process Cost",
+          "type": "number"
+        },
+        "setup_cost": {
+          "title": "Setup Cost",
+          "type": "number"
+        },
+        "penalty_cost": {
+          "title": "Penalty Cost",
+          "type": "number"
+        }
+      },
+      "required": [
+        "material_cost",
+        "process_cost",
+        "setup_cost",
+        "penalty_cost"
+      ],
+      "title": "CostBreakdown",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "violations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Violations",
+      "type": "array"
+    },
+    "suggestions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Suggestions",
+      "type": "array"
+    },
+    "estimated_unit_cost": {
+      "title": "Estimated Unit Cost",
+      "type": "number"
+    },
+    "breakdown": {
+      "$ref": "#/$defs/CostBreakdown"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "task_id",
+    "violations",
+    "suggestions",
+    "estimated_unit_cost",
+    "breakdown",
+    "confidence"
+  ],
+  "title": "DFMAEvaluateResponse",
+  "type": "object"
+}

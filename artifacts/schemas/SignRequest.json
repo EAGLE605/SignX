@@ -1,0 +1,223 @@
+{
+  "$defs": {
+    "Dimensions": {
+      "properties": {
+        "w_mm": {
+          "minimum": 0.0,
+          "title": "W Mm",
+          "type": "number"
+        },
+        "h_mm": {
+          "minimum": 0.0,
+          "title": "H Mm",
+          "type": "number"
+        },
+        "d_mm": {
+          "minimum": 0.0,
+          "title": "D Mm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "w_mm",
+        "h_mm",
+        "d_mm"
+      ],
+      "title": "Dimensions",
+      "type": "object"
+    },
+    "ElectricalInput": {
+      "properties": {
+        "primary_voltage": {
+          "description": "Line voltage in VAC",
+          "title": "Primary Voltage",
+          "type": "number"
+        },
+        "phase": {
+          "enum": [
+            "single",
+            "three"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "available_circuit_A": {
+          "minimum": 0.0,
+          "title": "Available Circuit A",
+          "type": "number"
+        }
+      },
+      "required": [
+        "primary_voltage",
+        "phase",
+        "available_circuit_A"
+      ],
+      "title": "ElectricalInput",
+      "type": "object"
+    },
+    "Jurisdiction": {
+      "properties": {
+        "country": {
+          "title": "Country",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        },
+        "county": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "County"
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "City"
+        }
+      },
+      "required": [
+        "country"
+      ],
+      "title": "Jurisdiction",
+      "type": "object"
+    },
+    "MountingParams": {
+      "properties": {
+        "type": {
+          "enum": [
+            "wall",
+            "raceway",
+            "suspended",
+            "monument_base",
+            "pole/pylon"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "MountingParams",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "naics_code": {
+      "const": "339950",
+      "title": "Naics Code",
+      "type": "string"
+    },
+    "use_case": {
+      "enum": [
+        "storefront",
+        "monument",
+        "pylon",
+        "channel_letters",
+        "cabinet",
+        "menu_board",
+        "wayfinding",
+        "traffic"
+      ],
+      "title": "Use Case",
+      "type": "string"
+    },
+    "illumination": {
+      "enum": [
+        "none",
+        "external",
+        "internal-LED",
+        "neon"
+      ],
+      "title": "Illumination",
+      "type": "string"
+    },
+    "electrical": {
+      "$ref": "#/$defs/ElectricalInput"
+    },
+    "environment": {
+      "enum": [
+        "indoor",
+        "outdoor",
+        "coastal",
+        "high-wind",
+        "cold-soak",
+        "high-temp"
+      ],
+      "title": "Environment",
+      "type": "string"
+    },
+    "dimensions": {
+      "$ref": "#/$defs/Dimensions"
+    },
+    "mounting": {
+      "$ref": "#/$defs/MountingParams"
+    },
+    "jurisdiction": {
+      "$ref": "#/$defs/Jurisdiction"
+    },
+    "labels_required": {
+      "default": true,
+      "title": "Labels Required",
+      "type": "boolean"
+    },
+    "traffic_control_context": {
+      "default": false,
+      "title": "Traffic Control Context",
+      "type": "boolean"
+    },
+    "provenance": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provenance"
+    }
+  },
+  "required": [
+    "naics_code",
+    "use_case",
+    "illumination",
+    "electrical",
+    "environment",
+    "dimensions",
+    "mounting",
+    "jurisdiction"
+  ],
+  "title": "SignRequest",
+  "type": "object"
+}

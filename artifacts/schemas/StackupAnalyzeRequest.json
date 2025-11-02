@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "Feature": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "nominal": {
+          "title": "Nominal",
+          "type": "number"
+        },
+        "tol_plus": {
+          "minimum": 0.0,
+          "title": "Tol Plus",
+          "type": "number"
+        },
+        "tol_minus": {
+          "minimum": 0.0,
+          "title": "Tol Minus",
+          "type": "number"
+        },
+        "distribution": {
+          "default": "normal",
+          "enum": [
+            "normal",
+            "uniform"
+          ],
+          "title": "Distribution",
+          "type": "string"
+        },
+        "correlation_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Group name for correlated features",
+          "title": "Correlation Group"
+        }
+      },
+      "required": [
+        "name",
+        "nominal",
+        "tol_plus",
+        "tol_minus"
+      ],
+      "title": "Feature",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "features": {
+      "items": {
+        "$ref": "#/$defs/Feature"
+      },
+      "title": "Features",
+      "type": "array"
+    },
+    "sample_size": {
+      "default": 10000,
+      "maximum": 50000,
+      "minimum": 1,
+      "title": "Sample Size",
+      "type": "integer"
+    },
+    "lower_spec": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lower Spec"
+    },
+    "upper_spec": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Upper Spec"
+    }
+  },
+  "required": [
+    "task_id",
+    "description",
+    "features"
+  ],
+  "title": "StackupAnalyzeRequest",
+  "type": "object"
+}

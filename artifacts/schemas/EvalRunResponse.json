@@ -1,0 +1,65 @@
+{
+  "$defs": {
+    "Metric": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Threshold"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "Metric",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/Metric"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "artifacts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "failed": {
+      "default": false,
+      "title": "Failed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "task_id",
+    "metrics"
+  ],
+  "title": "EvalRunResponse",
+  "type": "object"
+}

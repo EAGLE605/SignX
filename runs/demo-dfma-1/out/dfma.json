@@ -1,0 +1,77 @@
+{
+  "assumptions": [],
+  "blob_refs": [],
+  "confidence": 0.8,
+  "data_sha256": "cab2b782b618dd6fa9b4fe8b808840438372feecac50c2cdc2629479113235cf",
+  "provenance": {
+    "agent": "dfma",
+    "code_sha": "dev",
+    "finished_at": 1761959996.5296414,
+    "hostname": "CNC-1",
+    "inputs_hash": "a786ad3c3b8e27400da4c054764c83973f6a1ea64f05d0d413f5ab7af3baafbd",
+    "monotonic_ms": 0.03239998477511108,
+    "pid": 38864,
+    "queue_version": null,
+    "schema_version": "resp-1.0",
+    "started_at": 1761959996.5294907,
+    "version": "0.1.0"
+  },
+  "result": {
+    "breakdown": {
+      "material_cost": 5000.0,
+      "penalty_cost": 10.0,
+      "process_cost": 5.0,
+      "setup_cost": 20.0
+    },
+    "confidence": 0.8,
+    "estimated_unit_cost": 1.01,
+    "suggestions": [
+      "Increase hole-to-edge distance to >= 1.5d."
+    ],
+    "task_id": "demo-dfma-1",
+    "violations": [
+      "hole_to_edge_violation"
+    ]
+  },
+  "schema_version": "resp-1.0",
+  "trace": {
+    "code_version": {
+      "build_id": null,
+      "dirty": false,
+      "git_sha": "dev"
+    },
+    "data": {
+      "inputs": {},
+      "intermediates": {},
+      "outputs": {
+        "breakdown": {
+          "material_cost": 5000.0,
+          "penalty_cost": 10.0,
+          "process_cost": 5.0,
+          "setup_cost": 20.0
+        },
+        "confidence": 0.8,
+        "estimated_unit_cost": 1.01,
+        "suggestions": [
+          "Increase hole-to-edge distance to >= 1.5d."
+        ],
+        "task_id": "demo-dfma-1",
+        "violations": [
+          "hole_to_edge_violation"
+        ]
+      }
+    },
+    "ids": {
+      "parent_span_id": null,
+      "span_id": "cab2b782b618dd6f",
+      "trace_id": "a786ad3c3b8e2740"
+    },
+    "model_config": {
+      "max_tokens": 1,
+      "model": "dfma",
+      "provider": "apex",
+      "seed": 0,
+      "temperature": 0.0
+    }
+  }
+}

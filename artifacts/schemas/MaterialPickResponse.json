@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "Contribution": {
+      "properties": {
+        "property": {
+          "title": "Property",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        },
+        "normalized_value": {
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Normalized Value",
+          "type": "number"
+        },
+        "contribution": {
+          "description": "weight * normalized_value",
+          "title": "Contribution",
+          "type": "number"
+        }
+      },
+      "required": [
+        "property",
+        "weight",
+        "normalized_value",
+        "contribution"
+      ],
+      "title": "Contribution",
+      "type": "object"
+    },
+    "Recommendation": {
+      "properties": {
+        "material": {
+          "title": "Material",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "constraints_satisfied": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints Satisfied",
+          "type": "array"
+        }
+      },
+      "required": [
+        "material",
+        "score",
+        "reason"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    }
+  },
+  "description": "Response containing ranked recommendations and explanations.",
+  "properties": {
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "top_recommendations": {
+      "items": {
+        "$ref": "#/$defs/Recommendation"
+      },
+      "title": "Top Recommendations",
+      "type": "array"
+    },
+    "contributions": {
+      "items": {
+        "$ref": "#/$defs/Contribution"
+      },
+      "title": "Contributions",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "caveats": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Caveats",
+      "type": "array"
+    },
+    "provenance": {
+      "description": "Data sources or references",
+      "items": {
+        "type": "string"
+      },
+      "title": "Provenance",
+      "type": "array"
+    }
+  },
+  "required": [
+    "task_id",
+    "top_recommendations",
+    "contributions",
+    "confidence"
+  ],
+  "title": "MaterialPickResponse",
+  "type": "object"
+}

@@ -23,8 +23,8 @@ except ImportError:
 class KeyedInScraper:
     """Scrape work orders from KeyedIn legacy CGI system"""
 
-    def __init__(self, username: str = None, password: str = None):
-        self.base_url = "https://eaglesign.keyedinsign.com/cgi-bin/mvi.exe"
+    def __init__(self, username: str = None, password: str = None, base_url: str = None):
+        self.base_url = base_url or os.getenv("KEYEDIN_BASE_URL", "https://eaglesign.keyedinsign.com") + "/cgi-bin/mvi.exe"
         self.username = username or os.getenv("KEYEDIN_USERNAME")
         self.password = password or os.getenv("KEYEDIN_PASSWORD")
 

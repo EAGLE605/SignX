@@ -1,0 +1,9 @@
+# Web scraping dependencies for SignX Platform
+# Install with: pip install -r requirements_scraping.txt
+
+# RSS Feed parsing (FREE - no API key needed)
+feedparser>=6.0.10
+html2text>=2020.1.16
+
+# Optional: Firecrawl for advanced scraping (requires API key)
+firecrawl-py>=0.0.1

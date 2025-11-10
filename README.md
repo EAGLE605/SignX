@@ -1,6 +1,8 @@
 # 🏗️ SignX Platform - The OSHCut of the Sign Industry
 
-**Status**: ✅ **Foundation Complete** | 🚀 **Ready to Deploy**
+**Status**: ✅ **Foundation Complete** | 🚀 **Ready to Deploy** | 📦 **On GitHub**
+
+**Repository**: https://github.com/EAGLE605/SignX
 
 > *"What OSHCut did for metal fabrication, SignX does for signs: instant online quoting, AI-powered automation, and 95 years of institutional knowledge at your fingertips."*
 

@@ -7,7 +7,6 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 import structlog
 
@@ -29,9 +28,9 @@ class ProviderHealth:
 
     provider: str
     status: ProviderStatus = ProviderStatus.UNKNOWN
-    last_check: Optional[float] = None
-    last_success: Optional[float] = None
-    last_failure: Optional[float] = None
+    last_check: float | None = None
+    last_success: float | None = None
+    last_failure: float | None = None
     failure_count: int = 0
     success_count: int = 0
     response_times: deque[float] = field(default_factory=lambda: deque(maxlen=100))
@@ -78,7 +77,7 @@ class CircuitBreaker:
         
         self.state = "closed"  # closed, open, half-open
         self.failure_count = 0
-        self.last_failure_time: Optional[float] = None
+        self.last_failure_time: float | None = None
         self.half_open_attempts_made = 0
     
     def record_success(self) -> None:
@@ -243,7 +242,7 @@ class AuthProviderHealthMonitor:
             return ProviderStatus.UNKNOWN
         return self.providers[provider].status
     
-    def get_provider_health(self, provider: str) -> Optional[ProviderHealth]:
+    def get_provider_health(self, provider: str) -> ProviderHealth | None:
         """Get full health metrics for a provider."""
         return self.providers.get(provider)
     
@@ -251,7 +250,7 @@ class AuthProviderHealthMonitor:
         """Get status of all providers."""
         return {name: health.status for name, health in self.providers.items()}
     
-    async def select_healthy_provider(self, preferred: Optional[str] = None) -> Optional[str]:
+    async def select_healthy_provider(self, preferred: str | None = None) -> str | None:
         """Select a healthy provider, preferring the specified one.
         
         Args:
@@ -283,7 +282,7 @@ class AuthProviderHealthMonitor:
 
 
 # Global health monitor instance
-_health_monitor: Optional[AuthProviderHealthMonitor] = None
+_health_monitor: AuthProviderHealthMonitor | None = None
 
 
 def get_health_monitor() -> AuthProviderHealthMonitor:

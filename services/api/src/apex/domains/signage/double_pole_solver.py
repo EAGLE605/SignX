@@ -18,25 +18,24 @@ Code Compliance:
 Determinism: All calculations are pure functions - same inputs always produce same outputs.
 """
 
-from typing import NamedTuple, Optional, Literal
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
+from typing import Literal, NamedTuple
 
 from apex.domains.signage.asce7_wind import (
-    calculate_wind_force_on_sign,
-    calculate_wind_moment_at_base,
     ExposureCategory,
     RiskCategory,
+    calculate_wind_force_on_sign,
+    calculate_wind_moment_at_base,
 )
 from apex.domains.signage.single_pole_solver import (
-    PoleSection,
-    E_STEEL_KSI,
     ASD_ALLOWABLE_BENDING_FACTOR,
     ASD_ALLOWABLE_SHEAR_FACTOR,
-    IBC_OVERTURNING_SAFETY_FACTOR_MIN,
     DEFLECTION_LIMIT_L_OVER,
+    E_STEEL_KSI,
+    IBC_OVERTURNING_SAFETY_FACTOR_MIN,
+    PoleSection,
 )
-
 
 LoadDistributionMethod = Literal["equal", "proportional"]
 
@@ -133,7 +132,7 @@ class DoublePoleResults(NamedTuple):
     passes_all_checks: bool
 
     # Critical failure mode
-    critical_failure_mode: Optional[str]
+    critical_failure_mode: str | None
 
     # Warnings and code references
     warnings: list[str]

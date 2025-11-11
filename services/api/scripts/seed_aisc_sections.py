@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Seed AISC sections database from Excel file."""
 
+import hashlib
 import os
 import sys
-import hashlib
 from pathlib import Path
 
 # Add parent directory to path for imports

@@ -65,6 +65,7 @@ dev-dependencies = [
 line-length = 100
 target-version = "py311"
 lint.select = ["E", "F", "I", "B", "UP"]
+extend-exclude = ["alembic/versions/*.py"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 import structlog
 from tenacity import (
+    after_log,
+    before_log,
     retry,
+    retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    retry_if_exception_type,
-    before_log,
-    after_log,
 )
 
 from ..deps import settings
@@ -76,7 +76,7 @@ async def index_project(project_id: str, project_data: dict[str, Any]) -> bool:
 
 
 @OPENSEARCH_RETRY
-async def _search_with_retry(query: dict[str, Any]) -> Optional[list[dict[str, Any]]]:
+async def _search_with_retry(query: dict[str, Any]) -> list[dict[str, Any]] | None:
     """Internal function to search with retry logic."""
     async with aiohttp.ClientSession() as session:
         url = f"{settings.OPENSEARCH_URL}/projects/_search"

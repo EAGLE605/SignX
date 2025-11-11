@@ -24,7 +24,7 @@ def benchmark_derive_loads():
     times = []
     for _ in range(1000):
         start = time.perf_counter()
-        result = derive_loads(site, cabinets, height_ft=25.0)
+        _ = derive_loads(site, cabinets, height_ft=25.0)
         elapsed = (time.perf_counter() - start) * 1000  # ms
         times.append(elapsed)
     
@@ -32,7 +32,7 @@ def benchmark_derive_loads():
     p95 = sorted(times)[int(0.95 * len(times))]
     p99 = sorted(times)[int(0.99 * len(times))]
     
-    print(f"\nderive_loads benchmark (1000 iterations):")
+    print("\nderive_loads benchmark (1000 iterations):")
     print(f"  Mean: {avg:.2f}ms")
     print(f"  P95: {p95:.2f}ms")
     print(f"  P99: {p99:.2f}ms")
@@ -58,9 +58,9 @@ def benchmark_filter_poles_vectorized():
         times.append(elapsed)
     
     avg = mean(times)
-    print(f"\nfilter_poles benchmark (100 iterations):")
+    print("\nfilter_poles benchmark (100 iterations):")
     print(f"  Mean: {avg:.2f}ms")
-    print(f"  Vectorized implementation")
+    print("  Vectorized implementation")
 
 
 @pytest.mark.benchmark
@@ -74,9 +74,9 @@ def benchmark_footing_solve_cached():
         times.append(elapsed)
     
     avg = mean(times)
-    print(f"\nfooting_solve benchmark (100 iterations, memoized):")
+    print("\nfooting_solve benchmark (100 iterations, memoized):")
     print(f"  Mean: {avg:.2f}ms")
-    print(f"  First call populates cache, subsequent calls are fast")
+    print("  First call populates cache, subsequent calls are fast")
 
 
 if __name__ == "__main__":

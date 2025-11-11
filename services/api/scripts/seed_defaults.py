@@ -9,10 +9,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sqlalchemy import create_engine, text
-
 # Import psycopg2 for synchronous database operations
-import psycopg2
+from sqlalchemy import create_engine, text
 
 
 def seed_constants():

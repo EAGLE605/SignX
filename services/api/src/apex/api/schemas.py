@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,13 +10,13 @@ class ModelConfigModel(BaseModel):
     model: str = Field(..., description="Model name")
     temperature: float = Field(..., ge=0.0, le=1.0)
     max_tokens: int = Field(..., ge=1)
-    seed: Optional[int] = Field(None, ge=0)
+    seed: int | None = Field(None, ge=0)
 
 
 class CodeVersionModel(BaseModel):
     git_sha: str = Field(..., description="Short git SHA")
     dirty: bool = Field(..., description="Working tree dirty state")
-    build_id: Optional[str] = Field(None, description="Optional CI build id")
+    build_id: str | None = Field(None, description="Optional CI build id")
 
 
 class TraceDataModel(BaseModel):
@@ -41,11 +41,11 @@ class ResponseEnvelope(BaseModel):
     Includes deterministic content SHA256, round-trip traceability,
     confidence scoring, and assumptions tracking.
     """
-    result: Optional[Any] = Field(None, description="Domain result data")
+    result: Any | None = Field(None, description="Domain result data")
     assumptions: list[str] = Field(default_factory=list, description="Assumptions and warnings")
     confidence: float = Field(0.95, ge=0.0, le=1.0, description="Confidence score [0,1]")
     trace: TraceModel = Field(..., description="Audit trace data")
-    content_sha256: Optional[str] = Field(None, description="SHA256 of rounded result (deterministic)")
+    content_sha256: str | None = Field(None, description="SHA256 of rounded result (deterministic)")
     envelope_version: str = Field("1.0", description="Envelope schema version")
     
     model_config = ConfigDict(

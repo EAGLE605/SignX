@@ -6,7 +6,6 @@ import structlog
 
 from .deps import settings
 
-
 logger = structlog.get_logger(__name__)
 
 

@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models_audit import ComplianceRecord, PEStamp
 from .audit import log_audit
+from .models_audit import ComplianceRecord, PEStamp
 
 logger = structlog.get_logger(__name__)
 
@@ -49,8 +48,8 @@ async def check_compliance(
     project_id: str,
     requirement_type: str,
     compliance_data: dict,
-    verified_by: Optional[str] = None,
-    notes: Optional[str] = None,
+    verified_by: str | None = None,
+    notes: str | None = None,
 ) -> ComplianceRecord:
     """Check and record compliance with FAA/airport requirements.
     
@@ -88,7 +87,7 @@ async def check_compliance(
         record.status = status
         record.compliance_data = compliance_data
         record.verified_by = verified_by
-        record.verified_at = datetime.now(timezone.utc) if verified_by else None
+        record.verified_at = datetime.now(UTC) if verified_by else None
         record.notes = notes
         await db.commit()
         await db.refresh(record)
@@ -101,7 +100,7 @@ async def check_compliance(
             status=status,
             compliance_data=compliance_data,
             verified_by=verified_by,
-            verified_at=datetime.now(timezone.utc) if verified_by else None,
+            verified_at=datetime.now(UTC) if verified_by else None,
             notes=notes,
         )
         db.add(record)
@@ -150,7 +149,7 @@ async def verify_breakaway_compliance(
     pole_height_ft: float,
     base_diameter_in: float,
     material: str,
-    verified_by: Optional[str] = None,
+    verified_by: str | None = None,
 ) -> ComplianceRecord:
     """Verify breakaway compliance per FAA-AC-70/7460-1L.
     
@@ -167,7 +166,7 @@ async def verify_breakaway_compliance(
         "material": material,
         "requires_breakaway": pole_height_ft > 40.0,
         "is_compliant": is_compliant,
-        "check_date": datetime.now(timezone.utc).isoformat(),
+        "check_date": datetime.now(UTC).isoformat(),
     }
     
     status = "compliant" if is_compliant else "non_compliant"
@@ -189,7 +188,7 @@ async def verify_wind_load_compliance(
     exposure: str,
     calculated_load_psf: float,
     code_reference: str = "ASCE-7",
-    verified_by: Optional[str] = None,
+    verified_by: str | None = None,
 ) -> ComplianceRecord:
     """Verify wind load compliance per ASCE 7.
     
@@ -205,7 +204,7 @@ async def verify_wind_load_compliance(
         "calculated_load_psf": calculated_load_psf,
         "code_reference": code_reference,
         "is_compliant": is_compliant,
-        "check_date": datetime.now(timezone.utc).isoformat(),
+        "check_date": datetime.now(UTC).isoformat(),
     }
     
     status = "compliant" if is_compliant else "non_compliant"
@@ -229,8 +228,8 @@ async def create_pe_stamp(
     stamp_type: str,
     methodology: str,
     code_references: list[str],
-    calculation_id: Optional[str] = None,
-    pdf_url: Optional[str] = None,
+    calculation_id: str | None = None,
+    pdf_url: str | None = None,
 ) -> PEStamp:
     """Create Professional Engineer stamp for calculation.
     

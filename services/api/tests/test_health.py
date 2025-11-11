@@ -1,8 +1,7 @@
-import asyncio
 
 import pytest
-from httpx import AsyncClient
 from fastapi import FastAPI
+from httpx import AsyncClient
 
 from apex.api.main import app as fastapi_app
 

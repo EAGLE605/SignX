@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from urllib.parse import urlparse
 
 import structlog
-from urllib.parse import urlparse
 
 logger = structlog.get_logger(__name__)
 
@@ -16,14 +15,14 @@ class StorageClient:
     def __init__(
         self,
         endpoint: str,
-        access_key: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        bucket: Optional[str] = None,
+        access_key: str | None = None,
+        secret_key: str | None = None,
+        bucket: str | None = None,
     ):
         """Initialize storage client."""
         self.endpoint = endpoint
         self.bucket = bucket or "apex-uploads"
-        self._client: Optional[object] = None
+        self._client: object | None = None
         
         # Parse endpoint
         parsed = urlparse(endpoint)
@@ -59,7 +58,7 @@ class StorageClient:
         object_name: str,
         expires_seconds: int = 3600,
         content_type: str = "application/octet-stream",
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate presigned PUT URL for upload.
         
         Returns None if client not available.
@@ -80,7 +79,7 @@ class StorageClient:
             logger.error("storage.presign_failed", object_name=object_name, error=str(e))
             return None
     
-    def get_object_sha256(self, object_name: str) -> Optional[str]:
+    def get_object_sha256(self, object_name: str) -> str | None:
         """Get SHA256 hash of stored object.
         
         Returns None if client not available or object not found.

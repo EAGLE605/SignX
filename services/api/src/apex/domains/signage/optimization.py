@@ -337,9 +337,9 @@ def baseplate_optimize_ga(
         checks, _ = baseplate_checks(plate_input, loads, seed=seed, suggest_alternatives=False)
         
         # Check constraints
-        all_pass = all(c.pass for c in checks)
+        all_pass = all(c.pass_ for c in checks)
         min_sf = 2.0
-        actual_sf = min((c.capacity / max(c.demand, 0.01)) for c in checks if c.pass) if all_pass else 0.0
+        actual_sf = min((c.capacity / max(c.demand, 0.01)) for c in checks if c.pass_) if all_pass else 0.0
         
         constraint_penalty = 0.0
         if not all_pass:

@@ -19,12 +19,12 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, Generator
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import event, text
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -34,9 +34,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 
 from apex.api.db import Base
-from apex.domains.signage.single_pole_solver import PoleSection
 from apex.domains.signage.asce7_wind import ExposureCategory, RiskCategory
-
+from apex.domains.signage.single_pole_solver import PoleSection
 
 # ============================================================================
 # Pytest Configuration

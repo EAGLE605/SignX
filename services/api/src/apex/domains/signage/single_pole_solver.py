@@ -13,17 +13,16 @@ Determinism: All calculations are pure functions - same inputs always produce sa
 No randomness, no external API calls, no time-dependent calculations.
 """
 
-from typing import NamedTuple, Optional
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
+from typing import NamedTuple
 
 from apex.domains.signage.asce7_wind import (
-    calculate_wind_force_on_sign,
-    calculate_wind_moment_at_base,
     ExposureCategory,
     RiskCategory,
+    calculate_wind_force_on_sign,
+    calculate_wind_moment_at_base,
 )
-
 
 # IBC 2024 Section 1605.2.1 - Required Load Combinations (ASD)
 # All 7 combinations per IBC 2024 for Allowable Stress Design
@@ -158,7 +157,7 @@ class SinglePoleResults(NamedTuple):
     passes_all_checks: bool
 
     # Critical failure mode
-    critical_failure_mode: Optional[str]
+    critical_failure_mode: str | None
 
     # Warnings and code references
     warnings: list[str]

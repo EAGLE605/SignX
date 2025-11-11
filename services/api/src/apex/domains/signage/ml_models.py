@@ -6,19 +6,17 @@ Predicts initial configurations and detects anomalous designs.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.tree import DecisionTreeRegressor
 
-
 # ========== Rule-Based Heuristics (Fallback) ==========
 
 
-def _heuristic_pole_suggestion(cabinet_area_ft2: float, height_ft: float, wind_speed_mph: float) -> Dict[str, Any]:
+def _heuristic_pole_suggestion(cabinet_area_ft2: float, height_ft: float, wind_speed_mph: float) -> dict[str, Any]:
     """
     Rule-based heuristic for pole suggestion when no training data.
     
@@ -55,7 +53,7 @@ def _heuristic_pole_suggestion(cabinet_area_ft2: float, height_ft: float, wind_s
     }
 
 
-def _heuristic_footing_suggestion(mu_kipft: float, soil_psf: float) -> Dict[str, float]:
+def _heuristic_footing_suggestion(mu_kipft: float, soil_psf: float) -> dict[str, float]:
     """Rule-based footing suggestion."""
     # Simplified: larger moment -> larger diameter/deeper
     if mu_kipft < 10.0:
@@ -74,7 +72,7 @@ def _heuristic_footing_suggestion(mu_kipft: float, soil_psf: float) -> Dict[str,
 class ConfigPredictor:
     """ML model for predicting initial design configurations."""
     
-    def __init__(self, model_path: Optional[Path] = None):
+    def __init__(self, model_path: Path | None = None):
         """Initialize predictor, load model if available."""
         self.model = None
         self.trained = False
@@ -88,7 +86,7 @@ class ConfigPredictor:
             except Exception:
                 self.trained = False
     
-    def train(self, training_data: List[Dict[str, Any]]) -> bool:
+    def train(self, training_data: list[dict[str, Any]]) -> bool:
         """
         Train model on historical project data.
         
@@ -128,7 +126,7 @@ class ConfigPredictor:
         height_ft: float,
         wind_speed_mph: float,
         soil_bearing_psf: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Predict initial configuration.
         
@@ -171,8 +169,8 @@ def predict_initial_config(
     height_ft: float,
     wind_speed_mph: float,
     soil_bearing_psf: float = 3000.0,
-    training_data_path: Optional[Path] = None,
-) -> Dict[str, Any]:
+    training_data_path: Path | None = None,
+) -> dict[str, Any]:
     """
     Predict initial design configuration.
     
@@ -217,7 +215,7 @@ class AnomalyDetector:
         self.feature_means = None
         self.feature_stds = None
     
-    def train(self, training_data: List[Dict[str, Any]]) -> bool:
+    def train(self, training_data: list[dict[str, Any]]) -> bool:
         """Train on historical data."""
         if len(training_data) < 20:
             return False
@@ -251,7 +249,7 @@ class AnomalyDetector:
         height_ft: float,
         wind_speed_mph: float,
         pole_sx_in3: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect if configuration is anomalous.
         
@@ -329,8 +327,8 @@ def detect_unusual_config(
     height_ft: float,
     wind_speed_mph: float,
     pole_sx_in3: float,
-    training_data_path: Optional[Path] = None,
-) -> Dict[str, Any]:
+    training_data_path: Path | None = None,
+) -> dict[str, Any]:
     """
     Detect unusual configuration using isolation forest.
     

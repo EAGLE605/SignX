@@ -7,17 +7,18 @@ Create Date: 2025-11-01
 Adds tables for cantilever sign configurations and analysis results.
 References the AISC foundation catalog for structural sections.
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = '010_cantilever'
-down_revision: Union[str, None] = '001c_sign_views'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = '001c_sign_views'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

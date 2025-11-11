@@ -6,19 +6,21 @@ and the AISC shapes database for optimal section selection.
 
 from __future__ import annotations
 
+import uuid
+
 import asyncpg
 import structlog
-import uuid
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException
 
 from ...domains.signage.monument_solver import (
-    MonumentSolver, MonumentConfig, SectionProperties,
-    ExposureCategory, ImportanceFactor, optimize_monument_pole
+    ExposureCategory,
+    ImportanceFactor,
+    MonumentConfig,
+    MonumentSolver,
+    SectionProperties,
 )
-from ..common.models import make_envelope
 from ..common.envelope import calc_confidence
+from ..common.models import make_envelope
 from ..schemas import ResponseEnvelope, add_assumption
 
 logger = structlog.get_logger(__name__)
@@ -34,7 +36,7 @@ async def get_db_connection():
     return await asyncpg.connect(DATABASE_URL)
 
 
-async def get_section_properties(conn: asyncpg.Connection, designation: str) -> Optional[SectionProperties]:
+async def get_section_properties(conn: asyncpg.Connection, designation: str) -> SectionProperties | None:
     """Get AISC section properties from database."""
     
     result = await conn.fetchrow("""

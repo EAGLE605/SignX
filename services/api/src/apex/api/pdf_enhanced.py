@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from .utils.report import generate_report_from_payload
-from .models_audit import PEStamp
 from .compliance import get_project_compliance
+from .models_audit import PEStamp
+from .utils.report import generate_report_from_payload
 
 logger = structlog.get_logger(__name__)
 
@@ -21,8 +19,8 @@ async def generate_pe_stamped_report(
     db: AsyncSession,
     project_id: str,
     payload: dict,
-    pe_stamp_id: Optional[int] = None,
-    root_path: Optional[Path] = None,
+    pe_stamp_id: int | None = None,
+    root_path: Path | None = None,
 ) -> dict[str, str]:
     """Generate PDF report with PE stamp watermark and certification page.
     
@@ -98,7 +96,7 @@ async def generate_pe_stamped_report(
 async def add_pe_stamp_to_pdf(
     pdf_path: Path,
     pe_stamp: PEStamp,
-    output_path: Optional[Path] = None,
+    output_path: Path | None = None,
 ) -> Path:
     """Add PE stamp certification page to existing PDF.
     
@@ -113,9 +111,9 @@ async def add_pe_stamp_to_pdf(
         Path to stamped PDF
     """
     try:
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import letter
         from PyPDF2 import PdfReader, PdfWriter
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
         
         # Generate certification page
         cert_buffer = io.BytesIO()

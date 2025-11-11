@@ -324,7 +324,7 @@ class TestBaseplateChecks:
         
         assert len(checks) >= 3  # Plate, weld, anchors
         # All should pass with reasonable loads
-        assert all(c.pass for c in checks)
+        assert all(c.pass_ for c in checks)
     
     def test_baseplate_checks_plate_thickness_fail(self):
         """Test plate thickness check failure."""
@@ -349,7 +349,7 @@ class TestBaseplateChecks:
         plate_check = next((c for c in checks if c.name == "Plate Thickness"), None)
         assert plate_check is not None
         # Should fail with thin plate and high moment
-        assert not plate_check.pass
+        assert not plate_check.pass_
     
     def test_baseplate_checks_anchor_tension_steel_governing(self):
         """Test anchor tension check with steel capacity governing."""
@@ -400,7 +400,7 @@ class TestBaseplateChecks:
         assert len(checks1) == len(checks2)
         for c1, c2 in zip(checks1, checks2):
             assert c1.name == c2.name
-            assert c1.pass == c2.pass
+            assert c1.pass_ == c2.pass_
             assert c1.demand == c2.demand
     
     def test_baseplate_checks_zero_loads(self):
@@ -422,9 +422,9 @@ class TestBaseplateChecks:
         loads = {"mu_kipft": 0.0, "vu_kip": 0.0, "tu_kip": 0.0}
         
         checks, _ = baseplate_checks(plate, loads, seed=42, suggest_alternatives=False)
-        
+
         # All checks should pass with zero loads
-        assert all(c.pass for c in checks)
+        assert all(c.pass_ for c in checks)
 
 
 # ========== Baseplate Auto-Solve Tests ==========

@@ -13,40 +13,41 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from .schemas import CodeVersionModel, ModelConfigModel, ResponseEnvelope  # Must import first for forward refs
+from .common.idem import enforce_idempotency
 from .common.models import make_envelope
 from .common.redis_client import close_redis_client
-from .common.idem import enforce_idempotency
-from .deps import get_code_version, get_model_config, settings, get_rate_limit_default
-from .error_handlers import unhandled_exception_handler, validation_exception_handler
-from .metrics import ABSTAIN_TOTAL, setup_metrics
-from .startup_checks import validate_prod_requirements
 from .contract_lock import ensure_materials_contract
-from .tracing import setup_tracing
+from .deps import get_code_version, get_model_config, get_rate_limit_default, settings
+from .error_handlers import unhandled_exception_handler, validation_exception_handler
+from .metrics import setup_metrics
 from .middleware import BodySizeLimitMiddleware
 from .ready import router as ready_router
-from .routes.auth import router as auth_router
-from .routes.materials import router as materials_router
-from .routes.projects import router as projects_router
-from .routes.site import router as site_router
-from .routes.cabinets import router as cabinets_router
-from .routes.poles import router as poles_router
-from .routes.direct_burial import router as burial_router
-from .routes.baseplate import router as baseplate_router
-from .routes.cantilever import router as cantilever_router
-from .routes.pricing import router as pricing_router
-from .routes.submission import router as submission_router
-from .routes.files import router as files_router
-from .routes.payloads import router as payloads_router
-from .routes.concrete import router as concrete_router
-from .routes.bom import router as bom_router
-from .routes.tasks import router as tasks_router
-from .routes.signcalc import router as signcalc_router
-from .routes.uploads import router as uploads_router
-from .routes.compliance import router as compliance_router
-from .routes.crm import router as crm_router
 from .routes.audit import router as audit_router
-
+from .routes.auth import router as auth_router
+from .routes.baseplate import router as baseplate_router
+from .routes.bom import router as bom_router
+from .routes.cabinets import router as cabinets_router
+from .routes.cantilever import router as cantilever_router
+from .routes.compliance import router as compliance_router
+from .routes.concrete import router as concrete_router
+from .routes.crm import router as crm_router
+from .routes.direct_burial import router as burial_router
+from .routes.files import router as files_router
+from .routes.materials import router as materials_router
+from .routes.payloads import router as payloads_router
+from .routes.poles import router as poles_router
+from .routes.pricing import router as pricing_router
+from .routes.projects import router as projects_router
+from .routes.signcalc import router as signcalc_router
+from .routes.site import router as site_router
+from .routes.submission import router as submission_router
+from .routes.tasks import router as tasks_router
+from .routes.uploads import router as uploads_router
+from .schemas import (  # Must import first for forward refs
+    ResponseEnvelope,
+)
+from .startup_checks import validate_prod_requirements
+from .tracing import setup_tracing
 
 logger = structlog.get_logger(__name__)
 
@@ -94,7 +95,6 @@ def rate_key_func(request: Request):  # type: ignore[no-untyped-def]
     auth_header = request.headers.get("Authorization", "")
     if auth_header.startswith("Bearer "):
         try:
-            from ..auth import get_current_user
             # Would need to decode JWT here - simplified for now
             # In production, extract user_id from token payload
             pass
@@ -226,7 +226,7 @@ async def envelope_schema():  # type: ignore[no-untyped-def]
 # Minimal Scalar docs at /docs (Redoc still at /redoc)
 @app.get("/docs", include_in_schema=False)
 async def scalar_docs():  # type: ignore[no-untyped-def]
-    html = f"""
+    html = """
     <!doctype html>
     <html>
       <head><meta charset=\"utf-8\"><title>APEX API Docs</title></head>
@@ -319,9 +319,11 @@ async def _startup_contract_lock():  # type: ignore[no-untyped-def]
 async def _startup_metrics_background():  # type: ignore[no-untyped-def]
     """Start background metrics collection task."""
     import asyncio
+
     import asyncpg
     from redis.asyncio import Redis
-    from .metrics import CELERY_QUEUE_DEPTH, PG_POOL_USED, CACHE_HIT_RATIO
+
+    from .metrics import CACHE_HIT_RATIO, CELERY_QUEUE_DEPTH, PG_POOL_USED
     
     async def update_runtime_metrics():
         # Queue depth

@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-import json
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from fastapi import Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db import get_db
+from .auth import TokenData
 from .models_audit import AuditLog
-from .auth import get_current_user_optional, TokenData
 
 logger = structlog.get_logger(__name__)
 
@@ -21,16 +19,16 @@ async def log_audit(
     db: AsyncSession,
     action: str,
     resource_type: str,
-    resource_id: Optional[str] = None,
-    before_state: Optional[dict] = None,
-    after_state: Optional[dict] = None,
-    user_id: Optional[str] = None,
-    account_id: Optional[str] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
-    request_id: Optional[str] = None,
-    confidence: Optional[float] = None,
-    error_details: Optional[dict] = None,
+    resource_id: str | None = None,
+    before_state: dict | None = None,
+    after_state: dict | None = None,
+    user_id: str | None = None,
+    account_id: str | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
+    request_id: str | None = None,
+    confidence: float | None = None,
+    error_details: dict | None = None,
 ) -> int:
     """Log an audit event to the immutable audit log.
     
@@ -49,7 +47,7 @@ async def log_audit(
             resource_id=resource_id,
             before_state=before_state,
             after_state=after_state,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             ip_address=ip_address,
             user_agent=user_agent,
             request_id=request_id,
@@ -97,9 +95,8 @@ async def audit_middleware_handler(
     request_id = request.headers.get("x-request-id") or request.headers.get("x-correlation-id")
     
     # Try to get current user (may be None for public endpoints)
-    current_user: Optional[TokenData] = None
+    current_user: TokenData | None = None
     try:
-        from .auth import get_current_user_optional
         # We can't use Depends() in middleware, so we'll log after route execution
         # This is handled by the audit decorator instead
         pass
@@ -116,7 +113,7 @@ async def audit_middleware_handler(
     return response
 
 
-def extract_resource_from_path(path: str, method: str) -> tuple[str, Optional[str]]:
+def extract_resource_from_path(path: str, method: str) -> tuple[str, str | None]:
     """Extract resource type and ID from API path.
     
     Examples:
@@ -159,13 +156,13 @@ def extract_resource_from_path(path: str, method: str) -> tuple[str, Optional[st
 
 async def query_audit_logs(
     db: AsyncSession,
-    user_id: Optional[str] = None,
-    account_id: Optional[str] = None,
-    action: Optional[str] = None,
-    resource_type: Optional[str] = None,
-    resource_id: Optional[str] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    user_id: str | None = None,
+    account_id: str | None = None,
+    action: str | None = None,
+    resource_type: str | None = None,
+    resource_id: str | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     limit: int = 100,
     offset: int = 0,
 ) -> list[AuditLog]:
@@ -174,7 +171,7 @@ async def query_audit_logs(
     Returns:
         List of audit log entries matching criteria
     """
-    from sqlalchemy import select, and_
+    from sqlalchemy import and_, select
     
     query = select(AuditLog)
     conditions = []

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
+from fastapi import HTTPException, Request
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from fastapi import HTTPException, Request
-from slowapi.util import get_remote_address
 
 from ..db import Project, ProjectEvent
 
@@ -50,7 +50,7 @@ async def fetch_project_with_history(project_id: str, db: AsyncSession) -> Proje
     return project
 
 
-def _extract_request_metadata(request: Optional[Request]) -> dict[str, Any]:
+def _extract_request_metadata(request: Request | None) -> dict[str, Any]:
     """Extract IP address, user agent, and other request metadata.
     
     Returns dict with ip_address, user_agent, and optional proxy headers.
@@ -86,9 +86,9 @@ async def log_event(
     event_type: str,
     actor: str,
     data: dict | None = None,
-    request: Optional[Request] = None,
-    before_state: Optional[dict] = None,
-    after_state: Optional[dict] = None,
+    request: Request | None = None,
+    before_state: dict | None = None,
+    after_state: dict | None = None,
 ) -> None:
     """Helper to append event to audit log with full compliance metadata.
     
@@ -133,7 +133,7 @@ async def log_event(
         project_id=project_id,
         event_type=event_type,
         actor=actor,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         data=event_data,
     )
     session.add(event)

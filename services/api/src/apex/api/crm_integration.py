@@ -2,19 +2,16 @@
 
 from __future__ import annotations
 
-import json
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-import structlog
 import httpx
-from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+import structlog
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models_audit import CRMWebhook
 from .audit import log_audit
 from .deps import settings
+from .models_audit import CRMWebhook
 
 logger = structlog.get_logger(__name__)
 
@@ -24,16 +21,16 @@ class CRMWebhookPayload(BaseModel):
     
     event_type: str  # project.created, calculation.completed, cost.updated
     source: str  # keyedin, calcusign
-    project_id: Optional[str] = None
-    calculation_id: Optional[str] = None
+    project_id: str | None = None
+    calculation_id: str | None = None
     data: dict
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 class CRMClient:
     """Client for sending webhooks to KeyedIn CRM."""
     
-    def __init__(self, webhook_url: Optional[str] = None, api_key: Optional[str] = None):
+    def __init__(self, webhook_url: str | None = None, api_key: str | None = None):
         self.webhook_url = webhook_url or settings.KEYEDIN_WEBHOOK_URL if hasattr(settings, "KEYEDIN_WEBHOOK_URL") else None
         self.api_key = api_key or settings.KEYEDIN_API_KEY if hasattr(settings, "KEYEDIN_API_KEY") else None
         self.timeout = 30.0
@@ -43,7 +40,7 @@ class CRMClient:
         event_type: str,
         data: dict,
         direction: str = "outbound",
-        db: Optional[AsyncSession] = None,
+        db: AsyncSession | None = None,
     ) -> bool:
         """Send webhook to KeyedIn CRM.
         
@@ -63,7 +60,7 @@ class CRMClient:
         payload = {
             "event_type": event_type,
             "source": "calcusign",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "data": data,
         }
         
@@ -99,7 +96,7 @@ class CRMClient:
                 webhook_record.status = "delivered" if response.status_code < 400 else "failed"
                 webhook_record.response_code = response.status_code
                 webhook_record.response_body = response.text[:1000]  # Truncate long responses
-                webhook_record.processed_at = datetime.now(timezone.utc)
+                webhook_record.processed_at = datetime.now(UTC)
                 
                 if db:
                     await db.commit()
@@ -119,7 +116,7 @@ class CRMClient:
         except Exception as e:
             webhook_record.status = "failed"
             webhook_record.response_body = str(e)[:1000]
-            webhook_record.processed_at = datetime.now(timezone.utc)
+            webhook_record.processed_at = datetime.now(UTC)
             
             if db:
                 await db.commit()
@@ -131,8 +128,8 @@ class CRMClient:
         self,
         payload: CRMWebhookPayload,
         db: AsyncSession,
-        user_id: Optional[str] = None,
-        account_id: Optional[str] = None,
+        user_id: str | None = None,
+        account_id: str | None = None,
     ) -> dict:
         """Handle inbound webhook from KeyedIn CRM.
         
@@ -173,13 +170,13 @@ class CRMClient:
                 result = {"status": "ignored", "reason": "unknown_event_type"}
             
             webhook_record.status = "delivered"
-            webhook_record.processed_at = datetime.now(timezone.utc)
+            webhook_record.processed_at = datetime.now(UTC)
             await db.commit()
             
             # Log audit
             await log_audit(
                 db=db,
-                action=f"crm.webhook_received",
+                action="crm.webhook_received",
                 resource_type="webhook",
                 resource_id=str(webhook_record.webhook_id),
                 user_id=user_id or "system",
@@ -192,7 +189,7 @@ class CRMClient:
         except Exception as e:
             webhook_record.status = "failed"
             webhook_record.response_body = str(e)[:1000]
-            webhook_record.processed_at = datetime.now(timezone.utc)
+            webhook_record.processed_at = datetime.now(UTC)
             await db.commit()
             
             logger.error("crm.webhook_processing_failed", event_type=payload.event_type, error=str(e))
@@ -202,8 +199,8 @@ class CRMClient:
         self,
         payload: CRMWebhookPayload,
         db: AsyncSession,
-        user_id: Optional[str],
-        account_id: Optional[str],
+        user_id: str | None,
+        account_id: str | None,
     ) -> dict:
         """Create project in Calcusign from KeyedIn project data."""
         from .db import Project
@@ -222,7 +219,7 @@ class CRMClient:
         
         # Create new project
         project = Project(
-            project_id=f"keyedin-{keyedin_id}" if keyedin_id else f"imported-{datetime.now(timezone.utc).isoformat()}",
+            project_id=f"keyedin-{keyedin_id}" if keyedin_id else f"imported-{datetime.now(UTC).isoformat()}",
             account_id=account_id or "unknown",
             name=project_name,
             customer=payload.data.get("customer"),
@@ -244,12 +241,13 @@ class CRMClient:
         self,
         payload: CRMWebhookPayload,
         db: AsyncSession,
-        user_id: Optional[str],
-        account_id: Optional[str],
+        user_id: str | None,
+        account_id: str | None,
     ) -> dict:
         """Update project in Calcusign from KeyedIn updates."""
-        from .db import Project
         from sqlalchemy import select
+
+        from .db import Project
         
         keyedin_id = payload.data.get("keyedin_id")
         
@@ -283,12 +281,13 @@ class CRMClient:
         self,
         payload: CRMWebhookPayload,
         db: AsyncSession,
-        user_id: Optional[str],
-        account_id: Optional[str],
+        user_id: str | None,
+        account_id: str | None,
     ) -> dict:
         """Soft delete project (mark as deleted)."""
-        from .db import Project
         from sqlalchemy import select
+
+        from .db import Project
         
         keyedin_id = payload.data.get("keyedin_id")
         

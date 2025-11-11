@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import io
-from pathlib import Path
-from typing import Optional, BinaryIO
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 
 import structlog
-from fastapi import UploadFile, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
     from PIL import Image
@@ -20,10 +17,9 @@ try:
 except ImportError:
     PIL_AVAILABLE = False
 
-from .storage import StorageClient
-from .models_audit import FileUpload
 from .audit import log_audit
-from .deps import settings
+from .models_audit import FileUpload
+from .storage import StorageClient
 
 logger = structlog.get_logger(__name__)
 
@@ -37,7 +33,7 @@ ALLOWED_TYPES = ALLOWED_IMAGE_TYPES | ALLOWED_DOCUMENT_TYPES
 MAX_FILE_SIZE = 50 * 1024 * 1024
 
 # Virus scanning (async wrapper for ClamAV or similar)
-async def scan_file_for_viruses(file_content: bytes, filename: str) -> tuple[str, Optional[str]]:
+async def scan_file_for_viruses(file_content: bytes, filename: str) -> tuple[str, str | None]:
     """Scan file for viruses using ClamAV or similar.
     
     Returns:
@@ -77,7 +73,7 @@ async def generate_thumbnail(
     file_content: bytes,
     content_type: str,
     max_size: tuple[int, int] = (300, 300),
-) -> Optional[bytes]:
+) -> bytes | None:
     """Generate thumbnail for image files.
     
     Returns:
@@ -119,11 +115,11 @@ async def upload_file(
     db: AsyncSession,
     storage: StorageClient,
     file: UploadFile,
-    project_id: Optional[str],
+    project_id: str | None,
     user_id: str,
     account_id: str,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
 ) -> FileUpload:
     """Upload file with virus scanning, thumbnail generation, and metadata storage.
     
@@ -229,8 +225,6 @@ async def upload_file(
     # Upload to storage
     if storage._client:
         try:
-            from minio import Minio
-            from minio.error import S3Error
             
             storage._client.put_object(
                 storage.bucket,
@@ -277,7 +271,7 @@ async def upload_file(
         size_bytes=file_size,
         sha256=sha256,
         virus_scan_status=scan_status,
-        virus_scan_at=datetime.now(timezone.utc) if scan_status != "pending" else None,
+        virus_scan_at=datetime.now(UTC) if scan_status != "pending" else None,
         thumbnail_key=thumbnail_key,
         project_id=project_id,
         uploaded_by=user_id,
@@ -321,7 +315,7 @@ async def get_presigned_download_url(
     storage: StorageClient,
     file_key: str,
     expires_seconds: int = 3600,
-) -> Optional[str]:
+) -> str | None:
     """Generate presigned download URL for file access.
     
     Returns:

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 
 import structlog
@@ -42,8 +41,8 @@ class MonumentConfig:
     # Pole geometry
     pole_height_ft: float
     pole_section: str  # AISC designation (e.g., "HSS8X8X1/2")
-    base_plate_size_in: Optional[float] = None
-    embedment_depth_ft: Optional[float] = None
+    base_plate_size_in: float | None = None
+    embedment_depth_ft: float | None = None
     
     # Sign geometry
     sign_width_ft: float
@@ -119,9 +118,9 @@ class MonumentResults:
     resisting_moment_kipft: float
     overturning_safety_factor: float
     max_soil_pressure_psf: float
-    foundation_width_ft: Optional[float] = None
-    foundation_length_ft: Optional[float] = None
-    foundation_thickness_ft: Optional[float] = None
+    foundation_width_ft: float | None = None
+    foundation_length_ft: float | None = None
+    foundation_thickness_ft: float | None = None
     
     # Design status
     pole_adequate: bool
@@ -129,9 +128,9 @@ class MonumentResults:
     overall_passes: bool
     
     # Metadata
-    warnings: List[str]
-    design_notes: List[str]
-    assumptions: List[str]
+    warnings: list[str]
+    design_notes: list[str]
+    assumptions: list[str]
 
 
 class MonumentSolver:
@@ -257,7 +256,7 @@ class MonumentSolver:
         )
     
     def _calculate_wind_loads(self, config: MonumentConfig, 
-                            assumptions: List[str]) -> Dict[str, float]:
+                            assumptions: list[str]) -> dict[str, float]:
         """Calculate wind loads per ASCE 7-22."""
         
         # Velocity pressure coefficient Kz (ASCE 7-22 Table 26.10-1)
@@ -318,7 +317,7 @@ class MonumentSolver:
     
     def _calculate_dead_loads(self, config: MonumentConfig, 
                             section_props: SectionProperties,
-                            assumptions: List[str]) -> float:
+                            assumptions: list[str]) -> float:
         """Calculate dead loads (pole + sign weight)."""
         
         # Pole weight
@@ -339,7 +338,7 @@ class MonumentSolver:
         return total_dead_load
     
     def _calculate_snow_loads(self, config: MonumentConfig,
-                            assumptions: List[str]) -> float:
+                            assumptions: list[str]) -> float:
         """Calculate snow loads on sign (simplified)."""
         
         # Snow accumulation on top edge of sign (conservative)
@@ -349,7 +348,7 @@ class MonumentSolver:
         return snow_load
     
     def _calculate_ice_loads(self, config: MonumentConfig,
-                           assumptions: List[str]) -> float:
+                           assumptions: list[str]) -> float:
         """Calculate ice loads (simplified)."""
         
         # Ice weight on sign and pole
@@ -370,7 +369,7 @@ class MonumentSolver:
         return total_ice_load
     
     def _calculate_seismic_loads(self, config: MonumentConfig,
-                               assumptions: List[str]) -> float:
+                               assumptions: list[str]) -> float:
         """Calculate seismic loads (simplified)."""
         
         # Simplified seismic force F = Sds * W (very conservative)
@@ -383,8 +382,8 @@ class MonumentSolver:
                              section_props: SectionProperties,
                              moment_kipft: float,
                              shear_force_lbs: float,
-                             assumptions: List[str],
-                             warnings: List[str]) -> Dict[str, float]:
+                             assumptions: list[str],
+                             warnings: list[str]) -> dict[str, float]:
         """Analyze pole stresses and deflection."""
         
         # Material properties
@@ -427,8 +426,8 @@ class MonumentSolver:
     def _analyze_foundation(self, config: MonumentConfig,
                           overturning_moment_kipft: float,
                           dead_load_lbs: float,
-                          assumptions: List[str],
-                          warnings: List[str]) -> Dict[str, float]:
+                          assumptions: list[str],
+                          warnings: list[str]) -> dict[str, float]:
         """Analyze foundation requirements."""
         
         # Estimate foundation dimensions (simplified)
@@ -480,7 +479,7 @@ class MonumentSolver:
 
 
 def optimize_monument_pole(config: MonumentConfig,
-                         available_sections: List[SectionProperties]) -> Tuple[SectionProperties, MonumentResults]:
+                         available_sections: list[SectionProperties]) -> tuple[SectionProperties, MonumentResults]:
     """Find the optimal pole section for given monument requirements.
     
     Args:

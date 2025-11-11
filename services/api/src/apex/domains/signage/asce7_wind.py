@@ -18,9 +18,9 @@ References:
 - ASCE 7-22 Figure 29.4-1: Force Coefficients for Chimneys, Tanks, and Similar Structures
 """
 
-from typing import Literal, NamedTuple
-from enum import Enum
 import math
+from enum import Enum
+from typing import NamedTuple
 
 
 class ExposureCategory(str, Enum):
@@ -465,9 +465,9 @@ if __name__ == "__main__":
         risk_category=RiskCategory.II,
     )
 
-    print(f"  Wind speed:             115 mph (3-sec gust)")
-    print(f"  Exposure:               C (open terrain)")
-    print(f"  Risk category:          II (normal structures)")
+    print("  Wind speed:             115 mph (3-sec gust)")
+    print("  Exposure:               C (open terrain)")
+    print("  Risk category:          II (normal structures)")
     print(f"  Sign centroid height:   {12.0 + 1.5:.1f} ft")
     print(f"  Kz coefficient:         {result.exposure_coefficient_kz:.3f}")
     print(f"  Iw importance factor:   {result.wind_importance_factor_iw:.2f}")
@@ -495,9 +495,9 @@ if __name__ == "__main__":
         risk_category=RiskCategory.II,
     )
 
-    print(f"  Wind speed:             120 mph (3-sec gust)")
-    print(f"  Exposure:               C (open terrain)")
-    print(f"  Risk category:          II (normal structures)")
+    print("  Wind speed:             120 mph (3-sec gust)")
+    print("  Exposure:               C (open terrain)")
+    print("  Risk category:          II (normal structures)")
     print(f"  Sign centroid height:   {34.0 + 3.0:.1f} ft")
     print(f"  Kz coefficient:         {result2.exposure_coefficient_kz:.3f}")
     print(f"  Velocity pressure qz:   {result2.velocity_pressure_qz_psf:.2f} psf")

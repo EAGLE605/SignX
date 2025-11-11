@@ -5,7 +5,7 @@ Common types used across project management, signage, and calculation services.
 
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -26,7 +26,7 @@ class SiteLoads(BaseModel):
     """Wind and snow loads resolved for a site."""
 
     wind_speed_mph: Unit = Field(..., description="Basic wind speed in mph")
-    snow_load_psf: Optional[Unit] = Field(None, description="Ground snow load psf")
+    snow_load_psf: Unit | None = Field(None, description="Ground snow load psf")
     exposure: Exposure = Field("C", description="Wind exposure category")
 
 
@@ -81,8 +81,9 @@ def make_envelope(
     - Applies deterministic rounding to result
     - Computes content_sha256 for auditability
     """
-    from ..schemas import ResponseEnvelope as Envelope, TraceDataModel, TraceModel
     from ..deps import get_code_version, get_model_config
+    from ..schemas import ResponseEnvelope as Envelope
+    from ..schemas import TraceDataModel, TraceModel
     from .envelope import round_floats
     
     # Try to get request_id from context (if middleware is active)

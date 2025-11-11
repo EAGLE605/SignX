@@ -7,17 +7,18 @@ Create Date: 2025-11-01
 Monument sign pole calculations - references AISC foundation catalog.
 Supports single-pole monument signs with wind load analysis and foundation design.
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = '011_monument'
-down_revision: Union[str, None] = '010_add_cantilever_tables'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = '010_add_cantilever_tables'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

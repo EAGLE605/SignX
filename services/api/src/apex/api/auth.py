@@ -7,8 +7,8 @@ Implements RBAC with roles: user, admin.
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import structlog
 from fastapi import Depends, HTTPException, status
@@ -49,7 +49,7 @@ class TokenData(BaseModel):
 
 def create_access_token(
     data: dict[str, Any], 
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
     mfa_verified: bool = False
 ) -> str:
     """Create JWT access token with enhanced claims.
@@ -63,10 +63,10 @@ def create_access_token(
         Encoded JWT token string
     """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=JWT_EXPIRE_MINUTES))
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=JWT_EXPIRE_MINUTES))
     to_encode.update({
         "exp": expire, 
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(UTC),
         "mfa_verified": mfa_verified,
     })
     
@@ -126,8 +126,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     # Try Supabase token verification first
     if settings.SUPABASE_URL and settings.SUPABASE_KEY:
         try:
-            from .supabase_client import get_supabase_client
             from gotrue.errors import AuthApiError
+
+            from .supabase_client import get_supabase_client
             
             supabase = get_supabase_client()
             # Verify token with Supabase
@@ -206,8 +207,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
 async def get_current_user_optional(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
-) -> Optional[TokenData]:
+    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
+) -> TokenData | None:
     """Optional authentication - returns None if no token provided.
     
     Use for endpoints that work with or without authentication.

@@ -8,14 +8,12 @@ from __future__ import annotations
 
 import base64
 import io
-from typing import Any, Dict, List, Optional
 
-from jinja2 import Template
 import numpy as np
+from jinja2 import Template
 from matplotlib import pyplot as plt
 
 from .models import Cabinet, LoadDerivation, SiteLoads
-
 
 # ========== Calculation Sheet Generation (LaTeX/PDF) ==========
 
@@ -83,7 +81,7 @@ def generate_calc_sheet(
     site: SiteLoads,
     derived_loads: LoadDerivation,
     height_ft: float,
-    cabinets: List[Cabinet],
+    cabinets: list[Cabinet],
     output_format: str = "latex",
 ) -> str:
     """
@@ -168,7 +166,7 @@ def generate_calc_sheet(
         return template.render(**template_vars)
 
 
-def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: Optional[str] = None) -> bytes:
+def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: str | None = None) -> bytes:
     """
     Convert calculation sheet to PDF.
     

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-from typing import Optional
 
 import aiohttp
 
@@ -39,7 +38,7 @@ def _get_asce7_default_v(lat: float, lon: float) -> float:
     return 100.0
 
 
-async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: Optional[str] = None) -> Optional[dict]:
+async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: str | None = None) -> dict | None:
     """Fetch wind speed from OpenWeatherMap API.
     
     Returns: {"wind_speed_mph": float, "source": "openweathermap"} or None
@@ -70,7 +69,7 @@ async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: Optional
     return None
 
 
-async def fetch_wind_speed_noaa(lat: float, lon: float) -> Optional[dict]:
+async def fetch_wind_speed_noaa(lat: float, lon: float) -> dict | None:
     """Fetch wind speed from NOAA ASOS nearest station.
     
     Returns: {"wind_speed_mph": float, "source": "noaa"} or None
@@ -85,7 +84,7 @@ async def fetch_wind_speed_noaa(lat: float, lon: float) -> Optional[dict]:
     return None
 
 
-async def resolve_wind_speed(lat: float, lon: float, api_keys: Optional[dict] = None) -> dict:
+async def resolve_wind_speed(lat: float, lon: float, api_keys: dict | None = None) -> dict:
     """Resolve wind speed from multiple sources with fallback.
     
     Priority:
@@ -115,7 +114,7 @@ async def resolve_wind_speed(lat: float, lon: float, api_keys: Optional[dict] = 
     return result
 
 
-def fetch_snow_load(lat: float, lon: float) -> Optional[float]:
+def fetch_snow_load(lat: float, lon: float) -> float | None:
     """Fetch ground snow load from ASCE 7-16 Figure 7.2-1.
     
     Returns: snow_load_psf or None

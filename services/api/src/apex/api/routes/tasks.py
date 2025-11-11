@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import structlog
-from fastapi import APIRouter, Depends, HTTPException
 from typing import Any
+
+import structlog
+from fastapi import APIRouter, HTTPException
 
 from ..common.models import make_envelope
 from ..deps import get_code_version, get_model_config
-from ..utils.celery_client import get_celery_client
 from ..schemas import ResponseEnvelope
+from ..utils.celery_client import get_celery_client
 
 logger = structlog.get_logger(__name__)
 
@@ -47,16 +48,16 @@ async def get_task_status(
         elif state == "FAILURE":
             response_data["error"] = str(result.info)
             confidence = 0.9
-            add_assumption(assumptions, "Task failed")
+            assumptions.append("Task failed")
         elif state == "PENDING":
             confidence = 0.5
-            add_assumption(assumptions, "Task is still queued")
+            assumptions.append("Task is still queued")
         elif state == "STARTED":
             confidence = 0.7
-            add_assumption(assumptions, "Task is in progress")
+            assumptions.append("Task is in progress")
         elif state == "RETRY":
             confidence = 0.6
-            add_assumption(assumptions, "Task will be retried")
+            assumptions.append("Task will be retried")
         else:
             confidence = 0.8
             response_data["info"] = result.info

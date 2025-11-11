@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import json
 import os
-import time
 from hashlib import sha256
-from typing import Any, Optional
+from typing import Any
 
 import redis
 
@@ -14,7 +13,7 @@ def _redis() -> redis.Redis:
     return redis.from_url(url)
 
 
-def idem_cache_get(route: str, body: bytes, key: str) -> Optional[dict[str, Any]]:
+def idem_cache_get(route: str, body: bytes, key: str) -> dict[str, Any] | None:
     r = _redis()
     cache_key = f"idem:{route}:{sha256(body).hexdigest()}:{key}"
     val = r.get(cache_key)

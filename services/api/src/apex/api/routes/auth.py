@@ -2,32 +2,30 @@
 
 from __future__ import annotations
 
-import structlog
-from datetime import timedelta
 import time
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
+import structlog
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from gotrue.errors import AuthApiError
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 
 from ..auth import TokenData, create_access_token, create_session_token, get_current_user
+from ..auth_health import ProviderStatus, get_health_monitor
 from ..auth_helpers import get_account_from_email, normalize_provider
-from ..auth_health import get_health_monitor, ProviderStatus
 from ..auth_password import (
-    get_lockout_manager,
-    hash_password,
     PasswordStrength,
     generate_reset_token,
+    get_lockout_manager,
     validate_reset_token,
 )
 from ..common.models import make_envelope
 from ..deps import get_code_version, get_model_config, settings
 from ..duo_client import get_duo_service
 from ..schemas import ResponseEnvelope, add_assumption
-from ..supabase_client import get_supabase_client, get_supabase_admin
+from ..supabase_client import get_supabase_admin, get_supabase_client
 
 logger = structlog.get_logger(__name__)
 
@@ -42,11 +40,11 @@ class TokenResponse(BaseModel):
     """OAuth2 token response with session or access token."""
 
     access_token: str
-    refresh_token: Optional[str] = None
+    refresh_token: str | None = None
     token_type: str = "bearer"
     expires_in: int
     user: dict
-    session_token: Optional[str] = None  # For 2FA flow
+    session_token: str | None = None  # For 2FA flow
     requires_2fa: bool = False
 
 
@@ -63,7 +61,7 @@ class Verify2FARequest(BaseModel):
 
     session_token: str
     factor: str = "push"  # push, sms, phone, passcode
-    passcode: Optional[str] = None  # Required if factor="passcode"
+    passcode: str | None = None  # Required if factor="passcode"
 
 
 class PasswordResetRequest(BaseModel):
@@ -84,7 +82,7 @@ class PasswordResetConfirm(BaseModel):
 async def register(
     email: EmailStr = Query(..., description="User email address"),
     password: str = Query(..., min_length=8, description="User password"),
-    account_id: Optional[str] = Query(None, description="Account/organization ID (auto-assigned if not provided)"),
+    account_id: str | None = Query(None, description="Account/organization ID (auto-assigned if not provided)"),
 ) -> ResponseEnvelope:
     """Register new user via Supabase Auth with automatic account assignment.
     
@@ -330,7 +328,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> ResponseEnv
 @router.get("/oauth/{provider}")
 async def oauth_login(
     provider: str,
-    redirect_to: Optional[str] = Query(None, description="Redirect URL after OAuth"),
+    redirect_to: str | None = Query(None, description="Redirect URL after OAuth"),
 ) -> RedirectResponse:
     """Initiate OAuth flow for Microsoft 365, Google, or Apple.
     
@@ -390,9 +388,9 @@ async def oauth_login(
 
 @router.get("/callback")
 async def auth_callback(
-    code: Optional[str] = Query(None),
-    error: Optional[str] = Query(None),
-    error_description: Optional[str] = Query(None),
+    code: str | None = Query(None),
+    error: str | None = Query(None),
+    error_description: str | None = Query(None),
 ) -> RedirectResponse:
     """Handle OAuth callback from provider.
     

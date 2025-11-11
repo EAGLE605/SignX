@@ -1,5 +1,5 @@
 """
-Quoting Module - OSHCut-style instant quotes
+Quoting Module - instant quoting system-style instant quotes
 
 This module provides instant, automated quoting for sign projects:
 - Customer uploads design or provides specs
@@ -9,7 +9,7 @@ This module provides instant, automated quoting for sign projects:
 - Cost estimation via SignX-Intel
 - Professional quote generated in <5 minutes
 
-Status: 🚀 Core of the OSHCut transformation
+Status: 🚀 Core of the instant quoting system transformation
 """
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
@@ -26,7 +26,7 @@ module_def = ModuleDefinition(
     name="quoting",
     version="1.0.0",
     display_name="Quoting",
-    description="Instant automated quotes - OSHCut for signs",
+    description="Instant automated quotes - instant quoting system for signs",
     api_prefix="/api/v1/quoting",
     ui_routes=["/quote", "/quote/:id"],
     nav_order=1,
@@ -42,7 +42,7 @@ router = APIRouter(prefix="/api/v1/quoting", tags=["quoting"])
 # Request/Response models
 class InstantQuoteRequest(BaseModel):
     """
-    Request for instant quote - OSHCut style
+    Request for instant quote - instant quoting system style
     
     Customer provides minimal information, AI figures out the rest.
     """
@@ -109,7 +109,7 @@ class QuoteResponse(BaseModel):
 
 class QuoteService:
     """
-    OSHCut-style instant quote generation
+    instant quoting system-style instant quote generation
     
     Orchestrates multiple AI systems to generate quotes in <5 minutes:
     1. Gemini RAG: Find similar historical projects
@@ -129,11 +129,11 @@ class QuoteService:
         """
         Generate instant quote using multi-AI pipeline
         
-        OSHCut generates quotes in seconds. We aim for <5 minutes for complex signs.
+        instant quoting system generates quotes in seconds. We aim for <5 minutes for complex signs.
         """
         quote_id = str(uuid.uuid4())
         
-        # Run analyses in parallel (OSHCut speed optimization)
+        # Run analyses in parallel (instant quoting system speed optimization)
         try:
             results = await asyncio.gather(
                 self._analyze_requirements(request),
@@ -400,9 +400,9 @@ async def generate_instant_quote(
     background_tasks: BackgroundTasks
 ):
     """
-    Generate instant quote - OSHCut style
+    Generate instant quote - instant quoting system style
     
-    The magic endpoint that makes Eagle Sign competitive with OSHCUT.
+    The magic endpoint that makes Eagle Sign competitive with instant quoting system.
     
     Customer uploads specs → AI analyzes → Quote in <5 minutes
     
@@ -463,7 +463,7 @@ async def get_capacity_status():
     """
     Current capacity and lead times
     
-    OSHCut shows real-time capacity. This provides transparency to customers.
+    instant quoting system shows real-time capacity. This provides transparency to customers.
     """
     return {
         "current_backlog": "2-3 weeks",

@@ -1,6 +1,6 @@
 # 🏗️ SignX Platform Architecture Overview
 
-**The OSHCut of the Sign Industry**
+**The SignX Platform of the Sign Industry**
 
 ---
 
@@ -12,7 +12,7 @@ Customer Request → AI Analysis → Instant Quote → Accept → Production
    (5 seconds)   (95 years)    (<5 minutes)  (automated) (automated)
 ```
 
-**What OSHCut did for metal, you're doing for signs.**
+**What SignX Platform did for metal, you're doing for signs.**
 
 ---
 
@@ -173,7 +173,7 @@ Send instant quote email
 ---
 
 ### **5. Quoting Module** (THE KILLER FEATURE)
-**Purpose**: OSHCut-style instant quotes
+**Purpose**: SignX Platform-style instant quotes
 
 **Capabilities:**
 - Customer submits specs via web form
@@ -198,7 +198,7 @@ POST /api/v1/quoting/instant
 → Returns: Full quote with cost, timeline, similar projects
 ```
 
-**THIS IS WHAT MAKES YOU COMPETITIVE WITH OSHCUT.**
+**THIS IS WHAT MAKES YOU COMPETITIVE WITH SignX Platform.**
 
 ---
 
@@ -424,9 +424,9 @@ Iterate based on usage
 - Your hours: 50/week
 - Revenue up 50%
 
-### **Month 12** (OSHCut Transformation Complete)
+### **Month 12** (SignX Platform Transformation Complete)
 - 2,000+ quotes/year
-- 500+ customers (OSHCut model)
+- 500+ customers (SignX Platform model)
 - 2-3x industry margins
 - Your hours: 40/week (same output as 80!)
 - Revenue up 75%+
@@ -443,7 +443,7 @@ Iterate based on usage
 5. **Curated data** - BOT TRAINING is gold
 6. **AI acceleration** - Jules + Claude for fast development
 
-### **The OSHCut Parallel**
+### **The SignX Platform Parallel**
 - **They did**: "Call for quote" → "Instant online pricing"
 - **You're doing**: "3-day wait" → "5-minute quotes"
 - **Their result**: $5M+ revenue, 500+ customers, 2-3x margins

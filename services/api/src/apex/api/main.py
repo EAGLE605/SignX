@@ -46,6 +46,8 @@ from .routes.uploads import router as uploads_router
 from .routes.compliance import router as compliance_router
 from .routes.crm import router as crm_router
 from .routes.audit import router as audit_router
+from .routes.cad_export import router as cad_export_router
+from .routes.ai import router as ai_router
 
 
 logger = structlog.get_logger(__name__)
@@ -296,6 +298,12 @@ app.include_router(bom_router, tags=["bom"])
 
 # Include tasks router
 app.include_router(tasks_router, tags=["tasks"])
+
+# Include CAD export router
+app.include_router(cad_export_router, tags=["cad-export"])
+
+# Include AI/ML prediction router
+app.include_router(ai_router, tags=["ai-ml"])
 
 
 # Tracing last to ensure provider in place

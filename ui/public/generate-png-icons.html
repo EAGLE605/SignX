@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate PWA Icons</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    canvas { border: 1px solid #ccc; margin: 10px; }
+    button { padding: 10px 20px; margin: 10px; background: #1976d2; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>PWA Icon Generator</h1>
+  <p>Click the buttons to download icons (right-click → Save Image As)</p>
+
+  <div>
+    <button onclick="generateIcon(192)">Generate 192x192</button>
+    <button onclick="generateIcon(512)">Generate 512x512</button>
+    <button onclick="generateIcon(180)">Generate Apple Touch Icon (180x180)</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    function generateIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      // Draw foundation icon (simplified rebar grid)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = size * 0.02;
+      const gridSize = size * 0.5;
+      const gridX = (size - gridSize) / 2;
+      const gridY = (size - gridSize) / 2;
+
+      // Rectangle outline
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = size * 0.04;
+      ctx.strokeRect(gridX, gridY, gridSize, gridSize);
+
+      // Vertical bars
+      for (let i = 1; i < 4; i++) {
+        const x = gridX + (gridSize / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, gridY);
+        ctx.lineTo(x, gridY + gridSize);
+        ctx.stroke();
+      }
+
+      // Horizontal bars
+      for (let i = 1; i < 4; i++) {
+        const y = gridY + (gridSize / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(gridX, y);
+        ctx.lineTo(gridX + gridSize, y);
+        ctx.stroke();
+      }
+
+      // Draw "X" text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size * 0.2}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('X', size / 2, size * 0.8);
+
+      // Add to page
+      const output = document.getElementById('output');
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<h3>${size}x${size}px</h3>`;
+      wrapper.appendChild(canvas);
+
+      const link = document.createElement('a');
+      link.download = size === 180 ? 'apple-touch-icon.png' : `pwa-${size}x${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.textContent = 'Download';
+      link.style.display = 'block';
+      link.style.marginTop = '10px';
+      wrapper.appendChild(link);
+
+      output.appendChild(wrapper);
+    }
+  </script>
+</body>
+</html>

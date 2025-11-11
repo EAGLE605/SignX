@@ -21,8 +21,14 @@
       "Bash(docker --version:*)",
       "Bash(docker-compose up:*)",
       "Bash(cat:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e:*)",
+      "Bash(npx:*)",
+      "Bash(/plugin marketplace add:*)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

@@ -1,7 +1,7 @@
 """
 SignX Studio Platform - Core Infrastructure
 
-The OSHCut of the Sign Industry
+The Sign Industry Platform of the Sign Industry
 """
 
 __version__ = "2.0.0"

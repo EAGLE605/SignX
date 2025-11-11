@@ -40,6 +40,14 @@ from .wind_loads_service import (
     WindForceResult,
 )
 
+from .cad_export_service import (
+    CADExportService,
+    CADExportOptions,
+    CADFormat,
+    DrawingScale,
+    CADExportResult,
+)
+
 __all__ = [
     # AISC Database Service
     "get_section_properties_async",
@@ -64,4 +72,10 @@ __all__ = [
     "WindLoadInput",
     "VelocityPressureResult",
     "WindForceResult",
+    # CAD Export Service
+    "CADExportService",
+    "CADExportOptions",
+    "CADFormat",
+    "DrawingScale",
+    "CADExportResult",
 ]

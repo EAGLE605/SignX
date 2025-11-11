@@ -14,7 +14,7 @@ Comprehensive research compilation covering:
 - **GANs & Deep Learning** - Advanced ML techniques
 - **Real-Time Collaboration** - CRDT, WebRTC, multiplayer systems
 - **Manufacturing AI** - Job shop scheduling, autonomous systems
-- **Next-Gen UI/UX** - OSHCut, LEGO Builder, spatial computing, AR/VR
+- **Next-Gen UI/UX** - modern manufacturing platforms, LEGO Builder, spatial computing, AR/VR
 - **CAD/CAM Automation** - Computational engineering, LEAP 71
 - **DFM (Design for Manufacturability)** - Collision detection, automated validation
 - **Knowledge Representation** - Ontologies, semantic systems
@@ -46,7 +46,7 @@ Comprehensive research compilation covering:
 4. **Predictive Maintenance** - Digital twin, anomaly detection
 
 ### **For UI/UX Design**
-1. **OSHCut Analysis** - Instant quoting, DFM visualization, nesting
+1. **modern manufacturing platforms Analysis** - Instant quoting, DFM visualization, nesting
 2. **LEGO Builder** - Collaborative task division, 3D instructions
 3. **Invisible UI** - Micro-interactions, progressive disclosure, anticipatory design
 4. **AR/VR** - Spatial computing, remote assistance patterns
@@ -67,7 +67,7 @@ Comprehensive research compilation covering:
 - `../../platform/` - Platform core code
 
 **Implementation Guides:**
-- `../../OSHCUT_QUICKSTART.md` - OSHCut-style implementation
+- `../../modern manufacturing platforms_QUICKSTART.md` - modern manufacturing platforms-style implementation
 - `../../GETTING_STARTED.md` - Setup guide
 - `../workflows/` - Workflow documentation
 

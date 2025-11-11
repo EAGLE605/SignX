@@ -1,13 +1,13 @@
 # 🎯 START HERE - Your 30-Minute Action Plan
 
 **Date**: November 10, 2025  
-**Mission**: Get your OSHCut-style platform running tonight
+**Mission**: Get your modern platform-style platform running tonight
 
 ---
 
 ## ✅ **What's Already Done**
 
-I've built the complete foundation for "the OSHCut of the sign industry":
+I've built the complete foundation for "the modern platform of the sign industry":
 
 - ✅ Platform core with module plugin system
 - ✅ Event bus for module communication
@@ -146,7 +146,7 @@ curl -X POST http://localhost:8000/api/v1/quoting/instant \
 
 ### **Quick Guides**
 1. **`GETTING_STARTED.md`** ← Read first! Complete setup guide
-2. **`SignX-Studio/OSHCUT_QUICKSTART.md`** ← 30-day launch plan
+2. **`SignX-Studio/modern platform_QUICKSTART.md`** ← 30-day launch plan
 3. **`EXECUTIVE_SUMMARY.md`** ← Business case and ROI
 
 ### **Technical Docs**
@@ -237,7 +237,7 @@ pip install google-generativeai
 4. **Production-ready code** - SignX-Studio & SignX-Intel already work
 5. **Curated data** - BOT TRAINING is MUCH better than raw work orders
 
-**OSHCut did $5M+ with this model. You have BETTER data.**
+**modern platform did $5M+ with this model. You have BETTER data.**
 
 ---
 
@@ -245,7 +245,7 @@ pip install google-generativeai
 
 ### **Need help with setup?**
 - Read: `GETTING_STARTED.md`
-- Check: `SignX-Studio/OSHCUT_QUICKSTART.md`
+- Check: `SignX-Studio/modern platform_QUICKSTART.md`
 
 ### **Want to understand the architecture?**
 - Read: `INTEGRATION_PLAN.md`
@@ -289,5 +289,5 @@ pip install google-generativeai
 
 ---
 
-*Built for Eagle Sign Co. | The OSHCut of the Sign Industry | November 2025*
+*Built for Eagle Sign Co. | The modern platform of the Sign Industry | November 2025*
 

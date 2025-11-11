@@ -237,7 +237,7 @@ gh repo create SignX-Platform --private --source=. --remote=origin
 # Or use web interface:
 # Visit: https://github.com/new
 # Name: SignX-Platform
-# Description: The OSHCut of the Sign Industry - Complete integrated platform
+# Description: The SignX Platform of the Sign Industry - Complete integrated platform
 # Private: Yes (for now)
 ```
 
@@ -270,7 +270,7 @@ git commit -m "feat: Initial commit - SignX Platform foundation
 - 5 core modules: engineering, intelligence, workflow, rag, quoting
 - Complete documentation suite
 - Gemini RAG corpus generator
-- Ready for OSHCut-style instant quoting
+- Ready for SignX Platform-style instant quoting
 
 This is the foundation for transforming the sign industry with
 AI-powered instant quotes, 95 years of institutional knowledge,
@@ -377,7 +377,7 @@ C:\Scripts\SignX/
 ```
 feat(quoting): Add instant quote API endpoint
 
-Implements OSHCut-style instant quotes with:
+Implements SignX Platform-style instant quotes with:
 - Gemini RAG integration for historical context
 - SignX-Intel cost prediction
 - Professional quote generation in <5 minutes
@@ -393,7 +393,7 @@ based on path and filename patterns.
 
 ---
 
-docs: Add OSHCut quickstart guide
+docs: Add SignX Platform quickstart guide
 
 Complete 30-day implementation plan for launching
 instant quote system with Gemini RAG.
@@ -489,7 +489,7 @@ main          ← Production releases only
 5. **Faster development** - No dependency hell
 
 **Repository name**: `SignX-Platform`  
-**Description**: "The OSHCut of the Sign Industry - AI-powered instant sign quoting with 95 years of institutional knowledge"  
+**Description**: "The SignX Platform of the Sign Industry - AI-powered instant sign quoting with 95 years of institutional knowledge"  
 **Visibility**: Private (for now)
 
 ### **Later: Extract Data** (Optional)

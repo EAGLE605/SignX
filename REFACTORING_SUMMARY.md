@@ -47,7 +47,7 @@ Merge these two systems WITHOUT breaking production!
 ### **3. Research Database** ✅
 - **`docs/research/`** - 11,000+ lines of AI/ML research
 - **1,000+ citations** covering RAG, multi-agent, manufacturing AI
-- Patterns for OSHCut implementation
+- Patterns for instant quoting platform implementation
 - Technical references for advanced features
 
 ### **4. Repository Setup** ✅
@@ -263,7 +263,7 @@ SignX Platform
 - [ ] Test email → quote workflow
 
 ### **Web Portal**
-- [ ] Create HTML quote form (copy from OSHCUT_QUICKSTART.md)
+- [ ] Create HTML quote form (copy from instant quoting platform_QUICKSTART.md)
 - [ ] Deploy to Railway/Vercel/Netlify
 - [ ] Point domain: quote.eaglesign.net
 - [ ] Test customer submission → quote generation
@@ -328,9 +328,9 @@ With your API key (AIzaSyDtPu7Q...) and 834 curated docs:
 
 **This is your competitive moat** - **activate it NOW!**
 
-### **4. OSHCut Transformation is Real**
+### **4. instant quoting platform Transformation is Real**
 The research in `docs/research/` proves:
-- OSHCut did $5M+ with instant quotes
+- instant quoting platform did $5M+ with instant quotes
 - Metal fabrication ≈ Sign manufacturing (similar complexity)
 - First-mover advantage is TIME-SENSITIVE
 - 95-year knowledge base = unbeatable moat
@@ -395,7 +395,7 @@ python scripts/test_gemini_api.py
 ### **Research** ✅
 - 11,000+ lines of AI/ML research
 - 1,000+ citations on RAG, agents, manufacturing
-- OSHCut analysis and patterns
+- instant quoting platform analysis and patterns
 - DFM, CAD/CAM, collision detection references
 
 ### **Integration Plan** ✅
@@ -431,7 +431,7 @@ You asked me to "rigorously understand and deeply refactor" this project.
 2. **You have BEAUTIFUL architecture** (Platform) - Finish implementing it
 3. **You have INCREDIBLE data** (834 curated docs) - Activate it with Gemini
 4. **You have WORKING ML** (SignX-Intel) - Integrate it into platform
-5. **You have PROVEN MODEL** (OSHCut) - Follow their blueprint
+5. **You have PROVEN MODEL** (instant quoting platform) - Follow their blueprint
 
 **The refactoring isn't a rebuild - it's a bridge.**
 
@@ -479,7 +479,7 @@ python scripts/test_gemini_api.py
 
 **Then follow DEEP_REFACTORING_PLAN.md day by day.**
 
-**In 30 days, you'll have the OSHCut of the sign industry.**
+**In 30 days, you'll have the instant quoting platform of the sign industry.**
 
 ---
 

@@ -1,5 +1,5 @@
 """
-Module Registry - OSHCut-style plugin system
+Module Registry - modular platform-style plugin system
 
 Allows modules to register themselves with the platform and discover each other.
 """

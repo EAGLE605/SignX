@@ -138,7 +138,7 @@ if __name__ == "__main__":
 ## 📖 **Related Documentation**
 
 - **Getting Started**: `../GETTING_STARTED.md`
-- **OSHCut Quickstart**: `../OSHCUT_QUICKSTART.md`
+- **instant quoting platform Quickstart**: `../instant quoting platform_QUICKSTART.md`
 - **Integration Plan**: `../../INTEGRATION_PLAN.md`
 - **Platform API**: `../platform/api/main.py`
 

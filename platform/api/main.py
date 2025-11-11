@@ -16,7 +16,7 @@ import os
 # Create FastAPI application
 app = FastAPI(
     title="SignX Studio",
-    description="The OSHCut of the Sign Industry - All-in-one integrated platform",
+    description="The integrated platform of the Sign Industry - All-in-one integrated platform",
     version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -50,7 +50,7 @@ async def health_check():
         "status": "healthy",
         "version": "2.0.0",
         "platform": "SignX Studio",
-        "description": "The OSHCut of the Sign Industry",
+        "description": "The integrated platform of the Sign Industry",
         "modules": {
             "total": len(registry.modules),
             "enabled": len([m for m in registry.modules.values() if m.enabled])
@@ -115,7 +115,7 @@ async def root():
     return {
         "platform": "SignX Studio",
         "version": "2.0.0",
-        "description": "The OSHCut of the Sign Industry",
+        "description": "The integrated platform of the Sign Industry",
         "docs": "/api/docs",
         "modules": "/api/v1/platform/modules"
     }

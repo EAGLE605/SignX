@@ -1,9 +1,9 @@
-# SignX Studio - The OSHCut of the Sign Industry
+# SignX Studio - The modern integrated platform of the Sign Industry
 ## Complete Integration Roadmap
 
 **Vision:** Build the first all-in-one platform for the sign industry that combines quoting, design, engineering, estimation, and production planning into a single integrated system.
 
-**Inspiration:** OSHCut (metal fabrication) - but for signs
+**Inspiration:** modern integrated platform (metal fabrication) - but for signs
 
 ---
 
@@ -92,7 +92,7 @@ touch modules/quoting/README.md   # Quote generation
 **File:** `platform/registry.py`
 ```python
 """
-Module Registry - OSHCut-style plugin system
+Module Registry - modern integrated platform-style plugin system
 """
 from typing import Dict, List, Callable
 from fastapi import FastAPI, APIRouter
@@ -187,7 +187,7 @@ from platform.auth import get_current_user
 
 app = FastAPI(
     title="SignX Studio",
-    description="The OSHCut of the Sign Industry",
+    description="The modern integrated platform of the Sign Industry",
     version="2.0.0"
 )
 
@@ -558,7 +558,7 @@ registry.register(module_def, router)
 ```typescript
 /**
  * SignX Studio - Unified UI
- * OSHCut-style navigation with module tabs
+ * modern integrated platform-style navigation with module tabs
  */
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -576,7 +576,7 @@ function App() {
   
   return (
     <BrowserRouter>
-      {/* Top navigation - OSHCut style */}
+      {/* Top navigation - modern integrated platform style */}
       <AppBar position="static">
         <Tabs value={currentModule} onChange={(e, v) => setCurrentModule(v)}>
           <Tab label="Workflow" value="workflow" />
@@ -728,7 +728,7 @@ workflow = QuoteToCashWorkflow()
 
 ---
 
-## Success Metrics (OSHCut-style)
+## Success Metrics (modern integrated platform-style)
 
 ### Time Savings
 | Task | Before | After | Savings |

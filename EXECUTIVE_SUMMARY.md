@@ -8,7 +8,7 @@
 
 ## 🎯 **What Was Built**
 
-In this session, I've architected and implemented the **foundation for the OSHCut of the sign industry** - transforming your scattered projects into a unified, AI-powered platform that will revolutionize your business.
+In this session, I've architected and implemented the **foundation for the instant quoting platform of the sign industry** - transforming your scattered projects into a unified, AI-powered platform that will revolutionize your business.
 
 ### **The Core Achievement**
 
@@ -16,7 +16,7 @@ Created a **modular platform architecture** that integrates:
 1. Your existing SignX-Studio (APEX CalcuSign) - Production-ready structural engineering
 2. Your existing SignX-Intel - GPU-accelerated ML cost prediction
 3. Gemini File Search RAG - 95 years of institutional knowledge
-4. Instant quote API - The OSHCut killer feature
+4. Instant quote API - The instant quoting platform killer feature
 5. Module plugin system - Easy to extend without breaking existing code
 
 ---
@@ -48,11 +48,11 @@ C:\Scripts\SignX\
 │   │   ├── intelligence/      # SignX-Intel (integrated)
 │   │   ├── workflow/          # EagleHub (Python rewrite ready)
 │   │   ├── rag/               # Gemini knowledge base
-│   │   └── quoting/           # Instant quotes (OSHCut)
+│   │   └── quoting/           # Instant quotes (instant quoting platform)
 │   │
 │   └── docs/                  # ✅ NEW: Complete documentation
 │       ├── GETTING_STARTED.md
-│       ├── OSHCUT_QUICKSTART.md
+│       ├── instant quoting platform_QUICKSTART.md
 │       └── INTEGRATION_PLAN.md
 │
 ├── SignX-Intel/         # Keep as ML service
@@ -62,9 +62,9 @@ C:\Scripts\SignX\
 
 ---
 
-## 🚀 **The OSHCut Transformation**
+## 🚀 **The instant quoting platform Transformation**
 
-### **What OSHCut Did for Metal Fabrication**
+### **What instant quoting platform Did for Metal Fabrication**
 - Upload design → Instant manufacturability feedback → Quote in seconds
 - Result: $5M+ revenue, 2-3x industry margins, 500+ customers
 
@@ -74,7 +74,7 @@ C:\Scripts\SignX\
 
 ### **Your Competitive Advantages**
 1. **Knowledge Moat**: 95 years of projects (competitors have 0)
-2. **First Mover**: No one else has OSHCut-style sign quoting
+2. **First Mover**: No one else has instant quoting platform-style sign quoting
 3. **Technology Stack**: Gemini RAG (free!) + Your ML models
 4. **Existing Assets**: SignX-Studio & SignX-Intel already production-ready
 
@@ -233,7 +233,7 @@ Each module is:
 - [ ] 50+ new customers
 - [ ] $500k+ pipeline
 
-### **Month 12** (OSHCut Transformation Complete)
+### **Month 12** (instant quoting platform Transformation Complete)
 - [ ] 2,000+ quotes/year
 - [ ] 500+ customers
 - [ ] 2-3x margins
@@ -249,7 +249,7 @@ Each module is:
 2. **Gemini's Free RAG**: Zero marginal cost per query
 3. **Existing Production Systems**: SignX-Studio & SignX-Intel already work
 4. **Modular Architecture**: Easy to extend, hard to break
-5. **OSHCut Validation**: Proven business model in similar industry
+5. **instant quoting platform Validation**: Proven business model in similar industry
 
 ### **Why This Is Different from Past Attempts**
 
@@ -268,7 +268,7 @@ Each module is:
 **YES if:**
 - ✅ You want to transform from service to software-enabled business
 - ✅ You're willing to invest 10-15 hours/week for 4-8 weeks
-- ✅ You see the OSHCut model as applicable to signs
+- ✅ You see the instant quoting platform model as applicable to signs
 - ✅ You want 2-3x margins and 500+ customers
 
 **NO if:**
@@ -316,10 +316,10 @@ Each module is:
 ## 🏁 **Conclusion**
 
 **What you have now:**
-- A clear vision (OSHCut for signs)
+- A clear vision (instant quoting platform for signs)
 - A solid foundation (platform + modules)
 - A killer feature (instant quotes with 95-year knowledge)
-- A proven business model (OSHCut validation)
+- A proven business model (instant quoting platform validation)
 - A clear roadmap (30 days to launch)
 
 **What you need to do:**
@@ -345,5 +345,5 @@ Each module is:
 
 ---
 
-*"What OSHCut did for metal, SignX does for signs. First mover wins."*
+*"What instant quoting platform did for metal, SignX does for signs. First mover wins."*
 

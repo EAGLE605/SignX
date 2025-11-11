@@ -136,7 +136,7 @@ def test_model_listing():
 if __name__ == "__main__":
     print("=" * 70)
     print("GEMINI API TEST SUITE")
-    print("SignX Platform - OSHCut Integration")
+    print("SignX Platform - SignX Platform Integration")
     print("=" * 70)
     print(f"\nProject: SignX")
     print(f"Project ID: {GEMINI_PROJECT}")

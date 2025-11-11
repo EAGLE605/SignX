@@ -1,10 +1,10 @@
-# 🏗️ SignX Platform - The OSHCut of the Sign Industry
+# 🏗️ SignX Platform - Complete Integrated Sign Industry Solution
 
 **Status**: ✅ **Foundation Complete** | 🚀 **Ready to Deploy** | 📦 **On GitHub**
 
 **Repository**: https://github.com/EAGLE605/SignX
 
-> *"What OSHCut did for metal fabrication, SignX does for signs: instant online quoting, AI-powered automation, and 95 years of institutional knowledge at your fingertips."*
+> *"The first all-in-one platform for the sign industry: instant online quoting, AI-powered automation, and 95 years of institutional knowledge at your fingertips."*
 
 ---
 
@@ -41,7 +41,7 @@ C:\Scripts\SignX\
 │   │   ├── events.py          # Event bus for inter-module communication
 │   │   └── api/main.py        # FastAPI application with auto-discovery
 │   │
-│   ├── modules/               # ✅ Feature modules (OSHCut-style)
+│   ├── modules/               # ✅ Feature modules (instant online quoting platform-style)
 │   │   ├── engineering/       # Structural calculations (APEX)
 │   │   ├── intelligence/      # ML cost prediction (SignX-Intel)
 │   │   ├── workflow/          # Email automation (EagleHub → Python)
@@ -109,7 +109,7 @@ python platform/api/main.py
 ## 🎯 **Key Features**
 
 ### **1. Instant Quote API** 🏆
-The feature that makes you competitive with OSHCut:
+The feature that transforms the quoting process:
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/quoting/instant \
@@ -199,7 +199,7 @@ async def on_quote_accepted(event: Event):
 
 ---
 
-## 💰 **Business Model (OSHCut Transformation)**
+## 💰 **Business Model (instant online quoting platform Transformation)**
 
 ### **Revenue Structure**
 
@@ -208,7 +208,7 @@ async def on_quote_accepted(event: Event):
 - High dependency, low negotiating power
 - Manual processes limit scale
 
-**Target** (OSHCut model):
+**Target** (instant online quoting platform model):
 - 80% revenue from 500+ customers
 - Resilient to single customer loss
 - Automated processes enable scale
@@ -256,7 +256,7 @@ async def on_quote_accepted(event: Event):
 
 ### **Getting Started**
 1. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Start here! 30-minute setup guide
-2. **[OSHCUT_QUICKSTART.md](SignX-Studio/OSHCUT_QUICKSTART.md)** - 30-day implementation plan
+2. **[instant online quoting platform_QUICKSTART.md](SignX-Studio/instant online quoting platform_QUICKSTART.md)** - 30-day implementation plan
 3. **[INTEGRATION_PLAN.md](INTEGRATION_PLAN.md)** - Complete technical roadmap
 
 ### **Technical Docs**
@@ -265,7 +265,7 @@ async def on_quote_accepted(event: Event):
 - **API Reference**: http://localhost:8000/api/docs (when running)
 
 ### **Business Docs**
-- **OSHCut Case Study**: See `INTEGRATION_PLAN.md` (OSHCUT comparison)
+- **instant online quoting platform Case Study**: See `INTEGRATION_PLAN.md` (instant online quoting platform comparison)
 - **ROI Calculator**: See `GETTING_STARTED.md` (cost analysis)
 
 ---
@@ -290,7 +290,7 @@ async def on_quote_accepted(event: Event):
 - [ ] 50+ new customers
 - [ ] $500k+ revenue pipeline
 
-### **Month 12 Goals** (OSHCut Transformation)
+### **Month 12 Goals** (instant online quoting platform Transformation)
 - [ ] 2,000+ quotes/year
 - [ ] 500+ active customers
 - [ ] 2-3x industry margins
@@ -392,10 +392,10 @@ You have:
 - ✅ Production-ready engineering platform (SignX-Studio/APEX)
 - ✅ ML cost prediction system (SignX-Intel)
 - ✅ Plugin architecture (easy to extend)
-- ✅ Instant quote API (OSHCut killer feature)
+- ✅ Instant quote API (instant online quoting platform killer feature)
 - ✅ Free Gemini RAG (no marginal cost per query)
 
-**What OSHCut did**: Took metal fabrication from "call us for a quote" to "instant online pricing"
+**What instant online quoting platform did**: Took metal fabrication from "call us for a quote" to "instant online pricing"
 
 **What you're doing**: Taking sign manufacturing from "we'll get back to you in 3 days" to "here's your quote in 5 minutes"
 
@@ -405,5 +405,5 @@ You have:
 
 ---
 
-**Built with ❤️ for the sign industry | Powered by 95 years of expertise + 2025 AI**
+**Built for Eagle Sign Co. | Powered by 95 years of expertise + 2025 AI**
 

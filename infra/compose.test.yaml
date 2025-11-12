@@ -1,0 +1,136 @@
+# ============================================================================
+# Docker Compose - Test Environment
+# ============================================================================
+#
+# Isolated test environment with ephemeral database and Redis instances
+#
+# Usage:
+#   docker-compose -f compose.test.yaml up --build
+#   docker-compose -f compose.test.yaml run --rm test
+#   docker-compose -f compose.test.yaml down -v  # Clean up volumes
+#
+# ============================================================================
+
+services:
+  # Test Database (Ephemeral PostgreSQL)
+  test-db:
+    image: pgvector/pgvector:pg16
+    container_name: signx-test-db
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password_12345
+      POSTGRES_DB: test_signx_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5433:5432"  # Non-conflicting port
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_signx_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - test-network
+    tmpfs:
+      - /var/run/postgresql  # Speed up tests with tmpfs
+
+  # Test Redis (Ephemeral)
+  test-redis:
+    image: redis:7-alpine
+    container_name: signx-test-redis
+    command: redis-server --save "" --appendonly no  # No persistence
+    ports:
+      - "6380:6379"  # Non-conflicting port
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    networks:
+      - test-network
+
+  # Test Runner (API Tests)
+  test:
+    build:
+      context: ../services/api
+      dockerfile: Dockerfile.test
+    container_name: signx-test-runner
+    depends_on:
+      test-db:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    environment:
+      # Test configuration
+      TESTING: "1"
+      PYTHONHASHSEED: "0"
+
+      # Database
+      DATABASE_URL: "postgresql+asyncpg://test_user:test_password_12345@test-db:5432/test_signx_db"
+      POSTGRES_HOST: test-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password_12345
+      POSTGRES_DB: test_signx_db
+
+      # Redis
+      REDIS_URL: "redis://test-redis:6379/0"
+      REDIS_HOST: test-redis
+      REDIS_PORT: "6379"
+
+      # Application settings
+      APEX_ENV: test
+      APEX_LOG_LEVEL: WARNING
+      APEX_CORS_ALLOW_ORIGINS: "*"
+
+      # Disable external services
+      APEX_SUPABASE_ENABLED: "false"
+      APEX_DUO_ENABLED: "false"
+      APEX_SENTRY_ENABLED: "false"
+      APEX_OPENSEARCH_ENABLED: "false"
+      APEX_MINIO_ENABLED: "false"
+    networks:
+      - test-network
+    volumes:
+      - ../services/api/tests:/app/tests:ro
+      - ../services/api/src:/app/src:ro
+      - test_coverage:/app/htmlcov
+    command: >
+      pytest
+      -v
+      --tb=short
+      --cov=apex
+      --cov-report=term-missing
+      --cov-report=html
+      --cov-fail-under=80
+      --maxfail=5
+      -m "not slow"
+    profiles:
+      - test
+
+  # Coverage Report Server (Optional - view HTML coverage)
+  coverage-server:
+    image: python:3.11-slim
+    container_name: signx-coverage-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - test_coverage:/coverage:ro
+    working_dir: /coverage
+    command: python -m http.server 8080
+    networks:
+      - test-network
+    profiles:
+      - coverage
+
+volumes:
+  test_postgres_data:
+    driver: local
+  test_coverage:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge
+    name: signx-test-network

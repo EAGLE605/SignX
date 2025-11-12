@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-11-12T18:40:20.582641+00:00",
+  "git_commit": "ec198a3e1913d3469834a17fae6bee6e230ca624",
+  "python_version": "3.11.14",
+  "results": [
+    {
+      "operation": "dict_creation",
+      "iterations": 10000,
+      "total_time_s": 0.0027828170055954615,
+      "mean_time_ms": 0.00027828170055954615,
+      "median_time_ms": 0.00027199996566196205,
+      "p95_time_ms": 0.0002940000740636606,
+      "p99_time_ms": 0.0003849999075100641,
+      "min_time_ms": 0.0002519999497962999,
+      "max_time_ms": 0.010643999985404662,
+      "std_dev_ms": 0.00015125293627746725
+    },
+    {
+      "operation": "list_comprehension",
+      "iterations": 10000,
+      "total_time_s": 0.022375983991537396,
+      "mean_time_ms": 0.0022375983991537395,
+      "median_time_ms": 0.002173999973820173,
+      "p95_time_ms": 0.002312999981768371,
+      "p99_time_ms": 0.003594999952838407,
+      "min_time_ms": 0.002066999968519667,
+      "max_time_ms": 0.012413000035849109,
+      "std_dev_ms": 0.000447196493930882
+    },
+    {
+      "operation": "datetime_now_utc",
+      "iterations": 10000,
+      "total_time_s": 0.0037346259987316444,
+      "mean_time_ms": 0.00037346259987316446,
+      "median_time_ms": 0.00035599998682300793,
+      "p95_time_ms": 0.0003960000185543322,
+      "p99_time_ms": 0.00067100006617693,
+      "min_time_ms": 0.00032899993129831273,
+      "max_time_ms": 0.012110000056964054,
+      "std_dev_ms": 0.00022538104881132732
+    },
+    {
+      "operation": "json_encode",
+      "iterations": 5000,
+      "total_time_s": 0.023482342000875178,
+      "mean_time_ms": 0.004696468400175036,
+      "median_time_ms": 0.004520999937085435,
+      "p95_time_ms": 0.005087999966235657,
+      "p99_time_ms": 0.008376999971915211,
+      "min_time_ms": 0.004351000029600982,
+      "max_time_ms": 0.019441999938862864,
+      "std_dev_ms": 0.0009082963631640762
+    },
+    {
+      "operation": "json_decode",
+      "iterations": 5000,
+      "total_time_s": 0.008322992004423213,
+      "mean_time_ms": 0.0016645984008846425,
+      "median_time_ms": 0.0016120000054797856,
+      "p95_time_ms": 0.0017060000345736626,
+      "p99_time_ms": 0.0029530000347222085,
+      "min_time_ms": 0.0015419999499499681,
+      "max_time_ms": 0.015121999922484974,
+      "std_dev_ms": 0.00041051694285637185
+    }
+  ],
+  "metadata": {
+    "description": "Performance baseline for SignX API refactoring validation",
+    "purpose": "Validate <2% regression after code changes",
+    "environment": "Docker container (isolated)"
+  }
+}

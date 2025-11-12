@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -91,7 +91,7 @@ class NeuralEmbedding:
     embedding_vector: list[float] = field(default_factory=list)  # Learned representation
     confidence: float = 0.0  # Neural confidence (0-1)
     learned_from: list[str] = field(default_factory=list)  # Source data IDs
-    last_updated: datetime = field(default_factory=datetime.utcnow)
+    last_updated: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def similarity(self, other: NeuralEmbedding) -> float:
         """Compute cosine similarity with another embedding."""

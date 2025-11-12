@@ -48,7 +48,7 @@ class ExposureCategory(str, Enum):
 
 class RiskCategory(str, Enum):
     """Risk categories per ASCE 7-22 Table 1.5-1."""
-    I = "I"      # Low hazard
+    I = "I"      # noqa: E741 - Roman numeral per ASCE 7-22
     II = "II"    # Normal (most buildings)
     III = "III"  # Substantial hazard
     IV = "IV"    # Essential facilities

@@ -126,7 +126,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     # Try Supabase token verification first
     if settings.SUPABASE_URL and settings.SUPABASE_KEY:
         try:
-            from gotrue.errors import AuthApiError
+            from gotrue.errors import AuthApiError  # noqa: F401
 
             from .supabase_client import get_supabase_client
             

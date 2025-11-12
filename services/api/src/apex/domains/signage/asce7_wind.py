@@ -45,7 +45,7 @@ class RiskCategory(str, Enum):
     - III: Buildings and other structures that represent a substantial hazard to human life (schools, jails)
     - IV: Buildings and other structures designated as essential facilities (hospitals, fire stations)
     """
-    I = "I"
+    I = "I"  # noqa: E741 - Roman numeral per ASCE 7-22
     II = "II"
     III = "III"
     IV = "IV"

@@ -24,8 +24,8 @@ class ExposureCategory(Enum):
 
 class ImportanceFactor(Enum):
     """ASCE 7-22 importance factors."""
-    I = "I"      # Low hazard buildings (1.0)
-    II = "II"    # Standard occupancy (1.0)  
+    I = "I"      # noqa: E741 - Roman numeral per ASCE 7-22
+    II = "II"    # Standard occupancy (1.0)
     III = "III"  # High occupancy (1.15)
     IV = "IV"    # Essential facilities (1.15)
 

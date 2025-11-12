@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from PIL import Image
+    from PIL import Image  # noqa: F401
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False

@@ -65,6 +65,10 @@ dev-dependencies = [
 line-length = 100
 target-version = "py311"
 lint.select = ["E", "F", "I", "B", "UP"]
+lint.ignore = [
+    "E501",  # Line too long (handled by formatter, not critical for CI)
+    "B008",  # Function call in default argument (standard FastAPI pattern with Depends)
+]
 extend-exclude = ["alembic/versions/*.py"]
 
 [tool.mypy]

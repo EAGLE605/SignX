@@ -11,7 +11,7 @@ Provides:
 from __future__ import annotations
 
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -345,7 +345,7 @@ async def get_knowledge_base_stats(
             "nodes_by_type": nodes_by_type,
             "neural_embeddings": embeddings_count,
             "vitra_updates": scheduler.vitra_bridge.update_count,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
         }
 
         logger.info(
@@ -383,7 +383,7 @@ async def health_check() -> ResponseEnvelope:
             "scheduler_initialized": scheduler is not None,
             "rules_loaded": len(scheduler.kb.rules) > 0,
             "vitra_bridge_active": scheduler.vitra_bridge is not None,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         return make_envelope(

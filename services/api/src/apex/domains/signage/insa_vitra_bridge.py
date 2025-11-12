@@ -15,7 +15,7 @@ This creates a closed-loop AI system where:
 from __future__ import annotations
 
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
@@ -285,7 +285,7 @@ class VITRAINSABridge:
                 entity_type=EntityType.MATERIAL,
                 attributes={
                     "source": "vitra_inspection",
-                    "created_at": datetime.utcnow().isoformat(),
+                    "created_at": datetime.now(UTC).isoformat(),
                 },
             )
 
@@ -294,7 +294,7 @@ class VITRAINSABridge:
             "overall_condition": assessment.get("overall_condition", "unknown"),
             "remaining_life_years": assessment.get("estimated_remaining_life_years"),
             "capacity_retained_pct": assessment.get("load_capacity_retained_pct"),
-            "last_inspection": datetime.utcnow().isoformat(),
+            "last_inspection": datetime.now(UTC).isoformat(),
         })
 
         # Update confidence based on condition

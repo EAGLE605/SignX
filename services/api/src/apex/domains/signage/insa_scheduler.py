@@ -15,7 +15,7 @@ Produces:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
@@ -60,7 +60,7 @@ class SignXProductionScheduler:
             Optimized schedule with reasoning trace
 
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
 
         logger.info(
             "insa.schedule_project.start",
@@ -83,7 +83,7 @@ class SignXProductionScheduler:
         # 5. Validate against AISC/ASCE rules
         validation_result = self._validate_schedule(detailed_schedule)
 
-        elapsed = (datetime.utcnow() - start_time).total_seconds()
+        elapsed = (datetime.now(UTC) - start_time).total_seconds()
 
         logger.info(
             "insa.schedule_project.complete",
@@ -318,7 +318,7 @@ class SignXProductionScheduler:
                 "bom_items": len(bom_data.get("items", [])),
                 "deadline": constraints.get("deadline"),
                 "priority": constraints.get("priority", "normal"),
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
         )
 
@@ -332,7 +332,7 @@ class SignXProductionScheduler:
     ) -> dict[str, Any]:
         """Add detailed timing and resource information to schedule."""
         operations = []
-        current_time = datetime.utcnow()
+        current_time = datetime.now(UTC)
 
         for item in schedule:
             duration = item.get("end_time", 60) - item.get("start_time", 0)
@@ -356,7 +356,7 @@ class SignXProductionScheduler:
             "project_id": project_id,
             "operations": operations,
             "total_operations": len(operations),
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
         }
 
     def _extract_operation_type(self, job_id: str) -> str:
@@ -404,7 +404,7 @@ class SignXProductionScheduler:
     def _estimate_completion(self, schedule: dict[str, Any]) -> str:
         """Estimate project completion date."""
         if not schedule.get("operations"):
-            return datetime.utcnow().isoformat()
+            return datetime.now(UTC).isoformat()
 
         max_end = max(
             datetime.fromisoformat(op["scheduled_end"])
@@ -455,7 +455,7 @@ class SignXProductionScheduler:
         return {
             **current,
             "operations": merged_ops,
-            "revised_at": datetime.utcnow().isoformat(),
+            "revised_at": datetime.now(UTC).isoformat(),
         }
 
 

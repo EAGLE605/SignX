@@ -15,7 +15,7 @@ import hashlib
 # Import VITRA service
 import sys
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import structlog
@@ -124,9 +124,9 @@ async def create_vision_inspection(
         "latitude": request.latitude,
         "longitude": request.longitude,
         "location_name": request.location_name,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
-        "completed_at": datetime.utcnow(),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
+        "completed_at": datetime.now(UTC),
     }
 
     logger.info(
@@ -225,9 +225,9 @@ async def create_installation_video_analysis(
         "safety_violations": analysis_result.get("safety_violations", []),
         "quality_score": analysis_result.get("quality_score"),
         "completion_percentage": analysis_result.get("completion_percentage"),
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
-        "analyzed_at": datetime.utcnow(),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
+        "analyzed_at": datetime.now(UTC),
     }
 
     logger.info(
@@ -306,8 +306,8 @@ async def create_component_recognition(
         "bom_match_score": analysis_result.get("bom_validation", {}).get("match_score"),
         "discrepancies": analysis_result.get("bom_validation", {}).get("discrepancies", []),
         "validation_passed": analysis_result.get("bom_validation", {}).get("validation_passed"),
-        "created_at": datetime.utcnow(),
-        "analyzed_at": datetime.utcnow(),
+        "created_at": datetime.now(UTC),
+        "analyzed_at": datetime.now(UTC),
     }
 
     logger.info(
@@ -393,8 +393,8 @@ async def create_ar_design_review(
         "recommendations": analysis_result.get("recommendations", []),
         "latitude": request.latitude,
         "longitude": request.longitude,
-        "created_at": datetime.utcnow(),
-        "reviewed_at": datetime.utcnow(),
+        "created_at": datetime.now(UTC),
+        "reviewed_at": datetime.now(UTC),
     }
 
     logger.info(
@@ -481,7 +481,7 @@ async def create_robotic_fabrication_session(
         "cycle_time_sec": len(actions) * 15.0,  # Estimate
         "error_count": 0,
         "retry_count": 0,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(UTC),
     }
 
     logger.info(

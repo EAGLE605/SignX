@@ -7,6 +7,7 @@ from typing import Any
 
 import structlog
 from fastapi import Depends, FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, ORJSONResponse
 from slowapi import Limiter
@@ -132,22 +133,39 @@ async def add_request_context(request: Request, call_next):  # type: ignore[no-u
         "content": {
             "application/json": {
                 "example": {
-                    "result": {"service": "api", "status": "ok", "version": "0.1.0", "host": "host", "schema_version": "v1", "deployment_id": "dev"},
+                    "result": {
+                        "service": "api",
+                        "status": "ok",
+                        "version": "0.1.0",
+                        "host": "host",
+                        "schema_version": "v1",
+                        "deployment_id": "dev",
+                    },
                     "assumptions": [],
                     "confidence": 1.0,
                     "trace": {
-                        "data": {"inputs": {"env": "dev"}, "intermediates": {}, "outputs": {"status": "ok"}},
+                        "data": {
+                            "inputs": {"env": "dev"},
+                            "intermediates": {},
+                            "outputs": {"status": "ok"},
+                        },
                         "code_version": {"git_sha": "dev", "dirty": False},
-                        "model_config": {"provider": "none", "model": "none", "temperature": 0.0, "max_tokens": 1024, "seed": None}
-                    }
+                        "model_config": {
+                            "provider": "none",
+                            "model": "none",
+                            "temperature": 0.0,
+                            "max_tokens": 1024,
+                            "seed": None,
+                        },
+                    },
                 }
             }
         }
     }
 })
 async def health(
-    model_config=Depends(get_model_config),
-    code_version=Depends(get_code_version),
+    model_config=Depends(get_model_config),  # noqa: B008
+    code_version=Depends(get_code_version),  # noqa: B008
 ):
     hostname = socket.gethostname()
     result = {
@@ -184,18 +202,28 @@ async def health(
                     "assumptions": [],
                     "confidence": 1.0,
                     "trace": {
-                        "data": {"inputs": {}, "intermediates": {}, "outputs": {"version": "0.1.0"}},
+                        "data": {
+                            "inputs": {},
+                            "intermediates": {},
+                            "outputs": {"version": "0.1.0"},
+                        },
                         "code_version": {"git_sha": "dev", "dirty": False},
-                        "model_config": {"provider": "none", "model": "none", "temperature": 0.0, "max_tokens": 1024, "seed": None}
-                    }
+                        "model_config": {
+                            "provider": "none",
+                            "model": "none",
+                            "temperature": 0.0,
+                            "max_tokens": 1024,
+                            "seed": None,
+                        },
+                    },
                 }
             }
         }
     }
 })
 async def version(
-    model_config=Depends(get_model_config),
-    code_version=Depends(get_code_version),
+    model_config=Depends(get_model_config),  # noqa: B008
+    code_version=Depends(get_code_version),  # noqa: B008
 ):
     result = {"version": settings.APP_VERSION}
     return make_envelope(
@@ -211,8 +239,6 @@ async def version(
 
 
 # Register custom exception handlers
-from fastapi.exceptions import RequestValidationError
-
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 

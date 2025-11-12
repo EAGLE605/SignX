@@ -81,35 +81,23 @@ async def audit_middleware_handler(
     call_next: Any,
 ) -> Response:
     """Middleware to automatically log HTTP requests for audit trail.
-    
+
     Logs all authenticated requests with:
     - User ID, account ID
     - Action (from route + method)
     - Resource type and ID (from path params)
     - IP address, user agent
     - Request/response correlation
+
+    Note: Actual audit logging is done in route handlers using the @audit decorator.
+    This middleware is a placeholder for future request-level audit logging.
     """
-    # Extract request metadata
-    ip_address = request.client.host if request.client else None
-    user_agent = request.headers.get("user-agent")
-    request_id = request.headers.get("x-request-id") or request.headers.get("x-correlation-id")
-    
-    # Try to get current user (may be None for public endpoints)
-    current_user: TokenData | None = None
-    try:
-        # We can't use Depends() in middleware, so we'll log after route execution
-        # This is handled by the audit decorator instead
-        pass
-    except Exception:
-        pass
-    
     # Process request
     response = await call_next(request)
-    
-    # Extract response metadata for audit logging
-    # Note: Actual audit logging should be done in route handlers using the @audit decorator
-    # This middleware just ensures request metadata is available
-    
+
+    # Note: Request metadata (IP, user agent, request ID) should be extracted
+    # in route handlers where audit logging is actually performed
+
     return response
 
 

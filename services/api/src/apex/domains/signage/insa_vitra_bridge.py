@@ -20,13 +20,11 @@ from datetime import datetime
 from typing import Any
 
 import structlog
-
 from insa_core import (
     EntityType,
     INSAKnowledgeBase,
     KnowledgeNode,
     NeuralEmbedding,
-    RelationType,
     SymbolicRule,
 )
 

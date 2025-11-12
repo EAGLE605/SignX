@@ -20,7 +20,6 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import structlog
-
 from insa_core import EntityType, HybridScheduler, KnowledgeNode, get_knowledge_base
 from insa_rules import load_all_rules
 from insa_vitra_bridge import create_vitra_insa_bridge
@@ -344,8 +343,12 @@ class SignXProductionScheduler:
             operations.append({
                 "job_id": item["job_id"],
                 "operation_type": self._extract_operation_type(item["job_id"]),
-                "scheduled_start": (current_time + timedelta(minutes=item["start_time"])).isoformat(),
-                "scheduled_end": (current_time + timedelta(minutes=item["end_time"])).isoformat(),
+                "scheduled_start": (
+                    current_time + timedelta(minutes=item["start_time"])
+                ).isoformat(),
+                "scheduled_end": (
+                    current_time + timedelta(minutes=item["end_time"])
+                ).isoformat(),
                 "duration_min": duration,
                 "assigned_machine": item.get("assigned_machine", "M1"),
                 "assigned_worker": item.get("assigned_worker", "W1"),

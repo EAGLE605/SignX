@@ -227,8 +227,8 @@ class AuthProviderHealthMonitor:
         # For OAuth providers, check if Supabase is configured and responsive
         try:
             from .supabase_client import get_supabase_client
-            
-            supabase = get_supabase_client()
+
+            _supabase = get_supabase_client()  # Initialization verifies connectivity
             # Simple check - try to get auth settings (lightweight)
             # Supabase client initialization is enough to verify connectivity
             return True

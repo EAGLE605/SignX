@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
-
 
 # ===== Enums =====
 
@@ -75,7 +75,7 @@ class InspectionCreateRequest(BaseModel):
     """Request to create new vision inspection."""
     project_id: str | None = None
     sign_id: str | None = None
-    inspection_type: str = Field("periodic", description="'initial', 'periodic', 'damage_assessment'")
+    inspection_type: str = Field("periodic", description="'initial', 'periodic', 'damage_assessment'")  # noqa: E501
     media_urls: list[str] = Field(..., min_length=1, description="URLs to images/videos")
     latitude: float | None = None
     longitude: float | None = None
@@ -148,7 +148,7 @@ class ProcedureCompliance(BaseModel):
 class InstallationVideoCreateRequest(BaseModel):
     """Request to analyze installation video."""
     project_id: str
-    installation_phase: str = Field(..., description="'foundation', 'pole_erection', 'cabinet_mount', etc.")
+    installation_phase: str = Field(..., description="'foundation', 'pole_erection', 'cabinet_mount', etc.")  # noqa: E501
     video_url: str
     notes: str | None = None
 

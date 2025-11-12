@@ -168,9 +168,7 @@ async def verify_breakaway_compliance(
         "is_compliant": is_compliant,
         "check_date": datetime.now(UTC).isoformat(),
     }
-    
-    status = "compliant" if is_compliant else "non_compliant"
-    
+
     return await check_compliance(
         db=db,
         project_id=project_id,
@@ -206,9 +204,7 @@ async def verify_wind_load_compliance(
         "is_compliant": is_compliant,
         "check_date": datetime.now(UTC).isoformat(),
     }
-    
-    status = "compliant" if is_compliant else "non_compliant"
-    
+
     return await check_compliance(
         db=db,
         project_id=project_id,

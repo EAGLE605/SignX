@@ -12,13 +12,15 @@ Provides 5 core vision capabilities:
 from __future__ import annotations
 
 import hashlib
+
+# Import VITRA service
+import sys
 import uuid
 from datetime import datetime
-from typing import Any
+from pathlib import Path
 
 import structlog
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.envelope import make_envelope
@@ -27,31 +29,22 @@ from ..db import get_session
 from ..deps import get_current_user_id
 from ..schemas_vitra import (
     ARDesignReviewRequest,
-    ARDesignReviewResponse,
     ComponentRecognitionRequest,
-    ComponentRecognitionResponse,
     InspectionCreateRequest,
-    InspectionResponse,
     InstallationVideoCreateRequest,
-    InstallationVideoResponse,
     RoboticFabricationRequest,
-    RoboticFabricationResponse,
 )
-
-# Import VITRA service
-import sys
-from pathlib import Path
 
 _domains_path = Path(__file__).parent.parent.parent / "domains" / "signage"
 if str(_domains_path) not in sys.path:
     sys.path.insert(0, str(_domains_path))
 
-from vitra_service import (
-    analyze_ar_design,
+from vitra_service import (  # noqa: E402
     analyze_installation_video,
     analyze_sign_inspection,
     generate_fabrication_actions,
     recognize_components,
+    review_ar_design,
 )
 
 logger = structlog.get_logger(__name__)
@@ -65,7 +58,7 @@ router = APIRouter(prefix="/vitra", tags=["vitra-vision"])
 async def create_vision_inspection(
     request: InspectionCreateRequest,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """
     Create new vision-based sign inspection.
@@ -151,7 +144,7 @@ async def create_vision_inspection(
 async def get_inspection(
     inspection_id: str,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """Get inspection details by ID."""
     logger.info("vitra.inspection.get", user_id=user_id, inspection_id=inspection_id)
@@ -175,7 +168,7 @@ async def get_inspection(
 async def create_installation_video_analysis(
     request: InstallationVideoCreateRequest,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """
     Analyze installation process video.
@@ -255,7 +248,7 @@ async def create_installation_video_analysis(
 async def create_component_recognition(
     request: ComponentRecognitionRequest,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """
     Recognize and validate components from image.
@@ -336,7 +329,7 @@ async def create_component_recognition(
 async def create_ar_design_review(
     request: ARDesignReviewRequest,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """
     AR-assisted design review on site photo.
@@ -423,7 +416,7 @@ async def create_ar_design_review(
 async def create_robotic_fabrication_session(
     request: RoboticFabricationRequest,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """
     Generate VLA action sequence for robotic fabrication.
@@ -510,7 +503,7 @@ async def create_robotic_fabrication_session(
 async def get_robotic_session(
     session_id: str,
     user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
     """Get robotic fabrication session status and results."""
     logger.info("vitra.robotic.get", user_id=user_id, session_id=session_id)
@@ -530,7 +523,7 @@ async def get_robotic_session(
 
 @router.post("/upload-image", response_model=ResponseEnvelope)
 async def upload_inspection_image(
-    file: UploadFile = File(...),
+    file: UploadFile = File(...),  # noqa: B008
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
     """

@@ -14,7 +14,6 @@ arXiv: 2510.21571
 
 from __future__ import annotations
 
-import base64
 import hashlib
 import time
 from typing import Any
@@ -164,7 +163,10 @@ class VitraVisionModel:
                     "severity": "medium",
                     "confidence": 0.89,
                     "location": {"x": 0.45, "y": 0.32, "w": 0.15, "h": 0.12},
-                    "description": "Surface rust detected on pole base, approximately 3-5% surface area affected",
+                    "description": (
+                        "Surface rust detected on pole base, "
+                        "approximately 3-5% surface area affected"
+                    ),
                     "recommendation": "Clean and apply protective coating within 6 months",
                 },
                 {
@@ -289,15 +291,41 @@ class VitraVisionModel:
         context: dict[str, Any] | None,
     ) -> dict[str, Any]:
         """Mock installation video analysis."""
+        phase = context.get("phase", "pole_erection") if context else "pole_erection"
         return {
-            "installation_phase": context.get("phase", "pole_erection") if context else "pole_erection",
+            "installation_phase": phase,
             "duration_sec": 1847.3,
             "action_timeline": [
-                {"timestamp": 0, "action": "site_preparation", "duration_sec": 342, "quality": "excellent"},
-                {"timestamp": 342, "action": "foundation_excavation", "duration_sec": 628, "quality": "good"},
-                {"timestamp": 970, "action": "pole_erection", "duration_sec": 445, "quality": "excellent"},
-                {"timestamp": 1415, "action": "alignment_check", "duration_sec": 89, "quality": "excellent"},
-                {"timestamp": 1504, "action": "backfill_compaction", "duration_sec": 343, "quality": "good"},
+                {
+                    "timestamp": 0,
+                    "action": "site_preparation",
+                    "duration_sec": 342,
+                    "quality": "excellent",
+                },
+                {
+                    "timestamp": 342,
+                    "action": "foundation_excavation",
+                    "duration_sec": 628,
+                    "quality": "good",
+                },
+                {
+                    "timestamp": 970,
+                    "action": "pole_erection",
+                    "duration_sec": 445,
+                    "quality": "excellent",
+                },
+                {
+                    "timestamp": 1415,
+                    "action": "alignment_check",
+                    "duration_sec": 89,
+                    "quality": "excellent",
+                },
+                {
+                    "timestamp": 1504,
+                    "action": "backfill_compaction",
+                    "duration_sec": 343,
+                    "quality": "good",
+                },
             ],
             "procedure_compliance": {
                 "overall_score": 94,

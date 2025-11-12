@@ -35,7 +35,7 @@ router = APIRouter(prefix="/signage/baseplate", tags=["baseplate"])
 def _check_plate_thickness(plate: dict, loads: dict) -> dict:
     """ACI-style plate thickness check for bending under anchor tension."""
     w_in = float(plate.get("w_in", 12.0))
-    l_in = float(plate.get("l_in", 12.0))
+    _l_in = float(plate.get("l_in", 12.0))  # Reserved for future 2D analysis
     t_in = float(plate.get("t_in", 0.5))
     fy_ksi = float(plate.get("fy_ksi", 36.0))
     

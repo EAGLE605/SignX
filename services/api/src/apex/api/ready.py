@@ -130,9 +130,8 @@ async def ready(
     # Supabase connectivity
     try:
         from .supabase_client import get_supabase_client
-        
-        supabase = get_supabase_client()
-        # Just verify client can be created (connection test)
+
+        _supabase = get_supabase_client()  # Connection test via initialization
         checks["supabase"] = "ok"
     except Exception as e:  # pragma: no cover
         checks["supabase"] = f"fail:{e}"

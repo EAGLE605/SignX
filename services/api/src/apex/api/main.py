@@ -33,6 +33,7 @@ from .routes.concrete import router as concrete_router
 from .routes.crm import router as crm_router
 from .routes.direct_burial import router as burial_router
 from .routes.files import router as files_router
+from .routes.insa import router as insa_router
 from .routes.materials import router as materials_router
 from .routes.payloads import router as payloads_router
 from .routes.poles import router as poles_router
@@ -44,7 +45,6 @@ from .routes.submission import router as submission_router
 from .routes.tasks import router as tasks_router
 from .routes.uploads import router as uploads_router
 from .routes.vitra import router as vitra_router
-from .routes.insa import router as insa_router
 from .schemas import (  # Must import first for forward refs
     ResponseEnvelope,
 )

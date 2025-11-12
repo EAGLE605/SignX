@@ -17,13 +17,11 @@ Enables:
 
 from __future__ import annotations
 
-import hashlib
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 import structlog
 
@@ -98,7 +96,9 @@ class NeuralEmbedding:
             return 0.0
 
         # Simple dot product / norms (replace with proper cosine similarity)
-        dot_product = sum(a * b for a, b in zip(self.embedding_vector, other.embedding_vector))
+        dot_product = sum(
+            a * b for a, b in zip(self.embedding_vector, other.embedding_vector, strict=True)
+        )
         norm_a = sum(a * a for a in self.embedding_vector) ** 0.5
         norm_b = sum(b * b for b in other.embedding_vector) ** 0.5
 
@@ -620,7 +620,7 @@ def _add_core_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="cut_before_weld",
         description="Cutting must complete before welding",
-        condition="all(op['type'] == 'cut' for op in context.get('completed_ops', []) if any(op2['type'] == 'weld' for op2 in context.get('pending_ops', [])))",
+        condition="all(op['type'] == 'cut' for op in context.get('completed_ops', []) if any(op2['type'] == 'weld' for op2 in context.get('pending_ops', [])))", # noqa: E501
         hard_constraint=True,
         source="manufacturing_logic",
         priority=100,
@@ -649,7 +649,7 @@ def _add_core_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="certified_welder_required",
         description="Structural welds require AWS certified welder",
-        condition="context.get('operation_type') == 'structural_weld' and context.get('welder_certified', False)",
+        condition="context.get('operation_type') == 'structural_weld' and context.get('welder_certified', False)", # noqa: E501
         hard_constraint=True,
         source="quality_standard",
         priority=90,

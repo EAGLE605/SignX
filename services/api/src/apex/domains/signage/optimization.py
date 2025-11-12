@@ -7,14 +7,14 @@ Pareto optimization for pole selection and genetic algorithm for baseplate desig
 from __future__ import annotations
 
 import random
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 from deap import algorithms, base, creator, tools
 
 from .models import PoleOption
 from .solvers import filter_poles
-
 
 # ========== Multi-Objective Pareto Optimization ==========
 
@@ -36,7 +36,7 @@ class ParetoSolution:
         self.safety_factor = safety_factor
         self.is_dominated = is_dominated
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for API response."""
         return {
             "pole": {
@@ -54,13 +54,13 @@ class ParetoSolution:
 
 def pareto_optimize_poles(
     mu_required_kipin: float,
-    sections: List[Dict[str, Any]],
-    prefs: Dict[str, Any],
+    sections: list[dict[str, Any]],
+    prefs: dict[str, Any],
     height_ft: float,
     cost_per_lb: float = 3.0,
     max_solutions: int = 10,
     seed: int = 42,
-) -> List[ParetoSolution]:
+) -> list[ParetoSolution]:
     """
     Multi-objective Pareto optimization for pole selection.
     
@@ -121,7 +121,7 @@ def pareto_optimize_poles(
     toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_int, n=1)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     
-    def evaluate(individual: List[int]) -> Tuple[float, float, float]:
+    def evaluate(individual: list[int]) -> tuple[float, float, float]:
         """Evaluate fitness: (cost, weight, safety_factor)."""
         idx = individual[0]
         pole = feasible_poles[idx]
@@ -213,13 +213,13 @@ def pareto_optimize_poles(
 
 
 def baseplate_optimize_ga(
-    loads: Dict[str, float],
-    constraints: Dict[str, Any] | None = None,
-    cost_weights: Dict[str, float] | None = None,
+    loads: dict[str, float],
+    constraints: dict[str, Any] | None = None,
+    cost_weights: dict[str, float] | None = None,
     seed: int = 42,
     max_generations: int = 30,
-    progress_callback: Optional[Callable[[int, float], None]] = None,
-) -> Tuple[Any, float]:
+    progress_callback: Callable[[int, float], None] | None = None,
+) -> tuple[Any, float]:
     """
     Genetic algorithm optimization for baseplate design.
     
@@ -251,8 +251,8 @@ def baseplate_optimize_ga(
     except RuntimeError:
         pass
     
+    from .models import BasePlateInput
     from .solvers import baseplate_checks
-    from .models import BasePlateChecks, BasePlateInput
     
     random.seed(seed)
     np.random.seed(seed)
@@ -300,7 +300,7 @@ def baseplate_optimize_ga(
     )
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     
-    def evaluate(individual: List[float]) -> Tuple[float]:
+    def evaluate(individual: list[float]) -> tuple[float]:
         """Evaluate fitness: cost_proxy (penalize constraint violations)."""
         plate_w, plate_l, plate_t, anchor_dia, rows, bolts_per_row = individual
         

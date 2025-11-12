@@ -20,16 +20,16 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-# Import INSA modules
+# Import INSA modules (dynamic path required for domain modules)
 _domains_path = Path(__file__).parent.parent.parent / "domains" / "signage"
 if str(_domains_path) not in sys.path:
     sys.path.insert(0, str(_domains_path))
 
-from insa_scheduler import get_production_scheduler
+from insa_scheduler import get_production_scheduler  # noqa: E402
 
-from ..common.envelope import make_envelope
-from ..common.models import ResponseEnvelope
-from ..deps import get_current_user_id
+from ..common.envelope import make_envelope  # noqa: E402
+from ..common.models import ResponseEnvelope  # noqa: E402
+from ..deps import get_current_user_id  # noqa: E402
 
 logger = structlog.get_logger(__name__)
 
@@ -149,7 +149,7 @@ async def schedule_project(
 
     except Exception as e:
         logger.error("insa.schedule.error", error=str(e), project_id=request.project_id)
-        raise HTTPException(status_code=500, detail=f"Scheduling error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Scheduling error: {str(e)}") from e
 
 
 @router.post("/reschedule", response_model=ResponseEnvelope)
@@ -228,7 +228,7 @@ async def reschedule_with_vitra(
 
     except Exception as e:
         logger.error("insa.reschedule.error", error=str(e), project_id=request.project_id)
-        raise HTTPException(status_code=500, detail=f"Rescheduling error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Rescheduling error: {str(e)}") from e
 
 
 @router.post("/explain", response_model=ResponseEnvelope)
@@ -296,7 +296,7 @@ async def explain_schedule_decision(
 
     except Exception as e:
         logger.error("insa.explain.error", error=str(e), job_id=request.job_id)
-        raise HTTPException(status_code=500, detail=f"Explanation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Explanation error: {str(e)}") from e
 
 
 @router.get("/knowledge-base/stats", response_model=ResponseEnvelope)
@@ -364,7 +364,7 @@ async def get_knowledge_base_stats(
 
     except Exception as e:
         logger.error("insa.kb_stats.error", error=str(e))
-        raise HTTPException(status_code=500, detail=f"KB stats error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"KB stats error: {str(e)}") from e
 
 
 @router.get("/health", response_model=ResponseEnvelope)

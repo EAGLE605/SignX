@@ -68,6 +68,9 @@ lint.select = ["E", "F", "I", "B", "UP"]
 lint.ignore = [
     "E501",  # Line too long (handled by formatter, not critical for CI)
     "B008",  # Function call in default argument (standard FastAPI pattern with Depends)
+    "E402",  # Module level import not at top (intentional lazy imports in routes)
+    "B904",  # Raise without from inside except (many false positives in legacy code)
+    "B007",  # Unused loop control variable (intentional in some algorithms)
 ]
 extend-exclude = ["alembic/versions/*.py"]
 

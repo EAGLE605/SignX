@@ -578,7 +578,7 @@ class TestEdgeCases:
     async def test_query_with_special_characters(self, aisc_connection):
         """Test that special characters in designation are handled safely."""
         # HSS designations contain "/" character
-        result = await aisc_connection.fetchrow(
+        await aisc_connection.fetchrow(
             "SELECT * FROM aisc_shapes_v16 WHERE aisc_manual_label = $1",
             "HSS8X8X1/4"  # Contains "/"
         )

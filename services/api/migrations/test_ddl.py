@@ -53,7 +53,7 @@ async def test_constraints() -> None:
         # Test invalid status (should fail)
         try:
             await conn.execute("UPDATE projects SET status = 'invalid' WHERE project_id = 'test_001'")
-            assert False, "Should reject invalid status"
+            raise AssertionError("Should reject invalid status")
         except Exception as e:
             assert "CHECK constraint" in str(e) or "projects_status_check" in str(e)
         

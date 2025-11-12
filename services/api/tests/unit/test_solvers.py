@@ -17,9 +17,6 @@ All tests verify:
 
 from __future__ import annotations
 
-import math
-import pytest
-
 import sys
 from pathlib import Path
 
@@ -40,7 +37,6 @@ from apex.domains.signage.solvers import (
     filter_poles,
     footing_solve,
 )
-
 
 # ========== Load Derivation Tests ==========
 
@@ -398,7 +394,7 @@ class TestBaseplateChecks:
         checks2, _ = baseplate_checks(plate, loads, seed=42, suggest_alternatives=False)
         
         assert len(checks1) == len(checks2)
-        for c1, c2 in zip(checks1, checks2):
+        for c1, c2 in zip(checks1, checks2, strict=False):
             assert c1.name == c2.name
             assert c1.pass_ == c2.pass_
             assert c1.demand == c2.demand

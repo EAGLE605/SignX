@@ -43,6 +43,7 @@ from .routes.site import router as site_router
 from .routes.submission import router as submission_router
 from .routes.tasks import router as tasks_router
 from .routes.uploads import router as uploads_router
+from .routes.vitra import router as vitra_router
 from .schemas import (  # Must import first for forward refs
     ResponseEnvelope,
 )
@@ -296,6 +297,9 @@ app.include_router(bom_router, tags=["bom"])
 
 # Include tasks router
 app.include_router(tasks_router, tags=["tasks"])
+
+# Include VITRA vision analysis router
+app.include_router(vitra_router, tags=["vitra-vision"])
 
 
 # Tracing last to ensure provider in place

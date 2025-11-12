@@ -619,7 +619,7 @@ def _add_core_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="cut_before_weld",
         description="Cutting must complete before welding",
-        condition="all(op['type'] == 'cut' for op in context.get('completed_ops', []) if any(op2['type'] == 'weld' for op2 in context.get('pending_ops', [])))", # noqa: E501
+        condition="all(op['type'] == 'cut' for op in context.get('completed_ops', []) if any(op2['type'] == 'weld' for op2 in context.get('pending_ops', [])))",
         hard_constraint=True,
         source="manufacturing_logic",
         priority=100,
@@ -648,7 +648,7 @@ def _add_core_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="certified_welder_required",
         description="Structural welds require AWS certified welder",
-        condition="context.get('operation_type') == 'structural_weld' and context.get('welder_certified', False)", # noqa: E501
+        condition="context.get('operation_type') == 'structural_weld' and context.get('welder_certified', False)",
         hard_constraint=True,
         source="quality_standard",
         priority=90,

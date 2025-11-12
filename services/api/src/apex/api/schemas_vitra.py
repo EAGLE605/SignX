@@ -82,7 +82,7 @@ class InspectionCreateRequest(BaseModel):
 
     project_id: str | None = None
     sign_id: str | None = None
-    inspection_type: str = Field("periodic", description="'initial', 'periodic', 'damage_assessment'")  # noqa: E501
+    inspection_type: str = Field("periodic", description="'initial', 'periodic', 'damage_assessment'")
     media_urls: list[str] = Field(..., min_length=1, description="URLs to images/videos")
     latitude: float | None = None
     longitude: float | None = None
@@ -160,7 +160,7 @@ class InstallationVideoCreateRequest(BaseModel):
     """Request to analyze installation video."""
 
     project_id: str
-    installation_phase: str = Field(..., description="'foundation', 'pole_erection', 'cabinet_mount', etc.")  # noqa: E501
+    installation_phase: str = Field(..., description="'foundation', 'pole_erection', 'cabinet_mount', etc.")
     video_url: str
     notes: str | None = None
 

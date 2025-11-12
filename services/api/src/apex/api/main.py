@@ -165,8 +165,8 @@ async def add_request_context(request: Request, call_next):  # type: ignore[no-u
     },
 })
 async def health(
-    model_config=Depends(get_model_config),  # noqa: B008
-    code_version=Depends(get_code_version),  # noqa: B008
+    model_config=Depends(get_model_config),
+    code_version=Depends(get_code_version),
 ):
     hostname = socket.gethostname()
     result = {
@@ -223,8 +223,8 @@ async def health(
     },
 })
 async def version(
-    model_config=Depends(get_model_config),  # noqa: B008
-    code_version=Depends(get_code_version),  # noqa: B008
+    model_config=Depends(get_model_config),
+    code_version=Depends(get_code_version),
 ):
     result = {"version": settings.APP_VERSION}
     return make_envelope(

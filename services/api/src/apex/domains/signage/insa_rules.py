@@ -51,9 +51,9 @@ def add_aisc_rules(kb: INSAKnowledgeBase) -> None:
         name="aisc_weld_min_size",
         description="AISC 360-22 Table J2.4: Minimum fillet weld size based on material thickness",
         condition=(
-            "(context.get('material_thickness_in', 0) <= 0.25 and context.get('weld_size_in', 0) >= 0.125) or " # noqa: E501
-            "(context.get('material_thickness_in', 0) <= 0.5 and context.get('weld_size_in', 0) >= 0.1875) or " # noqa: E501
-            "(context.get('material_thickness_in', 0) <= 0.75 and context.get('weld_size_in', 0) >= 0.25) or " # noqa: E501
+            "(context.get('material_thickness_in', 0) <= 0.25 and context.get('weld_size_in', 0) >= 0.125) or "
+            "(context.get('material_thickness_in', 0) <= 0.5 and context.get('weld_size_in', 0) >= 0.1875) or "
+            "(context.get('material_thickness_in', 0) <= 0.75 and context.get('weld_size_in', 0) >= 0.25) or "
             "(context.get('weld_size_in', 0) >= 0.3125)"
         ),
         hard_constraint=True,
@@ -175,7 +175,7 @@ def add_aws_welding_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="aws_weld_prequalified",
         description="AWS D1.1: Use prequalified joint details when possible",
-        condition="context.get('joint_type', '') in ['square_groove', 'single_v', 'double_v', 'single_bevel', 'fillet']", # noqa: E501
+        condition="context.get('joint_type', '') in ['square_groove', 'single_v', 'double_v', 'single_bevel', 'fillet']",
         hard_constraint=False,  # Preference
         source="aws_d1_1_sec_3",
         priority=60,
@@ -183,7 +183,7 @@ def add_aws_welding_rules(kb: INSAKnowledgeBase) -> None:
 
     kb.add_rule(SymbolicRule(
         name="aws_base_metal_cleanliness",
-        description="AWS D1.1: Base metal must be free of rust, mill scale, and coatings at weld location", # noqa: E501
+        description="AWS D1.1: Base metal must be free of rust, mill scale, and coatings at weld location",
         condition="context.get('surface_prepared', False) == True",
         hard_constraint=True,
         source="aws_d1_1_sec_5_14",
@@ -235,7 +235,7 @@ def add_ibc_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="ibc_setback_requirement",
         description="IBC 2024: Sign setback from property line ≥ 10 ft for freestanding signs",
-        condition="context.get('setback_ft', 0) >= 10 or context.get('sign_type', '') != 'freestanding'", # noqa: E501
+        condition="context.get('setback_ft', 0) >= 10 or context.get('sign_type', '') != 'freestanding'",
         hard_constraint=True,
         source="ibc_2024_local_amendments",
         priority=85,
@@ -244,7 +244,7 @@ def add_ibc_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="ibc_height_restriction",
         description="IBC 2024: Maximum sign height 35 ft without special engineering (typical)",
-        condition="context.get('sign_height_ft', 0) <= 35 or context.get('pe_stamped', False) == True", # noqa: E501
+        condition="context.get('sign_height_ft', 0) <= 35 or context.get('pe_stamped', False) == True",
         hard_constraint=False,  # Varies by jurisdiction
         source="ibc_2024_local_amendments",
         priority=70,
@@ -259,7 +259,7 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
         name="mfg_cut_before_weld",
         description="Manufacturing: All cutting must complete before welding operations",
         condition=(
-            "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'cut') or " # noqa: E501
+            "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'cut') or "
             "not any(op.get('type') == 'weld' for op in context.get('operations', []))"
         ),
         hard_constraint=True,
@@ -271,7 +271,7 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
         name="mfg_weld_before_paint",
         description="Manufacturing: Welding must complete before painting/coating",
         condition=(
-            "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'weld') or " # noqa: E501
+            "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'weld') or "
             "not any(op.get('type') == 'paint' for op in context.get('operations', []))"
         ),
         hard_constraint=True,
@@ -355,7 +355,7 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     kb.add_rule(SymbolicRule(
         name="mfg_dimensional_tolerance",
         description="Manufacturing: Final dimensions must be within ±1/8 inch tolerance",
-        condition="abs(context.get('actual_dimension_in', 0) - context.get('nominal_dimension_in', 0)) <= 0.125", # noqa: E501
+        condition="abs(context.get('actual_dimension_in', 0) - context.get('nominal_dimension_in', 0)) <= 0.125",
         hard_constraint=True,
         source="tolerance_spec",
         priority=85,
@@ -400,7 +400,7 @@ def add_vitra_integration_rules(kb: INSAKnowledgeBase) -> None:
         name="vitra_safety_violation_halt",
         description="VITRA: Critical safety violations halt production immediately",
         condition=(
-            "not any(v.get('severity') == 'critical' for v in context.get('vitra_safety_violations', []))" # noqa: E501
+            "not any(v.get('severity') == 'critical' for v in context.get('vitra_safety_violations', []))"
         ),
         hard_constraint=True,
         source="vitra_safety",

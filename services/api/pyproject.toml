@@ -64,15 +64,57 @@ dev-dependencies = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-lint.select = ["E", "F", "I", "B", "UP"]
-lint.ignore = [
-    "E501",  # Line too long (handled by formatter, not critical for CI)
-    "B008",  # Function call in default argument (standard FastAPI pattern with Depends)
-    "E402",  # Module level import not at top (intentional lazy imports in routes)
-    "B904",  # Raise without from inside except (many false positives in legacy code)
-    "B007",  # Unused loop control variable (intentional in some algorithms)
+
+# Select core rules for production code quality
+lint.select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "C4",  # flake8-comprehensions
+    "RUF", # ruff-specific rules
 ]
-extend-exclude = ["alembic/versions/*.py"]
+
+# Justified ignores with rationale
+lint.ignore = [
+    # Formatting (handled by formatter, not critical for logic)
+    "E501",  # Line too long (formatter handles this)
+
+    # FastAPI patterns (standard framework idioms)
+    "B008",  # Function call in default argument (Depends() is FastAPI standard)
+
+    # Lazy imports (performance optimization)
+    "E402",  # Module level import not at top (intentional lazy imports in routes)
+
+    # Exception handling (defensive coding for production)
+    "B904",  # Raise without from inside except (acceptable for fallback logic)
+    "BLE001", # Blind except (necessary for graceful degradation in prod)
+    "S110",  # Try-except-pass (metrics/monitoring shouldn't crash app)
+
+    # Algorithm implementation details
+    "B007",  # Unused loop control variable (intentional in numerical algorithms)
+    "PLR2004", # Magic value comparison (constants extracted where semantically meaningful)
+
+    # Code organization (justified by architecture)
+    "PLC0415", # Import outside top level (lazy loading for performance)
+
+    # Type hints (incremental migration)
+    "ANN401", # Any type (acceptable during migration to full typing)
+
+    # Function signatures (engineering calculations need parameters)
+    "PLR0913", # Too many arguments (engineering functions are parameter-heavy)
+
+    # Engineering notation (semantically meaningful unicode)
+    "RUF001", # Ambiguous unicode in strings (engineering symbols: ×, π, etc.)
+    "RUF002", # Ambiguous unicode in docstrings (Greek letters for formulas)
+    "RUF003", # Ambiguous unicode in comments (engineering notation)
+]
+
+extend-exclude = [
+    "alembic/versions/*.py",  # Generated migration files
+    "tests/",  # Test code has different standards
+]
 
 [tool.mypy]
 python_version = "3.11"

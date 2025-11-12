@@ -32,7 +32,7 @@ if str(_domains_path) not in sys.path:
 
 from typing import TYPE_CHECKING, Annotated
 
-from vitra_service import (  # noqa: E402
+from vitra_service import (
     analyze_installation_video,
     analyze_sign_inspection,
     generate_fabrication_actions,

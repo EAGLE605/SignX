@@ -32,7 +32,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """
     trace_id = getattr(request.state, "trace_id", "unknown")
     error_id = str(uuid.uuid4())
-    
+
     # Extract field paths from errors
     errors = []
     for error in exc.errors():
@@ -42,7 +42,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "message": error["msg"],
             "type": error["type"],
         })
-    
+
     logger.warning(
         "validation_error",
         error_id=error_id,
@@ -50,11 +50,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         path=request.url.path,
         errors=errors,
     )
-    
+
     # Send to Sentry if available
     if SENTRY_AVAILABLE and settings.ENV == "prod":
         sentry_sdk.capture_exception(exc)
-    
+
     assumptions = [f"Validation failed: {len(errors)} error(s)"]
     envelope = make_envelope(
         result=None,
@@ -64,11 +64,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         intermediates={"errors": errors, "error_id": error_id},
         outputs={},
     )
-    
+
     # Add errors array to response for better UX
     envelope_dict = envelope.model_dump(mode="json")
     envelope_dict["errors"] = errors
-    
+
     return ORJSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=envelope_dict,
@@ -80,7 +80,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> ORJSO
     """Handle unexpected exceptions with Sentry integration."""
     trace_id = getattr(request.state, "trace_id", "unknown")
     error_id = str(uuid.uuid4())
-    
+
     logger.exception(
         "unhandled_exception",
         error=str(exc),
@@ -90,11 +90,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> ORJSO
         path=request.url.path,
         method=request.method,
     )
-    
+
     # Send to Sentry if available
     if SENTRY_AVAILABLE and settings.ENV == "prod":
         sentry_sdk.capture_exception(exc)
-    
+
     envelope = make_envelope(
         result={
             "error_id": error_id,
@@ -109,7 +109,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> ORJSO
         code_version=get_code_version(),
         model_config=get_model_config(),
     )
-    
+
     return ORJSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=envelope.model_dump(mode="json"),

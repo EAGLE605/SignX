@@ -1,5 +1,4 @@
-"""
-VITRA-INSA Integration Bridge
+"""VITRA-INSA Integration Bridge
 
 Connects VITRA vision analysis with INSA knowledge base for:
 1. Real-time knowledge updates from vision inspections
@@ -43,8 +42,7 @@ class VITRAINSABridge:
         inspection_id: str,
         vitra_result: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        Process VITRA inspection result and update INSA knowledge.
+        """Process VITRA inspection result and update INSA knowledge.
 
         Updates:
         - Component quality embeddings
@@ -54,6 +52,7 @@ class VITRAINSABridge:
 
         Returns:
             Update summary with reasoning trace
+
         """
         start_time = time.time()
 
@@ -118,8 +117,7 @@ class VITRAINSABridge:
         video_id: str,
         vitra_result: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        Process VITRA installation video analysis.
+        """Process VITRA installation video analysis.
 
         Learns:
         - Procedure compliance patterns
@@ -173,8 +171,7 @@ class VITRAINSABridge:
         recognition_id: str,
         vitra_result: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        Process VITRA component recognition result.
+        """Process VITRA component recognition result.
 
         Learns:
         - Component visual signatures
@@ -227,8 +224,7 @@ class VITRAINSABridge:
         self,
         base_context: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        Enhance scheduling context with VITRA-learned knowledge.
+        """Enhance scheduling context with VITRA-learned knowledge.
 
         Adds:
         - Component quality predictions
@@ -249,7 +245,7 @@ class VITRAINSABridge:
             if similar_jobs:
                 enhanced["similar_historical_jobs"] = similar_jobs
                 enhanced["predicted_quality_score"] = self._predict_quality_from_similar(
-                    similar_jobs
+                    similar_jobs,
                 )
 
         # Add equipment condition from recent inspections
@@ -257,7 +253,7 @@ class VITRAINSABridge:
             machine_node = self.kb.get_node(base_context["machine_id"])
             if machine_node:
                 enhanced["machine_condition"] = machine_node.attributes.get(
-                    "vitra_condition_score", 100
+                    "vitra_condition_score", 100,
                 )
 
         # Add worker skill levels from installation videos
@@ -265,7 +261,7 @@ class VITRAINSABridge:
             worker_node = self.kb.get_node(base_context["worker_id"])
             if worker_node:
                 enhanced["worker_skill_score"] = worker_node.attributes.get(
-                    "vitra_skill_score", 0.85
+                    "vitra_skill_score", 0.85,
                 )
 
         return enhanced
@@ -434,7 +430,7 @@ class VITRAINSABridge:
             )
 
             updates["procedure_updates"].append(
-                f"Low compliance ({overall_score}%) - review recommended"
+                f"Low compliance ({overall_score}%) - review recommended",
             )
 
     def _process_safety_violation(

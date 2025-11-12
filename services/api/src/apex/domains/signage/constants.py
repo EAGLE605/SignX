@@ -1,5 +1,4 @@
-"""
-Engineering Constants for Signage Domain
+"""Engineering Constants for Signage Domain
 
 All constants with code references for traceability and PE compliance.
 No magic numbers in calculation code - all values defined here with sources.

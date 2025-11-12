@@ -85,7 +85,7 @@ def make_envelope(
     from ..schemas import ResponseEnvelope as Envelope
     from ..schemas import TraceDataModel, TraceModel
     from .envelope import round_floats
-    
+
     # Try to get request_id from context (if middleware is active)
     try:
         from ..middleware import REQUEST_ID_VAR
@@ -96,20 +96,20 @@ def make_envelope(
         inputs = base_inputs
     except (ImportError, AttributeError):
         inputs = {}
-    
+
     # Auto-fetch code_version and model_config if not provided
     if code_version is None:
         code_version = get_code_version()
     if model_config is None:
         model_config = get_model_config()
-    
+
     # Load constants pack metadata
     try:
         from .constants import get_pack_metadata
         pack_metadata = get_pack_metadata()
     except Exception:
         pack_metadata = {}
-    
+
     # Apply deterministic rounding to result
     rounded_result = round_floats(result, precision=3) if result is not None else None
 
@@ -126,7 +126,7 @@ def make_envelope(
         code_version=code_version,
         model_config=model_config,
     )
-    
+
     envelope = Envelope(
         result=rounded_result,
         assumptions=assumptions or [],
@@ -134,12 +134,12 @@ def make_envelope(
         trace=trace,
         content_sha256=None,  # Will be computed after creation
     )
-    
+
     # Compute content SHA256 for deterministic auditability
     if rounded_result is not None:
         from .envelope import envelope_sha
         envelope.content_sha256 = envelope_sha(envelope)
-    
+
     return envelope
 
 
@@ -176,8 +176,8 @@ def build_response_envelope(
         trace_artifacts: External artifact references (e.g., MinIO keys)
         code_version: Optional explicit code version override
         model_config: Optional explicit model configuration override
-    """
 
+    """
     return make_envelope(
         result=result,
         assumptions=assumptions,

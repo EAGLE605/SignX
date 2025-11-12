@@ -5,13 +5,10 @@ from __future__ import annotations
 import hashlib
 
 # ResponseEnvelope imported locally in functions to avoid circular imports
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import orjson
 import structlog
-
-if TYPE_CHECKING:
-    pass
 
 logger = structlog.get_logger(__name__)
 
@@ -25,6 +22,7 @@ def round_floats(obj: Any, precision: int = 3) -> Any:
     
     Returns:
         Value with floats rounded to specified precision
+
     """
     if isinstance(obj, float):
         return round(obj, precision)
@@ -43,6 +41,7 @@ def envelope_sha(envelope: Any) -> str:
     
     Returns:
         SHA256 hex digest
+
     """
     from ..schemas import ResponseEnvelope
     # Convert to dict if needed
@@ -50,16 +49,16 @@ def envelope_sha(envelope: Any) -> str:
         payload = envelope.model_dump(mode="json")
     else:
         payload = envelope
-    
+
     # Round floats for determinism
     rounded = round_floats(payload, precision=3)
-    
+
     # Sort keys and serialize deterministically
     content = orjson.dumps(
         rounded.get("result"),
         option=orjson.OPT_SORT_KEYS,
     ).decode("utf-8")
-    
+
     # Compute hash
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
@@ -79,26 +78,25 @@ def calc_confidence(assumptions: list[str] | None) -> float:
     
     Returns:
         Confidence score [0.0, 1.0]
+
     """
     if not assumptions:
         return 1.0
-    
+
     confidence = 1.0
     assumptions_lower = [a.lower() for a in assumptions]
-    
+
     # Count penalties
     for assumption in assumptions_lower:
         if "abstain" in assumption or "cannot solve" in assumption:
             confidence -= 0.5
         elif "no feasible" in assumption:
             confidence -= 0.4
-        elif any(keyword in assumption for keyword in ["fail", "failed"]):
-            confidence -= 0.3
-        elif "request engineering" in assumption:
+        elif any(keyword in assumption for keyword in ["fail", "failed"]) or "request engineering" in assumption:
             confidence -= 0.3
         elif "warning" in assumption:
             confidence -= 0.1
-    
+
     # Clamp to [0.0, 1.0]
     return max(0.0, min(1.0, confidence))
 
@@ -113,20 +111,21 @@ def deterministic_sort(items: list[dict[str, Any]], sort_key: str = "id", seed: 
     
     Returns:
         Sorted list
+
     """
     if not items:
         return items
-    
+
     # Sort by primary key first
     sorted_items = sorted(items, key=lambda x: x.get(sort_key, ""))
-    
+
     # If seed provided, apply stable shuffle
     if seed:
         import random
         random.seed(hash(seed))
         # Don't actually shuffle - seed just ensures stable "randomness" for tie-breaking
         # In practice, we keep deterministic sort for reproducibility
-    
+
     return sorted_items
 
 
@@ -139,9 +138,10 @@ def extract_solver_warnings(result: Any, warnings_key: str = "warnings") -> list
     
     Returns:
         List of warning strings
+
     """
     warnings: list[str] = []
-    
+
     # Handle tuple results (result, warnings, flags) from Agent 4
     if isinstance(result, tuple):
         if len(result) >= 2:
@@ -153,20 +153,20 @@ def extract_solver_warnings(result: Any, warnings_key: str = "warnings") -> list
                 for key, value in flags.items():
                     if not value:  # False flag means problem
                         warnings.append(f"{key} check failed")
-    
+
     # Handle dict results
     elif isinstance(result, dict):
         if warnings_key in result:
             warnings = result[warnings_key]
         # Check for common flag patterns
-        if "request_engineering" in result and result["request_engineering"]:
+        if result.get("request_engineering"):
             warnings.append("Engineering review required")
         if "all_pass" in result and not result["all_pass"]:
             warnings.append("Some checks failed")
-    
+
     # Ensure list format
     if not isinstance(warnings, list):
         warnings = [str(warnings)] if warnings else []
-    
+
     return warnings
 

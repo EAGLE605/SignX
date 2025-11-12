@@ -1,5 +1,4 @@
-"""
-Custom Exception Hierarchy for Signage Engineering Domain
+"""Custom Exception Hierarchy for Signage Engineering Domain
 
 Provides structured error handling with engineering context and code references.
 All exceptions include metadata for audit trails and debugging.
@@ -12,8 +11,7 @@ from typing import Any
 
 
 class SignageEngineeringError(Exception):
-    """
-    Base exception for all signage engineering errors.
+    """Base exception for all signage engineering errors.
 
     Includes engineering context and code references for PE compliance.
     """
@@ -24,13 +22,13 @@ class SignageEngineeringError(Exception):
         code_ref: str | None = None,
         **context: Any,
     ):
-        """
-        Initialize engineering error with context.
+        """Initialize engineering error with context.
 
         Args:
             message: Human-readable error description
             code_ref: Reference to code section (e.g., "ASCE 7-22 Section 26.10")
             **context: Additional context data (inputs, intermediate values, etc.)
+
         """
         self.message = message
         self.code_ref = code_ref
@@ -53,8 +51,7 @@ class SignageEngineeringError(Exception):
 
 
 class ValidationError(SignageEngineeringError):
-    """
-    Input validation error.
+    """Input validation error.
 
     Raised when user inputs are outside valid engineering ranges
     or violate code requirements.
@@ -63,14 +60,13 @@ class ValidationError(SignageEngineeringError):
         - Negative dimensions
         - Wind speed outside ASCE 7 range
         - Soil bearing pressure <= 0
+
     """
 
-    pass
 
 
 class CalculationError(SignageEngineeringError):
-    """
-    Calculation failure or convergence error.
+    """Calculation failure or convergence error.
 
     Raised when numerical methods fail to converge, iterative
     solvers exceed max iterations, or calculations produce
@@ -80,14 +76,13 @@ class CalculationError(SignageEngineeringError):
         - Solver fails to converge
         - Division by zero in intermediate step
         - Result exceeds physical limits
+
     """
 
-    pass
 
 
 class DatabaseError(SignageEngineeringError):
-    """
-    Database query or data integrity error.
+    """Database query or data integrity error.
 
     Raised when database operations fail or return unexpected data.
 
@@ -95,14 +90,13 @@ class DatabaseError(SignageEngineeringError):
         - AISC section not found
         - Missing calibration constant
         - Data integrity violation
+
     """
 
-    pass
 
 
 class ConfigurationError(SignageEngineeringError):
-    """
-    System configuration error.
+    """System configuration error.
 
     Raised when required configuration is missing or invalid.
 
@@ -110,14 +104,13 @@ class ConfigurationError(SignageEngineeringError):
         - Missing environment variable
         - Invalid code version
         - Service dependency unavailable
+
     """
 
-    pass
 
 
 class EngineeringLimitError(SignageEngineeringError):
-    """
-    Engineering limit exceeded.
+    """Engineering limit exceeded.
 
     Raised when design requirements cannot be met within code limits
     or practical engineering constraints. Typically requires engineering
@@ -127,6 +120,6 @@ class EngineeringLimitError(SignageEngineeringError):
         - Load exceeds maximum foundation capacity
         - Required depth exceeds practical limits
         - No viable section meets all criteria
+
     """
 
-    pass

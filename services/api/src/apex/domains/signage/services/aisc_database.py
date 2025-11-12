@@ -1,5 +1,4 @@
-"""
-AISC Steel Shape Database Service
+"""AISC Steel Shape Database Service
 
 Provides type-safe, cached access to AISC steel section properties
 from the database with comprehensive error handling and validation.
@@ -55,7 +54,7 @@ class AISCSectionProperties(BaseModel):
 
 class AISCDatabaseError(Exception):
     """AISC database lookup error."""
-    pass
+
 
 
 # ============================================================================
@@ -68,8 +67,7 @@ def _get_cached_section_properties(
     designation: str,
     steel_grade: str,
 ) -> tuple:
-    """
-    Cache wrapper for section properties.
+    """Cache wrapper for section properties.
 
     Returns tuple for hashability in lru_cache.
     Actual database call happens in async function.
@@ -84,8 +82,7 @@ async def get_section_properties_async(
     steel_grade: str,
     db: AsyncSession,
 ) -> AISCSectionProperties:
-    """
-    Fetch AISC section properties from database with validation.
+    """Fetch AISC section properties from database with validation.
 
     This function provides type-safe, validated access to the AISC shapes database
     with comprehensive error handling and logging.
@@ -111,12 +108,13 @@ async def get_section_properties_async(
     References:
         - AISC 360-22 Table 2-4: Material Properties
         - AISC Shapes Database v16.0
+
     """
     # Validate designation format
     if not designation or len(designation) < 3:
         raise AISCDatabaseError(
             f"Invalid AISC designation format: '{designation}'. "
-            f"Expected format: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', etc."
+            f"Expected format: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', etc.",
         )
 
     # Steel grade to yield strength mapping (AISC 360-22 Table 2-5)
@@ -135,7 +133,7 @@ async def get_section_properties_async(
             "aisc.unknown_steel_grade",
             steel_grade=steel_grade,
             designation=designation,
-            available_grades=list(STEEL_GRADES.keys())
+            available_grades=list(STEEL_GRADES.keys()),
         )
         # Default to A36 if unknown
         fy_ksi = 36.0
@@ -155,13 +153,13 @@ async def get_section_properties_async(
                 "aisc.section_not_found",
                 designation=designation,
                 steel_grade=steel_grade,
-                available_types=["HSS", "PIPE", "W", "C", "MC", "L", "WT"]
+                available_types=["HSS", "PIPE", "W", "C", "MC", "L", "WT"],
             )
 
             raise AISCDatabaseError(
                 f"AISC section '{designation}' not found in database. "
                 f"Verify designation format and ensure it exists in AISC Shapes Database v16.0. "
-                f"Common formats: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', 'C12X20.7'"
+                f"Common formats: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', 'C12X20.7'",
             )
 
         # Build validated model
@@ -205,7 +203,7 @@ async def get_section_properties_async(
         )
 
         raise AISCDatabaseError(
-            f"Database error fetching AISC section '{designation}': {e}"
+            f"Database error fetching AISC section '{designation}': {e}",
         ) from e
 
 
@@ -213,8 +211,7 @@ def get_section_properties_sync(
     designation: str,
     steel_grade: str,
 ) -> dict:
-    """
-    Synchronous wrapper for section properties (for backward compatibility).
+    """Synchronous wrapper for section properties (for backward compatibility).
 
     NOTE: This function returns a placeholder. Use the async version for
     actual database queries.
@@ -229,11 +226,12 @@ def get_section_properties_sync(
     Deprecated:
         Use get_section_properties_async() instead. This sync version
         exists only for backward compatibility and returns placeholders.
+
     """
     logger.warning(
         "aisc.sync_deprecated",
         designation=designation,
-        message="get_section_properties_sync() is deprecated. Use async version."
+        message="get_section_properties_sync() is deprecated. Use async version.",
     )
 
     # Return placeholder - callers should migrate to async version
@@ -263,24 +261,24 @@ def validate_section_properties(
     area_in2: float,
     designation: str,
 ) -> None:
-    """
-    Validate section properties are positive and reasonable.
+    """Validate section properties are positive and reasonable.
 
     Raises:
         ValueError: If properties are invalid
+
     """
     if sx_in3 <= 0:
         raise ValueError(
             f"Invalid section modulus for {designation}: Sx={sx_in3} in³. "
             f"Section properties must be positive. "
-            f"Verify AISC database lookup or provide valid section designation."
+            f"Verify AISC database lookup or provide valid section designation.",
         )
 
     if area_in2 <= 0:
         raise ValueError(
             f"Invalid cross-sectional area for {designation}: A={area_in2} in². "
             f"Section properties must be positive. "
-            f"Verify AISC database lookup or provide valid section designation."
+            f"Verify AISC database lookup or provide valid section designation.",
         )
 
     # Sanity checks for typical ranges
@@ -289,7 +287,7 @@ def validate_section_properties(
             "aisc.unusual_section_modulus",
             designation=designation,
             sx_in3=sx_in3,
-            message="Section modulus exceeds typical range - verify correctness"
+            message="Section modulus exceeds typical range - verify correctness",
         )
 
     if area_in2 > 500:
@@ -297,5 +295,5 @@ def validate_section_properties(
             "aisc.unusual_area",
             designation=designation,
             area_in2=area_in2,
-            message="Cross-sectional area exceeds typical range - verify correctness"
+            message="Cross-sectional area exceeds typical range - verify correctness",
         )

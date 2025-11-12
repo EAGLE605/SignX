@@ -1,5 +1,4 @@
-"""
-INSA Production Scheduler for Sign Manufacturing
+"""INSA Production Scheduler for Sign Manufacturing
 
 Integrates:
 - INSA knowledge base (symbolic rules + neural embeddings)
@@ -50,8 +49,7 @@ class SignXProductionScheduler:
         bom_data: dict[str, Any],
         constraints: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Generate production schedule for sign project.
+        """Generate production schedule for sign project.
 
         Args:
             project_id: Project identifier
@@ -60,6 +58,7 @@ class SignXProductionScheduler:
 
         Returns:
             Optimized schedule with reasoning trace
+
         """
         start_time = datetime.utcnow()
 
@@ -112,8 +111,7 @@ class SignXProductionScheduler:
         current_schedule: dict[str, Any],
         vitra_data: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        Reschedule based on VITRA vision feedback.
+        """Reschedule based on VITRA vision feedback.
 
         Use cases:
         - Quality issue detected → adjust downstream processes
@@ -180,8 +178,7 @@ class SignXProductionScheduler:
         project_id: str,
         job_id: str,
     ) -> dict[str, Any]:
-        """
-        Generate human-readable explanation for scheduling decision.
+        """Generate human-readable explanation for scheduling decision.
 
         For PE stamp compliance and client transparency.
         """
@@ -218,7 +215,7 @@ class SignXProductionScheduler:
             for sim_id, similarity, attrs in similar_jobs:
                 explanation.append(
                     f"  • Similar to {sim_id} ({similarity:.2%} match) - "
-                    f"completed in {attrs.get('actual_duration_min', 'N/A')} min"
+                    f"completed in {attrs.get('actual_duration_min', 'N/A')} min",
                 )
 
         # 3. VITRA-learned constraints

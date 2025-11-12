@@ -1,5 +1,4 @@
-"""
-Type Definitions for Signage Engineering Domain
+"""Type Definitions for Signage Engineering Domain
 
 Enhanced type safety using NewType for domain-specific units.
 Prevents unit confusion errors (e.g., mixing feet and inches, kips and pounds).
@@ -14,13 +13,13 @@ from typing import NewType
 # Dimensional Types
 # ============================================================================
 
-Feet = NewType('Feet', float)
+Feet = NewType("Feet", float)
 """Length in feet"""
 
-Inches = NewType('Inches', float)
+Inches = NewType("Inches", float)
 """Length in inches"""
 
-Meters = NewType('Meters', float)
+Meters = NewType("Meters", float)
 """Length in meters"""
 
 
@@ -28,16 +27,16 @@ Meters = NewType('Meters', float)
 # Force Types
 # ============================================================================
 
-Pounds = NewType('Pounds', float)
+Pounds = NewType("Pounds", float)
 """Force in pounds (lb)"""
 
-Kips = NewType('Kips', float)
+Kips = NewType("Kips", float)
 """Force in kips (1 kip = 1000 lb)"""
 
-KipFt = NewType('KipFt', float)
+KipFt = NewType("KipFt", float)
 """Moment in kip-feet"""
 
-KipIn = NewType('KipIn', float)
+KipIn = NewType("KipIn", float)
 """Moment in kip-inches"""
 
 
@@ -45,13 +44,13 @@ KipIn = NewType('KipIn', float)
 # Stress Types
 # ============================================================================
 
-Psi = NewType('Psi', float)
+Psi = NewType("Psi", float)
 """Stress in pounds per square inch"""
 
-Ksi = NewType('Ksi', float)
+Ksi = NewType("Ksi", float)
 """Stress in kips per square inch (1 ksi = 1000 psi)"""
 
-Psf = NewType('Psf', float)
+Psf = NewType("Psf", float)
 """Pressure in pounds per square foot"""
 
 
@@ -59,10 +58,10 @@ Psf = NewType('Psf', float)
 # Velocity & Speed
 # ============================================================================
 
-Mph = NewType('Mph', float)
+Mph = NewType("Mph", float)
 """Velocity in miles per hour"""
 
-Fps = NewType('Fps', float)
+Fps = NewType("Fps", float)
 """Velocity in feet per second"""
 
 
@@ -70,13 +69,13 @@ Fps = NewType('Fps', float)
 # Volume & Mass
 # ============================================================================
 
-CubicFeet = NewType('CubicFeet', float)
+CubicFeet = NewType("CubicFeet", float)
 """Volume in cubic feet"""
 
-CubicYards = NewType('CubicYards', float)
+CubicYards = NewType("CubicYards", float)
 """Volume in cubic yards"""
 
-Tons = NewType('Tons', float)
+Tons = NewType("Tons", float)
 """Mass in tons (US short tons, 2000 lb)"""
 
 
@@ -84,10 +83,10 @@ Tons = NewType('Tons', float)
 # Area
 # ============================================================================
 
-SquareFeet = NewType('SquareFeet', float)
+SquareFeet = NewType("SquareFeet", float)
 """Area in square feet"""
 
-SquareInches = NewType('SquareInches', float)
+SquareInches = NewType("SquareInches", float)
 """Area in square inches"""
 
 
@@ -95,10 +94,10 @@ SquareInches = NewType('SquareInches', float)
 # Unitless Ratios
 # ============================================================================
 
-Ratio = NewType('Ratio', float)
+Ratio = NewType("Ratio", float)
 """Dimensionless ratio (0.0 to 1.0)"""
 
-Percentage = NewType('Percentage', float)
+Percentage = NewType("Percentage", float)
 """Percentage (0.0 to 100.0)"""
 
 

@@ -1,5 +1,4 @@
-"""
-VITRA Vision-Language-Action Integration for SignX
+"""VITRA Vision-Language-Action Integration for SignX
 
 Provides vision analysis capabilities for:
 1. Sign inspection from images/video
@@ -26,8 +25,7 @@ logger = structlog.get_logger(__name__)
 # ===== Mock VITRA Integration (replace with actual model API) =====
 
 class VitraVisionModel:
-    """
-    Mock VITRA Vision-Language-Action model.
+    """Mock VITRA Vision-Language-Action model.
 
     In production, this would integrate with:
     - Microsoft Azure Computer Vision API
@@ -46,8 +44,7 @@ class VitraVisionModel:
         task: str,
         context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Analyze image with VITRA model.
+        """Analyze image with VITRA model.
 
         Args:
             image_data: Raw image bytes
@@ -56,6 +53,7 @@ class VitraVisionModel:
 
         Returns:
             Analysis results with confidence scores
+
         """
         start_time = time.time()
 
@@ -92,8 +90,7 @@ class VitraVisionModel:
         task: str,
         context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """
-        Analyze video with VITRA temporal reasoning.
+        """Analyze video with VITRA temporal reasoning.
 
         Args:
             video_url: URL to video file
@@ -102,6 +99,7 @@ class VitraVisionModel:
 
         Returns:
             Temporal analysis results with action timeline
+
         """
         start_time = time.time()
 
@@ -126,8 +124,7 @@ class VitraVisionModel:
         task_spec: dict[str, Any],
         current_state: dict[str, Any],
     ) -> list[dict[str, Any]]:
-        """
-        Generate Vision-Language-Action sequence for robotic fabrication.
+        """Generate Vision-Language-Action sequence for robotic fabrication.
 
         Args:
             task_spec: Task specification (e.g., weld parameters)
@@ -135,6 +132,7 @@ class VitraVisionModel:
 
         Returns:
             Sequence of VLA actions for robot execution
+
         """
         logger.info("vitra.generate_vla.start", task=task_spec.get("task_type"))
 
@@ -387,7 +385,7 @@ class VitraVisionModel:
                 {"action": "disable_arc", "params": {}},
                 {"action": "retract", "params": {"z": 50}},
             ]
-        elif task_type == "assembly":
+        if task_type == "assembly":
             return [
                 {"action": "grasp", "params": {"component_id": "plate_1", "force": 50}},
                 {"action": "move_to", "params": {"x": 200, "y": 150, "z": 25}},
@@ -395,12 +393,11 @@ class VitraVisionModel:
                 {"action": "insert_fasteners", "params": {"torque": 45}},
                 {"action": "release", "params": {}},
             ]
-        else:
-            return [
-                {"action": "observe", "params": {}},
-                {"action": "plan", "params": {}},
-                {"action": "execute", "params": {}},
-            ]
+        return [
+            {"action": "observe", "params": {}},
+            {"action": "plan", "params": {}},
+            {"action": "execute", "params": {}},
+        ]
 
 
 # ===== Singleton Instance =====
@@ -423,8 +420,7 @@ async def analyze_sign_inspection(
     project_id: str | None = None,
     inspection_type: str = "periodic",
 ) -> dict[str, Any]:
-    """
-    Analyze sign inspection image.
+    """Analyze sign inspection image.
 
     Args:
         image_data: Raw image bytes
@@ -433,6 +429,7 @@ async def analyze_sign_inspection(
 
     Returns:
         Inspection analysis with detected issues and recommendations
+
     """
     model = get_vitra_model()
 
@@ -449,8 +446,7 @@ async def analyze_installation_video(
     project_id: str,
     installation_phase: str,
 ) -> dict[str, Any]:
-    """
-    Analyze installation process video.
+    """Analyze installation process video.
 
     Args:
         video_url: URL to video file
@@ -459,6 +455,7 @@ async def analyze_installation_video(
 
     Returns:
         Installation analysis with action timeline and compliance
+
     """
     model = get_vitra_model()
 
@@ -474,8 +471,7 @@ async def recognize_components(
     image_data: bytes,
     expected_components: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """
-    Recognize and validate components in image.
+    """Recognize and validate components in image.
 
     Args:
         image_data: Raw image bytes
@@ -483,6 +479,7 @@ async def recognize_components(
 
     Returns:
         Component recognition results with BOM validation
+
     """
     model = get_vitra_model()
 
@@ -498,8 +495,7 @@ async def review_ar_design(
     design_spec: dict[str, Any],
     location: dict[str, float] | None = None,
 ) -> dict[str, Any]:
-    """
-    AR-assisted design review on site photo.
+    """AR-assisted design review on site photo.
 
     Args:
         site_image_data: Raw site photo bytes
@@ -508,6 +504,7 @@ async def review_ar_design(
 
     Returns:
         Feasibility analysis and recommendations
+
     """
     model = get_vitra_model()
 
@@ -524,8 +521,7 @@ async def generate_fabrication_actions(
     component_spec: dict[str, Any],
     robot_id: str,
 ) -> list[dict[str, Any]]:
-    """
-    Generate VLA action sequence for robotic fabrication.
+    """Generate VLA action sequence for robotic fabrication.
 
     Args:
         task_type: Fabrication task (welding, assembly, etc.)
@@ -534,6 +530,7 @@ async def generate_fabrication_actions(
 
     Returns:
         List of VLA actions for robot execution
+
     """
     model = get_vitra_model()
 

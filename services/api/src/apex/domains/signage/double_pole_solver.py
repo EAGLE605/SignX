@@ -1,5 +1,4 @@
-"""
-Double Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
+"""Double Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
 
 This module analyzes double-pole sign structures (typically large monument signs,
 pylon signs, or multi-column supports) using current building code standards.
@@ -43,6 +42,7 @@ LoadDistributionMethod = Literal["equal", "proportional"]
 @dataclass
 class DoublePoleConfig:
     """Configuration for double-pole sign analysis."""
+
     # Pole geometry (two identical poles)
     pole_height_ft: float
     pole_section: PoleSection
@@ -80,6 +80,7 @@ class DoublePoleConfig:
 
 class DoublePoleResults(NamedTuple):
     """Complete results from double-pole structural analysis."""
+
     # Wind load analysis (total)
     velocity_pressure_qz_psf: float
     exposure_coefficient_kz: float
@@ -140,8 +141,7 @@ class DoublePoleResults(NamedTuple):
 
 
 def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
-    """
-    Complete structural analysis of double-pole sign per IBC 2024 / ASCE 7-22 / AISC 360-22.
+    """Complete structural analysis of double-pole sign per IBC 2024 / ASCE 7-22 / AISC 360-22.
 
     Key Assumptions:
     - Two identical poles support the sign
@@ -159,6 +159,7 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
 
     Raises:
         ValueError: If configuration is invalid (negative values, spacing too small, etc.)
+
     """
     warnings = []
     code_refs = []
@@ -213,7 +214,7 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
 
         warnings.append(
             "Proportional load distribution assumes symmetric sign geometry. "
-            "For non-symmetric signs, manual adjustment may be required."
+            "For non-symmetric signs, manual adjustment may be required.",
         )
         code_refs.append("Load Distribution: Proportional (symmetric assumed)")
 
@@ -232,13 +233,13 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
     if spacing_to_height_ratio > 1.5 and not config.lateral_bracing_required:
         warnings.append(
             f"Pole spacing ({config.pole_spacing_ft} ft) exceeds 1.5× pole height "
-            f"({config.pole_height_ft} ft). Lateral bracing recommended."
+            f"({config.pole_height_ft} ft). Lateral bracing recommended.",
         )
         lateral_stability_ok = False
     elif spacing_to_height_ratio > 2.0:
         warnings.append(
             f"Pole spacing ({config.pole_spacing_ft} ft) exceeds 2× pole height. "
-            f"Lateral bracing REQUIRED for stability."
+            f"Lateral bracing REQUIRED for stability.",
         )
         lateral_stability_ok = False
 
@@ -309,7 +310,7 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
     if deflection_in > 0:
         deflection_ratio = pole_height_in / deflection_in
     else:
-        deflection_ratio = float('inf')
+        deflection_ratio = float("inf")
 
     code_refs.append("AISC 360-22 Chapter L: Serviceability (Deflection)")
 
@@ -349,7 +350,7 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
     if overturning_moment_per_pole > 0:
         safety_factor_overturning = total_resisting_moment_per_pole / overturning_moment_per_pole
     else:
-        safety_factor_overturning = float('inf')
+        safety_factor_overturning = float("inf")
 
     # Soil bearing pressure
     foundation_area_sqft = math.pi * math.pow(foundation_diameter / 2.0, 2)
@@ -413,14 +414,14 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
 
     if safety_factor_overturning < 2.0:
         warnings.append(
-            f"Overturning SF {safety_factor_overturning:.2f} below 2.0 (exceeds IBC min 1.5 but low margin)"
+            f"Overturning SF {safety_factor_overturning:.2f} below 2.0 (exceeds IBC min 1.5 but low margin)",
         )
 
     # Differential settlement warning
     if config.pole_spacing_ft > 15:
         warnings.append(
             f"Large pole spacing ({config.pole_spacing_ft} ft) may result in differential settlement. "
-            f"Foundation coordination critical."
+            f"Foundation coordination critical.",
         )
 
     # =========================================================================
@@ -495,8 +496,7 @@ def _calculate_foundation_diameter_double_pole(
     soil_bearing_capacity_psf: float,
     target_safety_factor: float = 1.5,
 ) -> float:
-    """
-    Calculate required foundation diameter for double-pole configuration.
+    """Calculate required foundation diameter for double-pole configuration.
 
     Similar to single-pole, but accounts for load distribution between poles.
 
@@ -509,6 +509,7 @@ def _calculate_foundation_diameter_double_pole(
 
     Returns:
         Required foundation diameter in feet
+
     """
     min_diameter = 3.0
     max_diameter = 8.0  # Smaller than single-pole since load is distributed

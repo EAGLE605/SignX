@@ -35,26 +35,26 @@ async def resolve_site(req: SiteResolveRequest) -> ResponseEnvelope:
     """
     logger.info("site.resolve", address=req.address)
     assumptions: list[str] = []
-    
+
     address = req.address.strip()
-    
+
     # Geocode address
     geocode_result = await geocode_address(address)
     lat: float | None = None
     lon: float | None = None
-    
+
     if geocode_result:
         lat = geocode_result["lat"]
         lon = geocode_result["lon"]
         add_assumption(assumptions, f"Geocoded: {geocode_result.get('display_name', address)}")
     else:
         add_assumption(assumptions, "Geocoding failed; using manual overrides or defaults")
-    
+
     # Try ASCE API first if we have coordinates
     asce_data = None
     if lat is not None and lon is not None:
         asce_data = await fetch_asce_hazards(lat, lon, req.risk_category)
-    
+
     if asce_data:
         # Use ASCE API data
         result = {
@@ -88,7 +88,7 @@ async def resolve_site(req: SiteResolveRequest) -> ResponseEnvelope:
             wind_speed = wind_data["wind_speed_mph"]
             wind_source = wind_data.get("source", "unknown")
             add_assumption(assumptions, f"Wind speed from {wind_source}")
-            
+
             # Get snow load
             snow_load = fetch_snow_load(lat, lon)
             if snow_load:
@@ -99,13 +99,13 @@ async def resolve_site(req: SiteResolveRequest) -> ResponseEnvelope:
             wind_source = "default_conservative"
             snow_load = None
             add_assumption(assumptions, "Wind speed from default V=100 mph (no geocoding)")
-        
+
         # Default exposure handling
         exposure = req.exposure or "C"
         if exposure not in ["B", "C", "D"]:
             exposure = "C"
             add_assumption(assumptions, f"Exposure defaulted to C (was: {req.exposure})")
-        
+
         result = {
             "wind_speed_mph": wind_speed,
             "snow_load_psf": snow_load,
@@ -115,7 +115,7 @@ async def resolve_site(req: SiteResolveRequest) -> ResponseEnvelope:
             "source": wind_source,
             "address_resolved": geocode_result.get("display_name", address) if geocode_result else None,
         }
-        
+
         confidence = 0.7
         if lat is not None and lon is not None:
             confidence = 0.85

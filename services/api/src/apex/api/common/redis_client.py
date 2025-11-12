@@ -22,11 +22,11 @@ async def get_redis_client() -> aioredis.Redis | None:
     Returns None if Redis unavailable or not configured.
     """
     global _client
-    
+
     if aioredis is None:
         logger.warning("redis.not_available", reason="redis package not installed")
         return None
-    
+
     if _client is None:
         try:
             _client = aioredis.from_url(
@@ -40,7 +40,7 @@ async def get_redis_client() -> aioredis.Redis | None:
         except Exception as e:
             logger.warning("redis.client_failed", error=str(e))
             return None
-    
+
     return _client
 
 

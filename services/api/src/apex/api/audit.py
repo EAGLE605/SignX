@@ -36,6 +36,7 @@ async def log_audit(
     
     Returns:
         The log_id of the created audit entry
+
     """
     try:
         audit_entry = AuditLog(
@@ -53,11 +54,11 @@ async def log_audit(
             confidence=confidence,
             error_details=error_details,
         )
-        
+
         db.add(audit_entry)
         await db.commit()
         await db.refresh(audit_entry)
-        
+
         logger.info(
             "audit.logged",
             log_id=audit_entry.log_id,
@@ -66,7 +67,7 @@ async def log_audit(
             resource_id=resource_id,
             user_id=user_id,
         )
-        
+
         return audit_entry.log_id
     except Exception as e:
         # Never fail the main operation due to audit logging failure
@@ -107,9 +108,10 @@ def extract_resource_from_path(path: str, method: str) -> tuple[str, str | None]
         /projects/{id} -> ("project", id)
         /projects/{id}/files/{file_id} -> ("file", file_id)
         /calculations/{id}/approve -> ("calculation", id)
+
     """
     parts = path.strip("/").split("/")
-    
+
     # Map common paths to resource types
     resource_map = {
         "projects": "project",
@@ -119,10 +121,10 @@ def extract_resource_from_path(path: str, method: str) -> tuple[str, str | None]
         "uploads": "upload",
         "compliance": "compliance",
     }
-    
+
     resource_type = None
     resource_id = None
-    
+
     for i, part in enumerate(parts):
         if part in resource_map:
             resource_type = resource_map[part]
@@ -133,11 +135,11 @@ def extract_resource_from_path(path: str, method: str) -> tuple[str, str | None]
                 if len(potential_id) > 8 or potential_id.isdigit():
                     resource_id = potential_id
                 break
-    
+
     # If no resource type found, use method + path
     if not resource_type:
         resource_type = f"{method.lower()}_{parts[0] if parts else 'unknown'}"
-    
+
     return resource_type, resource_id
 
 
@@ -157,12 +159,13 @@ async def query_audit_logs(
     
     Returns:
         List of audit log entries matching criteria
+
     """
     from sqlalchemy import and_, select
-    
+
     query = select(AuditLog)
     conditions = []
-    
+
     if user_id:
         conditions.append(AuditLog.user_id == user_id)
     if account_id:
@@ -177,12 +180,12 @@ async def query_audit_logs(
         conditions.append(AuditLog.timestamp >= start_date)
     if end_date:
         conditions.append(AuditLog.timestamp <= end_date)
-    
+
     if conditions:
         query = query.where(and_(*conditions))
-    
+
     query = query.order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset)
-    
+
     result = await db.execute(query)
     return list(result.scalars().all())
 

@@ -21,19 +21,19 @@ def _get_asce7_default_v(lat: float, lon: float) -> float:
     """
     # Simplified lookup based on lat/lon zones
     # For production, would use digitized ASCE 7-16 Figure 26.5-1 map
-    
+
     # Hurricane-prone (Gulf Coast, Florida, Carolinas)
     if (24.0 <= lat <= 35.0 and -97.0 <= lon <= -80.0) or (25.0 <= lat <= 32.0 and -84.0 <= lon <= -79.0):
         return 150.0
-    
+
     # Atlantic Coast
     if 35.0 <= lat <= 45.0 and -80.0 <= lon <= -70.0:
         return 130.0
-    
+
     # Mountain/West Coast
     if lat >= 35.0 and lon <= -105.0:
         return 115.0
-    
+
     # Interior (default)
     return 100.0
 
@@ -46,7 +46,7 @@ async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: str | No
     api_key = api_key or os.getenv("OPENWEATHER_API_KEY")
     if not api_key:
         return None
-    
+
     try:
         async with aiohttp.ClientSession() as session:
             url = "https://api.openweathermap.org/data/2.5/weather"
@@ -65,7 +65,7 @@ async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: str | No
                     }
     except Exception:
         pass
-    
+
     return None
 
 
@@ -95,7 +95,7 @@ async def resolve_wind_speed(lat: float, lon: float, api_keys: dict | None = Non
     Returns: {"wind_speed_mph": float, "source": str, "confidence": float}
     """
     api_keys = api_keys or {}
-    
+
     # Try ASCE 7 default lookup first (deterministic, no API needed)
     v_asce7 = _get_asce7_default_v(lat, lon)
     result = {
@@ -104,13 +104,13 @@ async def resolve_wind_speed(lat: float, lon: float, api_keys: dict | None = Non
         "confidence": 0.85,
         "assumption": "ASCE 7-16 wind speed map approximation by lat/lon zone",
     }
-    
+
     # Try OpenWeatherMap for additional data (but don't override design wind speed)
     owm_data = await fetch_wind_speed_openweather(lat, lon, api_keys.get("openweather"))
     if owm_data:
         result["current_wind_mph"] = owm_data["wind_speed_mph"]
         result["note"] = "Design wind from ASCE 7 map; current wind shown for reference"
-    
+
     return result
 
 
@@ -125,15 +125,15 @@ def fetch_snow_load(lat: float, lon: float) -> float | None:
     # Heavy snow regions (mountain, upper midwest)
     if (lat >= 42.0 and lon <= -105.0) or (lat >= 45.0 and -97.0 <= lon <= -85.0):
         return 50.0  # Heavy snow zone
-    
+
     # Moderate snow
     if lat >= 40.0 and lon <= -90.0:
         return 30.0
-    
+
     # Light snow / none
     if lat >= 35.0:
         return 20.0
-    
+
     # Very light or none
     return None
 

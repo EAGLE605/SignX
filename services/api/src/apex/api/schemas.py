@@ -41,17 +41,18 @@ class ResponseEnvelope(BaseModel):
     Includes deterministic content SHA256, round-trip traceability,
     confidence scoring, and assumptions tracking.
     """
+
     result: Any | None = Field(None, description="Domain result data")
     assumptions: list[str] = Field(default_factory=list, description="Assumptions and warnings")
     confidence: float = Field(0.95, ge=0.0, le=1.0, description="Confidence score [0,1]")
     trace: TraceModel = Field(..., description="Audit trace data")
     content_sha256: str | None = Field(None, description="SHA256 of rounded result (deterministic)")
     envelope_version: str = Field("1.0", description="Envelope schema version")
-    
+
     model_config = ConfigDict(
         extra="allow",
         protected_namespaces=(),
-        arbitrary_types_allowed=True
+        arbitrary_types_allowed=True,
     )
 
 

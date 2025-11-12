@@ -38,13 +38,13 @@ async def upload_file_endpoint(
     
     Returns:
         FileUpload metadata with presigned download URL
+
     """
-    
     # Extract IP and user agent from request context
     # Note: We need to pass Request through middleware or dependency
     ip_address = None  # Would be extracted from request
     user_agent = None  # Would be extracted from request
-    
+
     # Upload file
     upload_record = await upload_file(
         db=db,
@@ -56,14 +56,14 @@ async def upload_file_endpoint(
         ip_address=ip_address,
         user_agent=user_agent,
     )
-    
+
     # Generate presigned download URL
     download_url = await get_presigned_download_url(
         storage=storage_client,
         file_key=upload_record.file_key,
         expires_seconds=3600,
     )
-    
+
     result = {
         "upload_id": upload_record.upload_id,
         "file_key": upload_record.file_key,
@@ -76,17 +76,17 @@ async def upload_file_endpoint(
         "download_url": download_url,
         "expires_in_seconds": 3600,
     }
-    
+
     assumptions: list[str] = []
     add_assumption(assumptions, f"SHA256: {upload_record.sha256[:16]}...")
     if upload_record.virus_scan_status == "clean":
         add_assumption(assumptions, "Virus scan passed")
     elif upload_record.virus_scan_status == "pending":
         add_assumption(assumptions, "Virus scan pending")
-    
+
     if upload_record.thumbnail_key:
         add_assumption(assumptions, "Thumbnail generated")
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,
@@ -111,13 +111,13 @@ async def get_upload(
     """
     # Get upload record
     result = await db.execute(
-        select(FileUpload).where(FileUpload.upload_id == upload_id)
+        select(FileUpload).where(FileUpload.upload_id == upload_id),
     )
     upload_record = result.scalar_one_or_none()
-    
+
     if not upload_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    
+
     # Check access: user must be in same account or have read permission
     if upload_record.account_id != current_user.account_id:
         # Check if user has file.read permission
@@ -125,14 +125,14 @@ async def get_upload(
         has_permission = await check_permission(db, current_user, "file.read")
         if not has_permission:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
-    
+
     # Generate presigned download URL
     download_url = await get_presigned_download_url(
         storage=storage_client,
         file_key=upload_record.file_key,
         expires_seconds=3600,
     )
-    
+
     # Generate thumbnail URL if available
     thumbnail_url = None
     if upload_record.thumbnail_key:
@@ -141,7 +141,7 @@ async def get_upload(
             file_key=upload_record.thumbnail_key,
             expires_seconds=3600,
         )
-    
+
     result = {
         "upload_id": upload_record.upload_id,
         "file_key": upload_record.file_key,
@@ -154,7 +154,7 @@ async def get_upload(
         "thumbnail_url": thumbnail_url,
         "expires_in_seconds": 3600,
     }
-    
+
     return make_envelope(
         result=result,
         assumptions=[],
@@ -178,22 +178,22 @@ async def delete_upload(
     Requires: file.delete permission
     """
     result = await db.execute(
-        select(FileUpload).where(FileUpload.upload_id == upload_id)
+        select(FileUpload).where(FileUpload.upload_id == upload_id),
     )
     upload_record = result.scalar_one_or_none()
-    
+
     if not upload_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    
+
     # Check access
     if upload_record.account_id != current_user.account_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
-    
+
     # Soft delete: set expiration
     from datetime import datetime, timedelta
     upload_record.expires_at = datetime.now(UTC) + timedelta(seconds=1)
     await db.commit()
-    
+
     # Log audit
     from ..audit import log_audit
     await log_audit(
@@ -205,7 +205,7 @@ async def delete_upload(
         account_id=current_user.account_id,
         before_state={"filename": upload_record.filename},
     )
-    
+
     return make_envelope(
         result={"deleted": True, "upload_id": upload_id},
         assumptions=[],

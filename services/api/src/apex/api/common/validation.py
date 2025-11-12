@@ -18,6 +18,7 @@ def require_field(data: dict, field: str, field_type: type | None = None) -> any
     
     Raises:
         HTTPException: 422 if field missing or invalid type
+
     """
     value = data.get(field)
     if value is None:

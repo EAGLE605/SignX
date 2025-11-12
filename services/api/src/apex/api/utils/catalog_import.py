@@ -1,5 +1,4 @@
-"""
-AISC/ASCE catalog import utilities.
+"""AISC/ASCE catalog import utilities.
 
 Agent 3: Importing AISC steel sections and ASCE wind load references for material catalog.
 """
@@ -24,6 +23,7 @@ async def import_aisc_sections(db: AsyncSession, sections: list[dict]) -> int:
     
     Returns:
         Number of sections imported
+
     """
     count = 0
     for section in sections:
@@ -47,6 +47,7 @@ async def import_asce_references(db: AsyncSession, refs: list[dict]) -> int:
     
     Returns:
         Number of references imported
+
     """
     count = 0
     for ref in refs:

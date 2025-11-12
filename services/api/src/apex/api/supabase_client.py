@@ -34,17 +34,18 @@ def get_supabase_client() -> Client:
         
     Raises:
         ValueError: If Supabase is not configured
+
     """
     if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
         raise ValueError(
-            "Supabase not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_KEY environment variables."
+            "Supabase not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_KEY environment variables.",
         )
-    
+
     if create_client is None:
         raise ImportError(
-            "supabase package not installed. Install with: pip install supabase"
+            "supabase package not installed. Install with: pip install supabase",
         )
-    
+
     return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
@@ -60,16 +61,17 @@ def get_supabase_admin() -> Client:
         
     Raises:
         ValueError: If Supabase is not configured
+
     """
     if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_KEY:
         raise ValueError(
-            "Supabase admin not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_SERVICE_KEY environment variables."
+            "Supabase admin not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_SERVICE_KEY environment variables.",
         )
-    
+
     if create_client is None:
         raise ImportError(
-            "supabase package not installed. Install with: pip install supabase"
+            "supabase package not installed. Install with: pip install supabase",
         )
-    
+
     return create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 

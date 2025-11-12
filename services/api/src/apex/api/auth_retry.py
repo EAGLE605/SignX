@@ -41,6 +41,7 @@ def retry_auth_operation(func: Callable[..., Any]) -> Callable[..., Any]:
         @retry_auth_operation
         async def oauth_sign_in(provider: str, ...):
             ...
+
     """
     return retry(**RETRY_CONFIG)(func)
 
@@ -64,9 +65,10 @@ async def retry_with_fallback(
     
     Raises:
         Last exception if all attempts fail
+
     """
     last_error: Exception | None = None
-    
+
     # Try primary with retry
     try:
         decorated = retry_auth_operation(primary)
@@ -74,7 +76,7 @@ async def retry_with_fallback(
     except error_types as e:
         logger.warning("auth.retry.primary_failed", error=str(e))
         last_error = e
-    
+
     # Try fallbacks
     for i, fallback in enumerate(fallbacks):
         try:
@@ -86,7 +88,7 @@ async def retry_with_fallback(
         except error_types as e:
             logger.warning("auth.retry.fallback_failed", fallback_index=i, error=str(e))
             last_error = e
-    
+
     # All attempts failed
     if last_error:
         raise last_error

@@ -1,5 +1,4 @@
-"""
-ASCE 7-22 Wind Load Calculations - Exact Code Implementation
+"""ASCE 7-22 Wind Load Calculations - Exact Code Implementation
 
 This module implements wind load calculations per ASCE 7-22 (American Society of Civil Engineers
 Minimum Design Loads and Associated Criteria for Buildings and Other Structures, 2022 Edition).
@@ -16,6 +15,7 @@ References:
 - ASCE 7-22 Table 1.5-2: Risk Category of Buildings and Other Structures
 - ASCE 7-22 Table 26.6-1: Wind Directionality Factor Kd
 - ASCE 7-22 Figure 29.4-1: Force Coefficients for Chimneys, Tanks, and Similar Structures
+
 """
 
 import math
@@ -24,27 +24,27 @@ from typing import NamedTuple
 
 
 class ExposureCategory(str, Enum):
-    """
-    Wind exposure categories per ASCE 7-22 Section 26.7.
+    """Wind exposure categories per ASCE 7-22 Section 26.7.
 
     - B: Urban and suburban areas, wooded areas, or other terrain with numerous closely spaced obstructions
     - C: Open terrain with scattered obstructions (most common for rural/suburban sign locations)
     - D: Flat, unobstructed areas exposed to wind flowing over open water for at least 1 mile
     """
+
     B = "B"
     C = "C"
     D = "D"
 
 
 class RiskCategory(str, Enum):
-    """
-    Risk categories per ASCE 7-22 Table 1.5-1 and IBC 2024 Table 1604.5.
+    """Risk categories per ASCE 7-22 Table 1.5-1 and IBC 2024 Table 1604.5.
 
     - I: Buildings and other structures that represent a low hazard to human life (agricultural, minor storage)
     - II: All buildings and other structures except those listed in I, III, and IV (MOST SIGNS)
     - III: Buildings and other structures that represent a substantial hazard to human life (schools, jails)
     - IV: Buildings and other structures designated as essential facilities (hospitals, fire stations)
     """
+
     I = "I"  # noqa: E741 - Roman numeral per ASCE 7-22
     II = "II"
     III = "III"
@@ -53,6 +53,7 @@ class RiskCategory(str, Enum):
 
 class WindLoadResult(NamedTuple):
     """Results from ASCE 7-22 wind load calculation."""
+
     velocity_pressure_qz_psf: float  # Velocity pressure at height z (psf)
     exposure_coefficient_kz: float  # Velocity pressure exposure coefficient
     wind_importance_factor_iw: float  # Wind importance factor (same as Iw in code)
@@ -161,8 +162,7 @@ def calculate_kz(
     height_ft: float,
     exposure: ExposureCategory,
 ) -> float:
-    """
-    Calculate velocity pressure exposure coefficient Kz per ASCE 7-22 Table 26.10-1.
+    """Calculate velocity pressure exposure coefficient Kz per ASCE 7-22 Table 26.10-1.
 
     Uses linear interpolation between table values for heights not explicitly listed.
     For heights below 15 ft, uses the 15 ft value (conservative).
@@ -177,6 +177,7 @@ def calculate_kz(
 
     Reference:
         ASCE 7-22 Section 26.10.1, Table 26.10-1
+
     """
     # Ensure minimum height of 15 ft per ASCE 7-22
     effective_height = max(height_ft, 15.0)
@@ -213,8 +214,7 @@ def calculate_kz(
 def calculate_wind_importance_factor(
     risk_category: RiskCategory,
 ) -> float:
-    """
-    Get wind importance factor Iw per ASCE 7-22 Table 1.5-2.
+    """Get wind importance factor Iw per ASCE 7-22 Table 1.5-2.
 
     Args:
         risk_category: Risk category (I, II, III, or IV)
@@ -224,6 +224,7 @@ def calculate_wind_importance_factor(
 
     Reference:
         ASCE 7-22 Table 1.5-2
+
     """
     return WIND_IMPORTANCE_FACTORS[risk_category]
 
@@ -236,8 +237,7 @@ def calculate_velocity_pressure(
     kd: float = WIND_DIRECTIONALITY_FACTOR_SIGNS,
     ke: float = 1.0,
 ) -> float:
-    """
-    Calculate velocity pressure qz per ASCE 7-22 Equation 26.10-1.
+    """Calculate velocity pressure qz per ASCE 7-22 Equation 26.10-1.
 
     qz = 0.00256 * Kz * Kzt * Kd * Ke * V²  (psf)
 
@@ -262,6 +262,7 @@ def calculate_velocity_pressure(
 
     Reference:
         ASCE 7-22 Equation 26.10-1
+
     """
     kz = calculate_kz(height_ft, exposure)
 
@@ -282,8 +283,7 @@ def calculate_design_wind_pressure(
     kd: float = WIND_DIRECTIONALITY_FACTOR_SIGNS,
     ke: float = 1.0,
 ) -> float:
-    """
-    Calculate design wind pressure per ASCE 7-22 Chapter 29 (Signs and Other Structures).
+    """Calculate design wind pressure per ASCE 7-22 Chapter 29 (Signs and Other Structures).
 
     Design pressure: p = qz * G * Cf * Iw  (psf)
 
@@ -310,6 +310,7 @@ def calculate_design_wind_pressure(
 
     Reference:
         ASCE 7-22 Chapter 29, Section 29.4
+
     """
     # Calculate velocity pressure
     qz = calculate_velocity_pressure(
@@ -343,8 +344,7 @@ def calculate_wind_force_on_sign(
     kd: float = WIND_DIRECTIONALITY_FACTOR_SIGNS,
     ke: float = 1.0,
 ) -> WindLoadResult:
-    """
-    Calculate total wind force on a sign structure per ASCE 7-22.
+    """Calculate total wind force on a sign structure per ASCE 7-22.
 
     Calculates design wind pressure at the sign centroid height, then applies
     to the full sign area to determine total wind force.
@@ -367,6 +367,7 @@ def calculate_wind_force_on_sign(
 
     Reference:
         ASCE 7-22 Chapter 29
+
     """
     # Calculate height to sign centroid
     sign_centroid_height_ft = pole_height_ft + (sign_height_ft / 2.0)
@@ -418,8 +419,7 @@ def calculate_wind_moment_at_base(
     pole_height_ft: float,
     sign_height_ft: float,
 ) -> float:
-    """
-    Calculate overturning moment at pole base due to wind force.
+    """Calculate overturning moment at pole base due to wind force.
 
     M = F * h
 
@@ -437,6 +437,7 @@ def calculate_wind_moment_at_base(
 
     Returns:
         Overturning moment at base in kip-ft
+
     """
     # Height to sign centroid (where wind force is applied)
     moment_arm_ft = pole_height_ft + (sign_height_ft / 2.0)

@@ -18,10 +18,10 @@ async def audit_mutations(request: Any, response: Any) -> None:
     # Only audit mutations
     if request.method not in ["POST", "PUT", "PATCH", "DELETE"]:
         return
-    
+
     # Extract actor from request (JWT or default)
     actor = getattr(request.state, "user_id", "system")
-    
+
     # Log to structured logs (already happens via ProjectEvent in routes)
     logger.info(
         "audit.mutation",
@@ -30,7 +30,7 @@ async def audit_mutations(request: Any, response: Any) -> None:
         actor=actor,
         status_code=response.status_code,
     )
-    
+
 
 async def audit_request_middleware(request: Any, call_next: Any) -> Any:
     """Middleware to audit all mutations.
@@ -39,12 +39,12 @@ async def audit_request_middleware(request: Any, call_next: Any) -> Any:
     This is just a pass-through for now.
     """
     response = await call_next(request)
-    
+
     # Async audit logging (don't block response)
     try:
         await audit_mutations(request, response)
     except Exception as e:
         logger.warning("audit.failed", error=str(e))
-    
+
     return response
 

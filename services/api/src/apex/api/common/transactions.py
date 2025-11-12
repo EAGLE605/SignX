@@ -49,25 +49,25 @@ def with_transaction(func: F) -> F:
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         # Find db session - check kwargs first (FastAPI dependency injection)
         db: AsyncSession | None = kwargs.get("db")
-        
+
         # If not in kwargs, check args (less common but possible)
         if db is None:
             for arg in args:
                 if isinstance(arg, AsyncSession):
                     db = arg
                     break
-        
+
         if db is None:
             logger.warning("with_transaction.no_db_session", func=func.__name__)
             # Function doesn't use db - execute normally
             return await func(*args, **kwargs)
-        
+
         operation = func.__name__
-        
+
         # Track transaction start
         if DB_TRANSACTIONS_TOTAL:
             DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="start").inc()
-        
+
         try:
             # Time transaction duration
             if DB_TRANSACTION_DURATION:
@@ -75,19 +75,19 @@ def with_transaction(func: F) -> F:
                     result = await func(*args, **kwargs)
             else:
                 result = await func(*args, **kwargs)
-            
+
             # Only commit if function completed successfully
             await db.commit()
-            
+
             # Track success
             if DB_TRANSACTIONS_TOTAL:
                 DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="success").inc()
-            
+
             logger.debug("transaction.committed", func=func.__name__)
             return result
         except Exception as e:
             await db.rollback()
-            
+
             # Track failure
             if DB_ROLLBACKS_TOTAL:
                 DB_ROLLBACKS_TOTAL.labels(operation=operation).inc()
@@ -95,7 +95,7 @@ def with_transaction(func: F) -> F:
                 DB_TRANSACTION_FAILURES.labels(operation=operation).inc()
             if DB_TRANSACTIONS_TOTAL:
                 DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="failure").inc()
-            
+
             logger.error(
                 "transaction.rolled_back",
                 func=func.__name__,
@@ -103,7 +103,7 @@ def with_transaction(func: F) -> F:
                 error_type=type(e).__name__,
             )
             raise
-    
+
     return wrapper  # type: ignore
 
 
@@ -123,11 +123,12 @@ async def transaction(db: AsyncSession, operation: str = "unknown"):
     
     Returns:
         The database session (for convenience)
+
     """
     # Track transaction start
     if DB_TRANSACTIONS_TOTAL:
         DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="start").inc()
-    
+
     try:
         # Time transaction duration
         if DB_TRANSACTION_DURATION:
@@ -135,17 +136,17 @@ async def transaction(db: AsyncSession, operation: str = "unknown"):
                 yield db
         else:
             yield db
-        
+
         await db.commit()
-        
+
         # Track success
         if DB_TRANSACTIONS_TOTAL:
             DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="success").inc()
-        
+
         logger.debug("transaction.committed", operation=operation)
     except Exception as e:
         await db.rollback()
-        
+
         # Track failure
         if DB_ROLLBACKS_TOTAL:
             DB_ROLLBACKS_TOTAL.labels(operation=operation).inc()
@@ -153,7 +154,7 @@ async def transaction(db: AsyncSession, operation: str = "unknown"):
             DB_TRANSACTION_FAILURES.labels(operation=operation).inc()
         if DB_TRANSACTIONS_TOTAL:
             DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="failure").inc()
-        
+
         logger.error(
             "transaction.rolled_back",
             operation=operation,

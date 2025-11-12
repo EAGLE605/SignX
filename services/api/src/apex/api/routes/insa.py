@@ -1,5 +1,4 @@
-"""
-INSA API Endpoints - Integrated Neuro-Symbolic Architecture
+"""INSA API Endpoints - Integrated Neuro-Symbolic Architecture
 
 Provides:
 - Production scheduling with hybrid AI reasoning
@@ -40,6 +39,7 @@ router = APIRouter(prefix="/insa", tags=["insa-scheduling"])
 
 class ScheduleProjectRequest(BaseModel):
     """Request to schedule a project."""
+
     project_id: str
     bom_data: dict[str, Any] = Field(
         ...,
@@ -53,6 +53,7 @@ class ScheduleProjectRequest(BaseModel):
 
 class RescheduleRequest(BaseModel):
     """Request to reschedule based on VITRA feedback."""
+
     project_id: str
     current_schedule: dict[str, Any]
     vitra_data: dict[str, Any] = Field(
@@ -63,6 +64,7 @@ class RescheduleRequest(BaseModel):
 
 class ExplainScheduleRequest(BaseModel):
     """Request for schedule explanation."""
+
     project_id: str
     job_id: str
 
@@ -74,8 +76,7 @@ async def schedule_project(
     request: ScheduleProjectRequest,
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
-    """
-    Generate optimized production schedule using INSA hybrid reasoning.
+    """Generate optimized production schedule using INSA hybrid reasoning.
 
     **Features:**
     - Symbolic constraint satisfaction (AISC/ASCE compliance)
@@ -138,7 +139,7 @@ async def schedule_project(
         if not result["metadata"]["validation"]["valid"]:
             assumptions.append(
                 f"WARNING: {len(result['metadata']['validation']['violations'])} "
-                "constraints could not be satisfied"
+                "constraints could not be satisfied",
             )
 
         return make_envelope(
@@ -149,7 +150,7 @@ async def schedule_project(
 
     except Exception as e:
         logger.error("insa.schedule.error", error=str(e), project_id=request.project_id)
-        raise HTTPException(status_code=500, detail=f"Scheduling error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Scheduling error: {e!s}") from e
 
 
 @router.post("/reschedule", response_model=ResponseEnvelope)
@@ -157,8 +158,7 @@ async def reschedule_with_vitra(
     request: RescheduleRequest,
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
-    """
-    Adaptive rescheduling based on VITRA vision feedback.
+    """Adaptive rescheduling based on VITRA vision feedback.
 
     **Use Cases:**
     1. **Quality Issue Detected**
@@ -228,7 +228,7 @@ async def reschedule_with_vitra(
 
     except Exception as e:
         logger.error("insa.reschedule.error", error=str(e), project_id=request.project_id)
-        raise HTTPException(status_code=500, detail=f"Rescheduling error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Rescheduling error: {e!s}") from e
 
 
 @router.post("/explain", response_model=ResponseEnvelope)
@@ -236,8 +236,7 @@ async def explain_schedule_decision(
     request: ExplainScheduleRequest,
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
-    """
-    Generate human-readable explanation for scheduling decision.
+    """Generate human-readable explanation for scheduling decision.
 
     **Purpose:**
     - PE stamp compliance (auditable reasoning)
@@ -296,15 +295,14 @@ async def explain_schedule_decision(
 
     except Exception as e:
         logger.error("insa.explain.error", error=str(e), job_id=request.job_id)
-        raise HTTPException(status_code=500, detail=f"Explanation error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Explanation error: {e!s}") from e
 
 
 @router.get("/knowledge-base/stats", response_model=ResponseEnvelope)
 async def get_knowledge_base_stats(
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
-    """
-    Get INSA knowledge base statistics.
+    """Get INSA knowledge base statistics.
 
     **Returns:**
     - Total rules (by source: AISC, ASCE, AWS, IBC, VITRA, etc.)
@@ -333,7 +331,7 @@ async def get_knowledge_base_stats(
         nodes_by_type = {}
         for node in kb.nodes.values():
             nodes_by_type[node.entity_type.value] = nodes_by_type.get(
-                node.entity_type.value, 0
+                node.entity_type.value, 0,
             ) + 1
 
         embeddings_count = sum(1 for node in kb.nodes.values() if node.embedding)
@@ -364,13 +362,12 @@ async def get_knowledge_base_stats(
 
     except Exception as e:
         logger.error("insa.kb_stats.error", error=str(e))
-        raise HTTPException(status_code=500, detail=f"KB stats error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"KB stats error: {e!s}") from e
 
 
 @router.get("/health", response_model=ResponseEnvelope)
 async def health_check() -> ResponseEnvelope:
-    """
-    INSA system health check.
+    """INSA system health check.
 
     **Verifies:**
     - Scheduler initialization

@@ -110,23 +110,23 @@ async def ready(
     except Exception as e:  # pragma: no cover
         checks["signcalc"] = f"fail:{e}"
         ok = False
-    
+
     # Authentication providers health
     try:
         from .auth_health import get_health_monitor
-        
+
         health_monitor = get_health_monitor()
         auth_providers = {}
-        
+
         for provider in ["azure", "google", "apple", "password"]:
             status = await health_monitor.check_provider_health(provider)
             auth_providers[provider] = status.value
-        
+
         checks["auth_providers"] = auth_providers
         # Don't fail health check if providers are degraded (graceful degradation)
     except Exception as e:  # pragma: no cover
         checks["auth_providers"] = f"fail:{e}"
-    
+
     # Supabase connectivity
     try:
         from .supabase_client import get_supabase_client
@@ -136,11 +136,11 @@ async def ready(
     except Exception as e:  # pragma: no cover
         checks["supabase"] = f"fail:{e}"
         # Don't fail if Supabase not configured (optional in some setups)
-    
+
     # Duo 2FA (optional)
     try:
         from .duo_client import get_duo_service
-        
+
         duo_service = get_duo_service()
         checks["duo_2fa"] = "configured" if duo_service and duo_service.is_configured else "disabled"
     except Exception:  # pragma: no cover

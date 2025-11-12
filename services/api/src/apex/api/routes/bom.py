@@ -27,7 +27,7 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
     from the design config.
     """
     items: list[dict[str, Any]] = []
-    
+
     # Extract pole
     if "pole_size" in config:
         items.append({
@@ -36,7 +36,7 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
             "quantity": config.get("num_supports", 1),
             "unit": "ea",
         })
-    
+
     # Extract foundation
     if "footing" in config:
         footing = config["footing"]
@@ -50,7 +50,7 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
                 "quantity": round(volume_cy, 2),
                 "unit": "cy",
             })
-    
+
     # Extract baseplate if present
     if "baseplate" in config:
         bp = config["baseplate"]
@@ -60,7 +60,7 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
             "quantity": 1,
             "unit": "ea",
         })
-    
+
     # Extract anchor bolts
     if "baseplate" in config:
         bp = config["baseplate"]
@@ -72,7 +72,7 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
                 "quantity": num_anchors,
                 "unit": "ea",
             })
-    
+
     return items
 
 
@@ -87,34 +87,34 @@ async def get_bom(
     """
     logger.info("bom.get", project_id=project_id)
     assumptions: list[str] = []
-    
+
     # Verify project exists
     await require_project(project_id, db)
-    
+
     # Get latest payload
     query = await db.execute(
         select(ProjectPayload)
         .where(ProjectPayload.project_id == project_id)
         .order_by(ProjectPayload.created_at.desc())
-        .limit(1)
+        .limit(1),
     )
     payload = query.scalar_one_or_none()
-    
+
     if not payload:
         raise HTTPException(status_code=404, detail="No payload found for project")
-    
+
     # Generate BOM
     bom_items = _generate_bom_items(payload.config)
-    
+
     result = {
         "project_id": project_id,
         "module": payload.module,
         "items": bom_items,
         "total_items": len(bom_items),
     }
-    
+
     add_assumption(assumptions, "BOM generated from latest payload configuration")
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

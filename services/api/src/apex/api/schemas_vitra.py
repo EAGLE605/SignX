@@ -1,5 +1,4 @@
-"""
-Pydantic schemas for VITRA vision analysis API endpoints.
+"""Pydantic schemas for VITRA vision analysis API endpoints.
 """
 
 from __future__ import annotations
@@ -14,6 +13,7 @@ from pydantic import BaseModel, Field
 
 class InspectionStatus(str, Enum):
     """Inspection processing status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -22,6 +22,7 @@ class InspectionStatus(str, Enum):
 
 class InspectionSeverity(str, Enum):
     """Issue severity level."""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -31,6 +32,7 @@ class InspectionSeverity(str, Enum):
 
 class ComponentType(str, Enum):
     """Component types for recognition."""
+
     POLE = "pole"
     BASE_PLATE = "base_plate"
     ANCHOR_BOLT = "anchor_bolt"
@@ -43,6 +45,7 @@ class ComponentType(str, Enum):
 
 class FabricationTask(str, Enum):
     """Robotic fabrication task types."""
+
     WELDING = "welding"
     CUTTING = "cutting"
     DRILLING = "drilling"
@@ -55,6 +58,7 @@ class FabricationTask(str, Enum):
 
 class DetectedIssue(BaseModel):
     """Individual issue detected in inspection."""
+
     type: str = Field(..., description="Issue type (e.g., 'corrosion', 'crack')")
     severity: InspectionSeverity
     confidence: float = Field(..., ge=0.0, le=1.0, description="Detection confidence")
@@ -65,6 +69,7 @@ class DetectedIssue(BaseModel):
 
 class StructuralAssessment(BaseModel):
     """Structural condition assessment."""
+
     overall_condition: str
     estimated_remaining_life_years: float | None = None
     load_capacity_retained_pct: float | None = Field(None, ge=0, le=100)
@@ -73,6 +78,7 @@ class StructuralAssessment(BaseModel):
 
 class InspectionCreateRequest(BaseModel):
     """Request to create new vision inspection."""
+
     project_id: str | None = None
     sign_id: str | None = None
     inspection_type: str = Field("periodic", description="'initial', 'periodic', 'damage_assessment'")  # noqa: E501
@@ -85,6 +91,7 @@ class InspectionCreateRequest(BaseModel):
 
 class InspectionResponse(BaseModel):
     """Vision inspection result."""
+
     id: str
     project_id: str | None
     sign_id: str | None
@@ -109,6 +116,7 @@ class InspectionResponse(BaseModel):
 
 class IssueResponse(BaseModel):
     """Inspection issue detail."""
+
     id: str
     inspection_id: str
     issue_type: str
@@ -131,6 +139,7 @@ class IssueResponse(BaseModel):
 
 class ActionTimelineEntry(BaseModel):
     """Single action in installation timeline."""
+
     timestamp: float = Field(..., description="Timestamp in seconds")
     action: str
     duration_sec: float | None = None
@@ -139,6 +148,7 @@ class ActionTimelineEntry(BaseModel):
 
 class ProcedureCompliance(BaseModel):
     """Installation procedure compliance."""
+
     overall_score: float = Field(..., ge=0, le=100)
     steps_completed: int
     steps_total: int
@@ -147,6 +157,7 @@ class ProcedureCompliance(BaseModel):
 
 class InstallationVideoCreateRequest(BaseModel):
     """Request to analyze installation video."""
+
     project_id: str
     installation_phase: str = Field(..., description="'foundation', 'pole_erection', 'cabinet_mount', etc.")  # noqa: E501
     video_url: str
@@ -155,6 +166,7 @@ class InstallationVideoCreateRequest(BaseModel):
 
 class InstallationVideoResponse(BaseModel):
     """Installation video analysis result."""
+
     id: str
     project_id: str
     installation_phase: str
@@ -182,6 +194,7 @@ class InstallationVideoResponse(BaseModel):
 
 class DetectedComponent(BaseModel):
     """Detected component in image."""
+
     type: ComponentType
     material: str | None = None
     shape: str | None = None
@@ -193,6 +206,7 @@ class DetectedComponent(BaseModel):
 
 class DimensionVerification(BaseModel):
     """Dimension measurement verification."""
+
     measurement_method: str
     accuracy_mm: float
     verified_dimensions: bool
@@ -201,6 +215,7 @@ class DimensionVerification(BaseModel):
 
 class BOMValidation(BaseModel):
     """BOM validation result."""
+
     expected_items: list[dict[str, Any]]
     match_score: float = Field(..., ge=0.0, le=1.0)
     discrepancies: list[str]
@@ -209,6 +224,7 @@ class BOMValidation(BaseModel):
 
 class ComponentRecognitionRequest(BaseModel):
     """Request to recognize components."""
+
     project_id: str | None = None
     bom_id: str | None = None
     image_url: str
@@ -218,6 +234,7 @@ class ComponentRecognitionRequest(BaseModel):
 
 class ComponentRecognitionResponse(BaseModel):
     """Component recognition result."""
+
     id: str
     project_id: str | None
     bom_id: str | None
@@ -243,6 +260,7 @@ class ComponentRecognitionResponse(BaseModel):
 
 class ClearanceAnalysis(BaseModel):
     """Clearance analysis result."""
+
     overhead_clearance_ft: float
     min_required_ft: float
     clearance_ok: bool
@@ -251,6 +269,7 @@ class ClearanceAnalysis(BaseModel):
 
 class VisualImpactAssessment(BaseModel):
     """Visual impact assessment."""
+
     visibility_score: float = Field(..., ge=0, le=100)
     viewing_angles: list[str]
     lighting_conditions: str | None = None
@@ -259,6 +278,7 @@ class VisualImpactAssessment(BaseModel):
 
 class SiteConstraints(BaseModel):
     """Site constraint analysis."""
+
     soil_type: str | None = None
     water_table_ft: float | None = None
     bedrock_depth_ft: float | None = None
@@ -268,6 +288,7 @@ class SiteConstraints(BaseModel):
 
 class ARDesignReviewRequest(BaseModel):
     """Request for AR design review."""
+
     project_id: str
     site_photo_url: str
     design_spec: dict[str, Any] = Field(..., description="Sign design specifications")
@@ -279,6 +300,7 @@ class ARDesignReviewRequest(BaseModel):
 
 class ARDesignReviewResponse(BaseModel):
     """AR design review result."""
+
     id: str
     project_id: str
     reviewer_id: str
@@ -304,12 +326,14 @@ class ARDesignReviewResponse(BaseModel):
 
 class VLAAction(BaseModel):
     """Vision-Language-Action for robot."""
+
     action: str
     params: dict[str, Any]
 
 
 class QualityCheck(BaseModel):
     """Quality check result."""
+
     check_type: str
     passed: bool
     measurement: float | None = None
@@ -318,6 +342,7 @@ class QualityCheck(BaseModel):
 
 class RoboticFabricationRequest(BaseModel):
     """Request for robotic fabrication session."""
+
     project_id: str | None = None
     component_id: str | None = None
     robot_id: str
@@ -328,6 +353,7 @@ class RoboticFabricationRequest(BaseModel):
 
 class RoboticFabricationResponse(BaseModel):
     """Robotic fabrication session result."""
+
     id: str
     project_id: str | None
     component_id: str | None

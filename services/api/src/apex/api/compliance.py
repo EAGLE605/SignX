@@ -63,25 +63,26 @@ async def check_compliance(
     
     Returns:
         ComplianceRecord instance
+
     """
     requirement = FAA_REQUIREMENTS.get(requirement_type)
     if not requirement:
         raise ValueError(f"Unknown requirement type: {requirement_type}")
-    
+
     # Determine compliance status
     status = compliance_data.get("status", "pending")
     if status not in ["pending", "compliant", "non_compliant", "exempt"]:
         status = "pending"
-    
+
     # Check if record already exists
     existing = await db.execute(
         select(ComplianceRecord).where(
             ComplianceRecord.project_id == project_id,
             ComplianceRecord.requirement_type == requirement_type,
-        )
+        ),
     )
     record = existing.scalar_one_or_none()
-    
+
     if record:
         # Update existing record
         record.status = status
@@ -106,7 +107,7 @@ async def check_compliance(
         db.add(record)
         await db.commit()
         await db.refresh(record)
-    
+
     # Log audit
     await log_audit(
         db=db,
@@ -121,14 +122,14 @@ async def check_compliance(
         user_id=verified_by or "system",
         account_id="unknown",  # Should be extracted from project
     )
-    
+
     logger.info(
         "compliance.recorded",
         project_id=project_id,
         requirement_type=requirement_type,
         status=status,
     )
-    
+
     return record
 
 
@@ -138,7 +139,7 @@ async def get_project_compliance(
 ) -> list[ComplianceRecord]:
     """Get all compliance records for a project."""
     result = await db.execute(
-        select(ComplianceRecord).where(ComplianceRecord.project_id == project_id)
+        select(ComplianceRecord).where(ComplianceRecord.project_id == project_id),
     )
     return list(result.scalars().all())
 
@@ -159,7 +160,7 @@ async def verify_breakaway_compliance(
     Simplified check: Pole height > 40ft requires breakaway design.
     """
     is_compliant = pole_height_ft <= 40.0 or material in ["breakaway", "frangible"]
-    
+
     compliance_data = {
         "pole_height_ft": pole_height_ft,
         "base_diameter_in": base_diameter_in,
@@ -195,7 +196,7 @@ async def verify_wind_load_compliance(
     # Simplified: Check if wind load calculation is reasonable
     # In production, this would validate against ASCE 7 tables
     is_compliant = calculated_load_psf > 0 and calculated_load_psf <= 200  # Reasonable range
-    
+
     compliance_data = {
         "wind_speed_mph": wind_speed_mph,
         "exposure": exposure,
@@ -243,6 +244,7 @@ async def create_pe_stamp(
     
     Returns:
         PEStamp instance
+
     """
     stamp = PEStamp(
         project_id=project_id,
@@ -255,11 +257,11 @@ async def create_pe_stamp(
         code_references=code_references,
         pdf_url=pdf_url,
     )
-    
+
     db.add(stamp)
     await db.commit()
     await db.refresh(stamp)
-    
+
     # Log audit
     await log_audit(
         db=db,
@@ -274,13 +276,13 @@ async def create_pe_stamp(
         user_id=pe_user_id,
         account_id="unknown",
     )
-    
+
     logger.info(
         "pe.stamp_created",
         stamp_id=stamp.stamp_id,
         project_id=project_id,
         pe_state=pe_state,
     )
-    
+
     return stamp
 

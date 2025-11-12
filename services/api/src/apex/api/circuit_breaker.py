@@ -38,13 +38,14 @@ class CircuitBreaker:
     Prevents cascading failures by temporarily blocking requests
     to failing services.
     """
-    
+
     def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
         """Initialize circuit breaker.
         
         Args:
             name: Service name for logging
             config: Circuit breaker configuration
+
         """
         self.name = name
         self.config = config or CircuitBreakerConfig()
@@ -54,7 +55,7 @@ class CircuitBreaker:
         self.last_failure_time: float | None = None
         self.half_open_attempts = 0
         self._lock = asyncio.Lock()
-    
+
     async def call(self, func: Callable[[], Any]) -> Any:
         """Execute function with circuit breaker protection.
         
@@ -66,6 +67,7 @@ class CircuitBreaker:
         
         Raises:
             CircuitBreakerOpen: If circuit is open
+
         """
         async with self._lock:
             # Check if circuit is open
@@ -79,32 +81,32 @@ class CircuitBreaker:
                     remaining = int(self.config.recovery_timeout - (time.time() - (self.last_failure_time or 0)))
                     raise CircuitBreakerOpen(
                         f"Circuit breaker open for {self.name}. "
-                        f"Retry in {remaining}s"
+                        f"Retry in {remaining}s",
                     )
-        
+
         # Execute function
         try:
             result = await func() if asyncio.iscoroutinefunction(func) else func()
-            
+
             # Record success
             async with self._lock:
                 await self._record_success()
-            
+
             return result
-            
+
         except Exception:
             # Record failure
             async with self._lock:
                 await self._record_failure()
-            
+
             raise
-    
+
     async def _record_success(self) -> None:
         """Record successful call."""
         if self.state == CircuitState.HALF_OPEN:
             self.success_count += 1
             self.half_open_attempts += 1
-            
+
             if self.success_count >= self.config.success_threshold:
                 logger.info("circuit_breaker.closed", name=self.name, attempts=self.half_open_attempts)
                 self.state = CircuitState.CLOSED
@@ -114,12 +116,12 @@ class CircuitBreaker:
         else:
             # Normal operation - reset failure count
             self.failure_count = 0
-    
+
     async def _record_failure(self) -> None:
         """Record failed call."""
         self.failure_count += 1
         self.last_failure_time = time.time()
-        
+
         if self.state == CircuitState.HALF_OPEN:
             # Half-open failed - go back to open
             logger.warning("circuit_breaker.half_open_failed", name=self.name)
@@ -130,18 +132,18 @@ class CircuitBreaker:
             # Too many failures - open circuit
             logger.error("circuit_breaker.opened", name=self.name, failures=self.failure_count)
             self.state = CircuitState.OPEN
-    
+
     def _should_attempt_recovery(self) -> bool:
         """Check if enough time has passed to attempt recovery."""
         if not self.last_failure_time:
             return False
         elapsed = time.time() - self.last_failure_time
         return elapsed >= self.config.recovery_timeout
-    
+
     def get_state(self) -> CircuitState:
         """Get current circuit breaker state."""
         return self.state
-    
+
     def reset(self) -> None:
         """Manually reset circuit breaker (admin operation)."""
         logger.info("circuit_breaker.manual_reset", name=self.name)
@@ -154,8 +156,7 @@ class CircuitBreaker:
 
 class CircuitBreakerOpen(Exception):
     """Exception raised when circuit breaker is open."""
-    
-    pass
+
 
 
 # Global circuit breakers for different services
@@ -171,6 +172,7 @@ def get_circuit_breaker(name: str, config: CircuitBreakerConfig | None = None) -
     
     Returns:
         CircuitBreaker instance
+
     """
     if name not in _circuit_breakers:
         _circuit_breakers[name] = CircuitBreaker(name, config)

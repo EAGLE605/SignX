@@ -28,6 +28,7 @@ router = APIRouter(prefix="/api/v1/compliance", tags=["compliance"])
 
 class ComplianceCheckRequest(BaseModel):
     """Request for compliance check."""
+
     requirement_type: str = Field(..., description="Type: breakaway, wind_load, material_cert, foundation")
     compliance_data: dict = Field(..., description="Detailed compliance data")
     notes: str | None = None
@@ -35,6 +36,7 @@ class ComplianceCheckRequest(BaseModel):
 
 class BreakawayCheckRequest(BaseModel):
     """Request for breakaway compliance check."""
+
     pole_height_ft: float
     base_diameter_in: float
     material: str
@@ -42,6 +44,7 @@ class BreakawayCheckRequest(BaseModel):
 
 class WindLoadCheckRequest(BaseModel):
     """Request for wind load compliance check."""
+
     wind_speed_mph: float
     exposure: str = Field(..., description="B, C, or D")
     calculated_load_psf: float
@@ -50,6 +53,7 @@ class WindLoadCheckRequest(BaseModel):
 
 class PEStampRequest(BaseModel):
     """Request for PE stamp."""
+
     pe_license_number: str
     pe_state: str = Field(..., min_length=2, max_length=2, description="Two-letter state code")
     stamp_type: str = Field(..., description="structural, foundation, electrical")
@@ -76,7 +80,7 @@ async def check_project_compliance(
         verified_by=current_user.user_id,
         notes=req.notes,
     )
-    
+
     return make_envelope(
         result={
             "record_id": record.record_id,
@@ -112,7 +116,7 @@ async def check_breakaway(
         material=req.material,
         verified_by=current_user.user_id,
     )
-    
+
     return make_envelope(
         result={
             "record_id": record.record_id,
@@ -149,7 +153,7 @@ async def check_wind_load(
         code_reference=req.code_reference,
         verified_by=current_user.user_id,
     )
-    
+
     return make_envelope(
         result={
             "record_id": record.record_id,
@@ -176,7 +180,7 @@ async def get_project_compliance_records(
 ) -> ResponseEnvelope:
     """Get all compliance records for a project."""
     records = await get_project_compliance(db=db, project_id=project_id)
-    
+
     return make_envelope(
         result=[
             {
@@ -222,7 +226,7 @@ async def create_pe_stamp_endpoint(
         calculation_id=req.calculation_id,
         pdf_url=req.pdf_url,
     )
-    
+
     return make_envelope(
         result={
             "stamp_id": stamp.stamp_id,

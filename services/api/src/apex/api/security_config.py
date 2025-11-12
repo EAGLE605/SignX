@@ -19,7 +19,6 @@ _RATE_LIMIT_OVERRIDES: dict[str, str] = {
 @lru_cache(maxsize=1)
 def get_global_limiter() -> Limiter:
     """Lazily instantiate the SlowAPI limiter with default limits."""
-
     default_limit = get_rate_limit_default()
     logger.info("security.limiter.init", default_limit=default_limit)
     return Limiter(key_func=get_remote_address, default_limits=[default_limit])
@@ -27,7 +26,6 @@ def get_global_limiter() -> Limiter:
 
 def get_rate_limit(endpoint_key: str) -> str:
     """Resolve the rate limit string for a named endpoint."""
-
     limit = _RATE_LIMIT_OVERRIDES.get(endpoint_key, get_rate_limit_default())
     logger.debug("security.limiter.override", endpoint=endpoint_key, limit=limit)
     return limit

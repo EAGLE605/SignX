@@ -59,7 +59,7 @@ logger = structlog.get_logger(__name__)
 try:
     import sentry_sdk
     from sentry_sdk.integrations.fastapi import FastApiIntegration
-    
+
     if settings.ENV == "prod":
         sentry_sdk.init(
             dsn=os.getenv("SENTRY_DSN"),
@@ -103,7 +103,7 @@ def rate_key_func(request: Request):  # type: ignore[no-untyped-def]
             pass
         except Exception:
             pass
-    
+
     # Fallback to IP or API key
     token = request.headers.get("x-apex-key")
     return token or get_remote_address(request)
@@ -158,10 +158,10 @@ async def add_request_context(request: Request, call_next):  # type: ignore[no-u
                             "seed": None,
                         },
                     },
-                }
-            }
-        }
-    }
+                },
+            },
+        },
+    },
 })
 async def health(
     model_config=Depends(get_model_config),  # noqa: B008
@@ -216,10 +216,10 @@ async def health(
                             "seed": None,
                         },
                     },
-                }
-            }
-        }
-    }
+                },
+            },
+        },
+    },
 })
 async def version(
     model_config=Depends(get_model_config),  # noqa: B008
@@ -358,7 +358,7 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
     from redis.asyncio import Redis
 
     from .metrics import CACHE_HIT_RATIO, CELERY_QUEUE_DEPTH, PG_POOL_USED
-    
+
     async def update_runtime_metrics():
         # Queue depth
         try:
@@ -368,7 +368,7 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
             CELERY_QUEUE_DEPTH.set(depth)
         except Exception:
             pass
-        
+
         # PG pool usage
         pool = getattr(app.state, "pg_pool", None)
         if isinstance(pool, asyncpg.Pool):
@@ -378,18 +378,18 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
                 PG_POOL_USED.set(max(size - idle, 0))
             except Exception:
                 pass
-        
+
         # Cache hit ratio
         try:
             CACHE_HIT_RATIO.set(-1)
         except Exception:
             pass
-    
+
     async def metrics_background_loop():
         while True:
             await update_runtime_metrics()
             await asyncio.sleep(10)
-    
+
     app.state.metrics_task = asyncio.create_task(metrics_background_loop())
 
 

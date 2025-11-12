@@ -38,7 +38,7 @@ def _check_plate_thickness(plate: dict, loads: dict) -> dict:
     _l_in = float(plate.get("l_in", 12.0))  # Reserved for future 2D analysis
     t_in = float(plate.get("t_in", 0.5))
     fy_ksi = float(plate.get("fy_ksi", 36.0))
-    
+
     # Simplified: M = T * e (eccentricity), fb = M / S <= 0.6 * fy
     T_kip = float(loads.get("T_kip", 0.0))
     e_in = float(plate.get("e_in", 3.0))  # Distance to anchor
@@ -46,7 +46,7 @@ def _check_plate_thickness(plate: dict, loads: dict) -> dict:
     S_in3 = w_in * (t_in ** 2) / 6.0
     fb_ksi = M_kipin / max(S_in3, 0.01)
     fb_allow_ksi = 0.6 * fy_ksi
-    
+
     pass_check = fb_ksi <= fb_allow_ksi
     return {
         "name": "Plate Thickness",
@@ -63,18 +63,18 @@ def _check_weld_strength(weld: dict, loads: dict) -> dict:
     """Weld strength check per AISC."""
     size_in = float(weld.get("size_in", 0.25))
     strength_ksi = float(weld.get("strength", 70.0))  # E70XX
-    
+
     V_kip = float(loads.get("V_kip", 0.0))
     M_kipin = float(loads.get("M_kipin", 0.0))
-    
+
     # Simplified weld capacity: 0.6 * fexx * 0.707 * size * length
     fexx_ksi = strength_ksi
     weld_length_in = float(weld.get("length_in", 12.0))
     capacity_k = 0.6 * fexx_ksi * 0.707 * size_in * weld_length_in
-    
+
     # Combined stress (simplified)
     demand_k = math.sqrt(V_kip ** 2 + (M_kipin / weld_length_in) ** 2)
-    
+
     pass_check = demand_k <= capacity_k
     return {
         "name": "Weld Strength",
@@ -93,23 +93,23 @@ def _check_anchor_tension(anchors: dict, loads: dict) -> dict:
     dia_in = float(anchors.get("dia_in", 0.75))
     embed_in = float(anchors.get("embed_in", 10.0))
     fy_anchor_ksi = float(anchors.get("fy_ksi", 58.0))
-    
+
     T_total_kip = float(loads.get("T_kip", 0.0))
     T_per_bolt_kip = T_total_kip / num_anchors
-    
+
     # Simplified capacity: min(steel, concrete breakout)
     # Steel: 0.75 * 0.75 * Ab * fy
     Ab_sqin = math.pi * (dia_in / 2.0) ** 2
     steel_capacity_k = 0.75 * 0.75 * Ab_sqin * fy_anchor_ksi
-    
+
     # Concrete breakout (simplified): ~25 * embed^1.5 * sqrt(fc') * spacing factor
     fc_psi = float(anchors.get("fc_psi", 4000.0))
     spacing_in = float(anchors.get("spacing_in", 6.0))
     breakout_factor = 25.0 * (embed_in ** 1.5) * math.sqrt(fc_psi / 1000.0) * min(1.0, spacing_in / embed_in)
     concrete_capacity_k = breakout_factor / 1000.0  # Convert to kips
-    
+
     capacity_k = min(steel_capacity_k, concrete_capacity_k)
-    
+
     pass_check = T_per_bolt_kip <= capacity_k
     return {
         "name": "Anchor Tension",
@@ -127,14 +127,14 @@ def _check_anchor_shear(anchors: dict, loads: dict) -> dict:
     num_anchors = int(anchors.get("num_anchors", 4))
     dia_in = float(anchors.get("dia_in", 0.75))
     fy_anchor_ksi = float(anchors.get("fy_ksi", 58.0))
-    
+
     V_total_kip = float(loads.get("V_kip", 0.0))
     V_per_bolt_kip = V_total_kip / num_anchors
-    
+
     # Steel capacity: 0.65 * 0.6 * Ab * fy
     Ab_sqin = math.pi * (dia_in / 2.0) ** 2
     capacity_k = 0.65 * 0.6 * Ab_sqin * fy_anchor_ksi
-    
+
     pass_check = V_per_bolt_kip <= capacity_k
     return {
         "name": "Anchor Shear",
@@ -161,12 +161,12 @@ async def baseplate_checks(req: dict) -> ResponseEnvelope:
     """
     logger.info("baseplate.checks")
     assumptions: list[str] = []
-    
+
     plate = req.get("plate", {})
     weld = req.get("weld", {})
     anchors = req.get("anchors", {})
     loads = req.get("loads", {})
-    
+
     # Run all checks
     checks = [
         _check_plate_thickness(plate, loads),
@@ -174,17 +174,17 @@ async def baseplate_checks(req: dict) -> ResponseEnvelope:
         _check_anchor_tension(anchors, loads),
         _check_anchor_shear(anchors, loads),
     ]
-    
+
     all_pass = all(c["pass"] for c in checks)
-    
+
     add_assumption(assumptions, f"Fy={plate.get('fy_ksi', 36)}ksi, E{int(weld.get('strength', 70))}XX fillet, ACI breakout")
-    
+
     result = {
         "all_pass": all_pass,
         "checks": checks,
         "approved": all_pass,
     }
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,
@@ -206,16 +206,16 @@ async def baseplate_design(req: dict) -> ResponseEnvelope:
     """
     logger.info("baseplate.design")
     assumptions: list[str] = []
-    
+
     loads = req.get("loads", {})
     F_lbf = float(loads.get("F_lbf", 0.0))
     M_inlb = float(loads.get("M_inlb", 120000.0))
-    
+
     # Use signcalc design_anchors
     anc, checks = design_anchors(F_lbf, M_inlb)
-    
+
     add_assumption(assumptions, "4-anchor symmetric pattern")
-    
+
     result = {
         "design": {
             "pattern": anc["pattern"],
@@ -229,9 +229,9 @@ async def baseplate_design(req: dict) -> ResponseEnvelope:
             "V_sf": checks["V_sf"],
         },
     }
-    
+
     confidence = 0.8 if min(checks["T_sf"], checks["V_sf"]) >= 1.5 else 0.6
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

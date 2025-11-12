@@ -22,19 +22,20 @@ def get_account_from_email(email: str, provider: str) -> tuple[str, str]:
     
     Returns:
         Tuple of (account_id, role)
+
     """
     email_lower = email.lower() if email else ""
-    
+
     # Internal staff with Microsoft 365
     if email_lower.endswith("@eaglesign.net"):
         logger.info("auth.account.assigned", email=email, account="eagle-sign", role="admin", provider=provider)
         return "eagle-sign", "admin"
-    
+
     # External Microsoft 365 users (B2B clients)
     if provider == "azure":
         logger.info("auth.account.assigned", email=email, account="custom", role="client", provider=provider)
         return "custom", "client"
-    
+
     # Consumer Google/Apple or email/password
     logger.info("auth.account.assigned", email=email, account="custom", role="viewer", provider=provider)
     return "custom", "viewer"
@@ -48,16 +49,16 @@ def normalize_provider(provider: str) -> str:
     
     Returns:
         Normalized provider: "azure", "google", "apple", "password"
+
     """
     provider_lower = provider.lower() if provider else ""
-    
+
     # Map common variations
     if provider_lower in ("azure", "microsoft", "microsoft365", "azuread"):
         return "azure"
-    elif provider_lower in ("google", "google-oauth", "google_oauth"):
+    if provider_lower in ("google", "google-oauth", "google_oauth"):
         return "google"
-    elif provider_lower in ("apple", "apple-id", "sign-in-with-apple"):
+    if provider_lower in ("apple", "apple-id", "sign-in-with-apple"):
         return "apple"
-    else:
-        return "password"  # Default fallback
+    return "password"  # Default fallback
 

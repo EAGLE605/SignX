@@ -39,21 +39,21 @@ async def submit_project(
     """
     logger.info("project.submit", project_id=project_id, idempotency_key=idempotency_key)
     assumptions: list[str] = []
-    
+
     # Verify project exists
     project = await require_project(project_id, db)
-    
+
     # Idempotency check: look for existing submission event with same key
     # Note: SQLAlchemy JSON queries use cast() for PostgreSQL
     from sqlalchemy import String, cast
-    
+
     if idempotency_key:
         event_query = await db.execute(
             select(ProjectEvent).where(
                 ProjectEvent.project_id == project_id,
                 ProjectEvent.event_type == "project.submitted",
                 cast(ProjectEvent.data["idempotency_key"], String) == idempotency_key,
-            ).limit(1)
+            ).limit(1),
         )
         existing = event_query.scalar_one_or_none()
         if existing:
@@ -77,16 +77,16 @@ async def submit_project(
                 code_version=get_code_version(),
                 model_config=get_model_config(),
             )
-    
+
     # Get latest payload for submission
     payload_query = await db.execute(
-        select(ProjectPayload).where(ProjectPayload.project_id == project_id).order_by(ProjectPayload.created_at.desc()).limit(1)
+        select(ProjectPayload).where(ProjectPayload.project_id == project_id).order_by(ProjectPayload.created_at.desc()).limit(1),
     )
     payload_row = payload_query.scalar_one_or_none()
-    
+
     if not payload_row:
         raise HTTPException(status_code=422, detail="No design payload found. Complete design stages first.")
-    
+
     # Prepare project data for PM dispatch
     project_data = {
         "project_id": project_id,
@@ -99,11 +99,11 @@ async def submit_project(
             "cost_snapshot": payload_row.cost_snapshot,
         },
     }
-    
+
     # Enqueue PM dispatch task
     pm_task_id = enqueue_pm_dispatch(project_id, project_data, idempotency_key)
     add_assumption(assumptions, f"PM dispatch enqueued: task_id={pm_task_id}")
-    
+
     # State transition and logging in single transaction
     # Use context manager for explicit transaction control
     try:
@@ -111,7 +111,7 @@ async def submit_project(
             # State transition: estimating → submitted
             if project.status == "estimating":
                 project.status = "submitted"
-            
+
             # Log submission event
             await log_event(
                 db,
@@ -129,9 +129,9 @@ async def submit_project(
         logger.error("submission.transaction_failed", project_id=project_id, error=str(e))
         raise HTTPException(
             status_code=500,
-            detail="Failed to complete project submission. Changes rolled back."
+            detail="Failed to complete project submission. Changes rolled back.",
         )
-    
+
     # Enqueue email notification (if project has manager email)
     # TODO: Extract manager email from project metadata when available
     manager_email = project_data.get("manager_email")
@@ -145,7 +145,7 @@ async def submit_project(
         add_assumption(assumptions, f"Email notification enqueued: task_id={email_task_id}")
     else:
         add_assumption(assumptions, "No manager email - skipping notification")
-    
+
     result = {
         "project_id": project_id,
         "status": "submitted",
@@ -153,7 +153,7 @@ async def submit_project(
         "pm_task_id": pm_task_id,
         "idempotent": False,
     }
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,
@@ -179,19 +179,19 @@ async def generate_report(
     """
     logger.info("project.generate_report", project_id=project_id)
     assumptions: list[str] = []
-    
+
     # Verify project exists
     await require_project(project_id, db)
-    
+
     # Get latest payload
     payload_query = await db.execute(
-        select(ProjectPayload).where(ProjectPayload.project_id == project_id).order_by(ProjectPayload.created_at.desc()).limit(1)
+        select(ProjectPayload).where(ProjectPayload.project_id == project_id).order_by(ProjectPayload.created_at.desc()).limit(1),
     )
     payload_row = payload_query.scalar_one_or_none()
-    
+
     if not payload_row:
         raise HTTPException(status_code=422, detail="No design payload found for project. Complete design stages first.")
-    
+
     # Convert payload to dict format
     payload = {
         "module": payload_row.module,
@@ -199,15 +199,15 @@ async def generate_report(
         "files": payload_row.files,
         "cost_snapshot": payload_row.cost_snapshot,
     }
-    
+
     # Option 1: Generate synchronously (instant for cached reports)
     # Option 2: Enqueue async task (for heavy generation)
     # For now, use sync for instant response when cached
     artifacts_root = Path(settings.MINIO_BUCKET or "./artifacts").expanduser().resolve()
     artifacts_root.mkdir(parents=True, exist_ok=True)
-    
+
     report_data = await generate_report_from_payload(project_id, payload, artifacts_root)
-    
+
     # Alternative: For async generation, uncomment:
     # report_task_id = enqueue_report_generation(project_id, payload)
     # return ResponseEnvelope(
@@ -215,9 +215,9 @@ async def generate_report(
     #     assumptions=["Report generation enqueued"],
     #     ...
     # )
-    
+
     add_assumption(assumptions, f"Report {'cached' if report_data['cached'] else 'generated'} by SHA256: {report_data['sha256'][:16]}...")
-    
+
     result = {
         "project_id": project_id,
         "sha256": report_data["sha256"],
@@ -225,9 +225,9 @@ async def generate_report(
         "cached": report_data["cached"],
         "download_url": f"/artifacts/{report_data['pdf_ref']}",  # Relative URL for API
     }
-    
+
     confidence = 0.95 if report_data["cached"] else 0.90
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

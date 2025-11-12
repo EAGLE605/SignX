@@ -20,6 +20,7 @@ def compute_payload_sha256(payload: dict[str, Any]) -> str:
     
     Returns:
         SHA256 hex digest
+
     """
     normalized = {
         "module": payload.get("module"),

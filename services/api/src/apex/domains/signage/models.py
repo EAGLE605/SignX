@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Domain Models (Pydantic v2)
+"""APEX Signage Engineering - Domain Models (Pydantic v2)
 Shared primitives for sign structure design
 """
 
@@ -119,9 +118,9 @@ class CheckResult(BaseModel):
     demand: Unit
     capacity: Unit
     unit: str
-    pass_: bool = Field(alias="pass")  # noqa: A003
+    pass_: bool = Field(alias="pass")
     governing: str | None = None
-    
+
     model_config = ConfigDict(populate_by_name=True)
 
 

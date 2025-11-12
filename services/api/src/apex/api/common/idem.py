@@ -24,16 +24,16 @@ async def enforce_idempotency(request: Request, call_next) -> Response:  # type:
     key = request.headers.get("Idempotency-Key")
     if not key:
         return await call_next(request)
-    
+
     # Only apply to mutation methods
     if request.method not in ["POST", "PUT", "PATCH", "DELETE"]:
         return await call_next(request)
-    
+
     # Create cache key from path + body hash + idempotency key
     body = await request.body()
     body_hash = sha256(body).hexdigest()[:16]
     cache_key = f"idem:{request.url.path}:{body_hash}:{key}"
-    
+
     # Check Redis cache
     redis = await get_redis_client()
     if redis:
@@ -44,14 +44,14 @@ async def enforce_idempotency(request: Request, call_next) -> Response:  # type:
                 # Parse cached JSON bytes
                 cached_data = orjson.loads(cached)
                 return ORJSONResponse(content=cached_data, status_code=status.HTTP_200_OK)
-            
+
             logger.debug("idempotency.cache_miss", key=key, cache_key=cache_key)
         except Exception as e:
             logger.warning("idempotency.redis_error", error=str(e))
-    
+
     # Execute request
     response = await call_next(request)
-    
+
     # Cache successful responses (2xx, 3xx) for 24 hours
     if redis and response.status_code < 400:
         try:
@@ -60,10 +60,10 @@ async def enforce_idempotency(request: Request, call_next) -> Response:  # type:
                 body_data = response.body
             else:
                 body_data = await response.body()
-            
+
             await redis.set(cache_key, body_data, ex=86400)
             logger.debug("idempotency.cached", key=key, ttl=86400)
         except Exception as e:
             logger.warning("idempotency.cache_failed", error=str(e))
-    
+
     return response

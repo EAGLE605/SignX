@@ -48,9 +48,9 @@ class TokenData(BaseModel):
 
 
 def create_access_token(
-    data: dict[str, Any], 
+    data: dict[str, Any],
     expires_delta: timedelta | None = None,
-    mfa_verified: bool = False
+    mfa_verified: bool = False,
 ) -> str:
     """Create JWT access token with enhanced claims.
     
@@ -61,15 +61,16 @@ def create_access_token(
     
     Returns:
         Encoded JWT token string
+
     """
     to_encode = data.copy()
     expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=JWT_EXPIRE_MINUTES))
     to_encode.update({
-        "exp": expire, 
+        "exp": expire,
         "iat": datetime.now(UTC),
         "mfa_verified": mfa_verified,
     })
-    
+
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     logger.debug("token.created", user_id=data.get("sub"), expires_in=expires_delta, mfa_verified=mfa_verified)
     return encoded_jwt
@@ -80,7 +81,7 @@ def create_session_token(
     email: str,
     account_id: str,
     provider: str = "password",
-    expires_minutes: int = 10
+    expires_minutes: int = 10,
 ) -> str:
     """Create short-lived session token for 2FA flow.
     
@@ -96,6 +97,7 @@ def create_session_token(
     
     Returns:
         Encoded JWT session token
+
     """
     data = {
         "sub": user_id,
@@ -114,26 +116,27 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     Raises:
         HTTPException: 401 if token invalid/expired/missing
+
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     token = credentials.credentials
-    
+
     # Try Supabase token verification first
     if settings.SUPABASE_URL and settings.SUPABASE_KEY:
         try:
             from gotrue.errors import AuthApiError  # noqa: F401
 
             from .supabase_client import get_supabase_client
-            
+
             supabase = get_supabase_client()
             # Verify token with Supabase
             user_response = supabase.auth.get_user(token)
-            
+
             if user_response and user_response.user:
                 user = user_response.user
                 # Extract metadata
@@ -143,13 +146,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 provider = metadata.get("provider", "password")
                 mfa_verified = metadata.get("mfa_verified", False)
                 accounts_data = metadata.get("accounts", [])
-                
+
                 # Parse accounts list
                 accounts = [
                     AccountInfo(account_id=acc.get("account_id", ""), role=acc.get("role", "viewer"))
                     for acc in accounts_data
                 ] if isinstance(accounts_data, list) else []
-                
+
                 token_data = TokenData(
                     user_id=user.id,
                     email=user.email or "",
@@ -164,12 +167,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         except (ValueError, ImportError) as e:
             # Supabase not available - fall back to legacy JWT
             logger.debug("token.supabase_fallback", error=str(e))
-            pass
         except Exception as e:
             # AuthApiError or other - try legacy JWT
             logger.debug("token.supabase_error", error=str(e))
-            pass
-    
+
     # Fallback to legacy JWT validation
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
@@ -179,20 +180,20 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError as e:
         logger.warning("token.invalid", error=str(e))
         raise credentials_exception from e
-    
+
     email = payload.get("email", "")
     account_id = payload.get("account_id", "")
     roles = payload.get("roles", ["user"])
     mfa_verified = payload.get("mfa_verified", False)
     provider = payload.get("provider", "password")
     accounts_data = payload.get("accounts", [])
-    
+
     # Parse accounts list
     accounts = [
         AccountInfo(account_id=acc.get("account_id", ""), role=acc.get("role", "viewer"))
         for acc in accounts_data
     ] if isinstance(accounts_data, list) else []
-    
+
     token_data = TokenData(
         user_id=user_id,
         email=email,
@@ -207,7 +208,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
 async def get_current_user_optional(
-    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
+    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
 ) -> TokenData | None:
     """Optional authentication - returns None if no token provided.
     
@@ -215,7 +216,7 @@ async def get_current_user_optional(
     """
     if not credentials:
         return None
-    
+
     try:
         return await get_current_user(credentials)
     except HTTPException:
@@ -231,6 +232,7 @@ def require_role(allowed_roles: list[str]):
             current_user: TokenData = Depends(require_role(["admin"]))
         ):
             ...
+
     """
     async def _role_check(current_user: TokenData = Depends(get_current_user)) -> TokenData:
         if not any(role in current_user.roles for role in allowed_roles):
@@ -240,14 +242,14 @@ def require_role(allowed_roles: list[str]):
                 detail=f"Required roles: {allowed_roles}",
             )
         return current_user
-    
+
     return _role_check
 
 
 # Placeholder auth for development
 class MockAuth:
     """Mock auth for local development without JWT."""
-    
+
     @staticmethod
     def get_mock_user() -> TokenData:
         """Return a mock user for local dev."""

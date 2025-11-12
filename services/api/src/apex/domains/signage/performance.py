@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Performance Optimizations
+"""APEX Signage Engineering - Performance Optimizations
 
 Advanced performance improvements for scale: caching, parallelization, adaptive algorithms.
 """
@@ -15,44 +14,44 @@ from typing import Any
 
 class AdaptiveStopping:
     """Adaptive stopping criterion for optimization algorithms."""
-    
+
     def __init__(self, improvement_threshold: float = 0.01, patience: int = 5):
-        """
-        Initialize adaptive stopping.
+        """Initialize adaptive stopping.
         
         Args:
             improvement_threshold: Stop when improvement <1% (default)
             patience: Number of generations without improvement before stopping
+
         """
         self.improvement_threshold = improvement_threshold
         self.patience = patience
         self.best_fitness_history: list[float] = []
         self.stagnant_count = 0
-    
+
     def should_stop(self, current_best: float) -> bool:
-        """
-        Check if optimization should stop.
+        """Check if optimization should stop.
         
         Args:
             current_best: Current best fitness value
         
         Returns:
             True if should stop
+
         """
         if len(self.best_fitness_history) == 0:
             self.best_fitness_history.append(current_best)
             return False
-        
+
         previous_best = self.best_fitness_history[-1]
         improvement = abs(previous_best - current_best) / max(abs(previous_best), 1e-6)
-        
+
         if improvement < self.improvement_threshold:
             self.stagnant_count += 1
         else:
             self.stagnant_count = 0
-        
+
         self.best_fitness_history.append(current_best)
-        
+
         return self.stagnant_count >= self.patience
 
 
@@ -69,8 +68,7 @@ def pareto_optimize_poles_enhanced(
     seed: int = 42,
     use_multiprocessing: bool = True,
 ) -> list[Any]:
-    """
-    Enhanced Pareto optimization with adaptive stopping and parallelization.
+    """Enhanced Pareto optimization with adaptive stopping and parallelization.
     
     Performance: 3x faster than basic NSGA-II via adaptive stopping.
     
@@ -86,15 +84,16 @@ def pareto_optimize_poles_enhanced(
     
     Returns:
         List of Pareto solutions
+
     """
     from .optimization import pareto_optimize_poles
-    
+
     # Use basic implementation for now, add enhancements
     # In production, would implement:
     # - Adaptive stopping
     # - DEAP multiprocessing
     # - Reference point method
-    
+
     return pareto_optimize_poles(
         mu_required_kipin,
         sections,
@@ -116,8 +115,7 @@ def _cached_predict(
     wind_speed_hash: int,
     soil_bearing_hash: int,
 ) -> dict[str, Any]:
-    """
-    Cached prediction (simplified - actual implementation would hash feature vector).
+    """Cached prediction (simplified - actual implementation would hash feature vector).
     
     Note: This is a placeholder. Real implementation would hash feature vectors properly.
     """
@@ -131,8 +129,7 @@ def predict_with_cache(
     wind_speed_mph: float,
     soil_bearing_psf: float,
 ) -> dict[str, Any]:
-    """
-    Predict with LRU cache (1000 entries).
+    """Predict with LRU cache (1000 entries).
     
     Args:
         cabinet_area_ft2: Cabinet area
@@ -142,13 +139,14 @@ def predict_with_cache(
     
     Returns:
         Prediction dict
+
     """
     # Hash inputs (simplified - real implementation would use proper feature hashing)
     area_hash = hash(round(cabinet_area_ft2, 1))
     height_hash = hash(round(height_ft, 1))
     wind_hash = hash(round(wind_speed_mph, 0))
     soil_hash = hash(round(soil_bearing_psf, 0))
-    
+
     return _cached_predict(area_hash, height_hash, wind_hash, soil_hash)
 
 
@@ -159,8 +157,7 @@ def batch_predict(
     inputs: list[dict[str, float]],
     batch_size: int = 32,
 ) -> list[dict[str, Any]]:
-    """
-    Batch ML inference for multiple projects.
+    """Batch ML inference for multiple projects.
     
     Args:
         inputs: List of {cabinet_area_ft2, height_ft, wind_speed_mph, soil_bearing_psf}
@@ -168,16 +165,17 @@ def batch_predict(
     
     Returns:
         List of predictions
+
     """
     from .ml_models import predict_initial_config
-    
+
     # Process in batches
     results = []
     for i in range(0, len(inputs), batch_size):
         batch = inputs[i : i + batch_size]
         batch_results = [predict_initial_config(**inp) for inp in batch]
         results.extend(batch_results)
-    
+
     return results
 
 
@@ -185,8 +183,7 @@ def batch_predict(
 
 
 def quantize_model(model: Any, reduction_factor: float = 0.5) -> Any:
-    """
-    Reduce model memory footprint by quantization.
+    """Reduce model memory footprint by quantization.
     
     Args:
         model: ML model
@@ -196,6 +193,7 @@ def quantize_model(model: Any, reduction_factor: float = 0.5) -> Any:
         Quantized model
     
     Note: Actual implementation would use quantization libraries
+
     """
     # Placeholder - actual quantization would use TensorFlow/PyTorch quantization
     return model
@@ -208,8 +206,7 @@ def benchmark_scale_test(
     n_projects: int = 10000,
     n_workers: int = 4,
 ) -> dict[str, Any]:
-    """
-    Benchmark batch processing at scale.
+    """Benchmark batch processing at scale.
     
     Args:
         n_projects: Number of projects to process
@@ -217,10 +214,11 @@ def benchmark_scale_test(
     
     Returns:
         Benchmark results
+
     """
     from .batch import ProjectConfig, solve_batch
     from .models import SiteLoads
-    
+
     # Generate test projects
     site = SiteLoads(wind_speed_mph=115.0, exposure="C")
     configs = [
@@ -232,16 +230,16 @@ def benchmark_scale_test(
         )
         for i in range(n_projects)
     ]
-    
+
     start = time.perf_counter()
     results = solve_batch(configs, n_workers=n_workers)
     elapsed = time.perf_counter() - start
-    
+
     successful = sum(1 for r in results if r["error"] is None)
     failed = len(results) - successful
-    
+
     throughput = n_projects / elapsed if elapsed > 0 else 0.0
-    
+
     return {
         "n_projects": n_projects,
         "elapsed_seconds": round(elapsed, 2),

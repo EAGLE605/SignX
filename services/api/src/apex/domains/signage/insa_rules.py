@@ -1,5 +1,4 @@
-"""
-INSA Symbolic Rules for Sign Manufacturing
+"""INSA Symbolic Rules for Sign Manufacturing
 
 Encodes engineering standards, manufacturing constraints, and domain knowledge
 as symbolic rules for the INSA reasoning engine.
@@ -19,7 +18,6 @@ from insa_core import INSAKnowledgeBase, SymbolicRule
 
 def add_aisc_rules(kb: INSAKnowledgeBase) -> None:
     """Add AISC 360-22 structural steel design rules."""
-
     # ===== Base Plate Design (AISC 360-22 Chapter J) =====
 
     kb.add_rule(SymbolicRule(
@@ -56,7 +54,7 @@ def add_aisc_rules(kb: INSAKnowledgeBase) -> None:
             "(context.get('material_thickness_in', 0) <= 0.25 and context.get('weld_size_in', 0) >= 0.125) or " # noqa: E501
             "(context.get('material_thickness_in', 0) <= 0.5 and context.get('weld_size_in', 0) >= 0.1875) or " # noqa: E501
             "(context.get('material_thickness_in', 0) <= 0.75 and context.get('weld_size_in', 0) >= 0.25) or " # noqa: E501
-            "(context.get('weld_size_in', 0) >= 0.3125)" # noqa: E501
+            "(context.get('weld_size_in', 0) >= 0.3125)"
         ),
         hard_constraint=True,
         source="aisc_360_22_table_j2_4",
@@ -104,7 +102,6 @@ def add_aisc_rules(kb: INSAKnowledgeBase) -> None:
 
 def add_asce_rules(kb: INSAKnowledgeBase) -> None:
     """Add ASCE 7-22 wind and seismic load rules."""
-
     # ===== Wind Load Requirements =====
 
     kb.add_rule(SymbolicRule(
@@ -166,7 +163,6 @@ def add_asce_rules(kb: INSAKnowledgeBase) -> None:
 
 def add_aws_welding_rules(kb: INSAKnowledgeBase) -> None:
     """Add AWS D1.1 structural welding code rules."""
-
     kb.add_rule(SymbolicRule(
         name="aws_welder_certification_required",
         description="AWS D1.1: Welders must be certified for structural welding",
@@ -218,7 +214,6 @@ def add_aws_welding_rules(kb: INSAKnowledgeBase) -> None:
 
 def add_ibc_rules(kb: INSAKnowledgeBase) -> None:
     """Add IBC 2024 building code rules for sign structures."""
-
     kb.add_rule(SymbolicRule(
         name="ibc_permit_required",
         description="IBC 2024: Building permit required for permanent signs",
@@ -258,7 +253,6 @@ def add_ibc_rules(kb: INSAKnowledgeBase) -> None:
 
 def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     """Add manufacturing process and sequencing rules."""
-
     # ===== Process Sequencing =====
 
     kb.add_rule(SymbolicRule(
@@ -266,7 +260,7 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
         description="Manufacturing: All cutting must complete before welding operations",
         condition=(
             "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'cut') or " # noqa: E501
-            "not any(op.get('type') == 'weld' for op in context.get('operations', []))" # noqa: E501
+            "not any(op.get('type') == 'weld' for op in context.get('operations', []))"
         ),
         hard_constraint=True,
         source="manufacturing_logic",
@@ -278,7 +272,7 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
         description="Manufacturing: Welding must complete before painting/coating",
         condition=(
             "all(op.get('status') == 'completed' for op in context.get('operations', []) if op.get('type') == 'weld') or " # noqa: E501
-            "not any(op.get('type') == 'paint' for op in context.get('operations', []))" # noqa: E501
+            "not any(op.get('type') == 'paint' for op in context.get('operations', []))"
         ),
         hard_constraint=True,
         source="manufacturing_logic",
@@ -393,7 +387,6 @@ def add_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
 
 def add_vitra_integration_rules(kb: INSAKnowledgeBase) -> None:
     """Add rules for VITRA vision AI integration."""
-
     kb.add_rule(SymbolicRule(
         name="vitra_quality_threshold",
         description="VITRA: Component must pass quality inspection (score ≥ 85/100)",

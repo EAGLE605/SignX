@@ -28,20 +28,20 @@ async def get_task_status(
     """
     logger.info("task.status", task_id=task_id)
     assumptions: list[str] = []
-    
+
     celery = get_celery_client()
-    
+
     try:
         result = celery.AsyncResult(task_id)
-        
+
         # Get task state and result
         state = result.state
-        
+
         response_data: dict[str, Any] = {
             "task_id": task_id,
             "state": state,
         }
-        
+
         if state == "SUCCESS":
             response_data["result"] = result.get()
             confidence = 0.95
@@ -61,7 +61,7 @@ async def get_task_status(
         else:
             confidence = 0.8
             response_data["info"] = result.info
-        
+
         return make_envelope(
             result=response_data,
             assumptions=assumptions,
@@ -72,12 +72,12 @@ async def get_task_status(
             code_version=get_code_version(),
             model_config=get_model_config(),
         )
-        
+
     except Exception as e:
         logger.error("task.status.error", task_id=task_id, error=str(e))
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get task status: {str(e)}"
+            detail=f"Failed to get task status: {e!s}",
         )
 
 
@@ -91,26 +91,26 @@ async def cancel_task(
     """
     logger.info("task.cancel", task_id=task_id)
     assumptions: list[str] = []
-    
+
     celery = get_celery_client()
-    
+
     try:
         result = celery.AsyncResult(task_id)
-        
+
         # Check current state
         state = result.state
-        
+
         if state in ["SUCCESS", "FAILURE", "REVOKED"]:
             raise HTTPException(
                 status_code=400,
-                detail=f"Cannot cancel task in {state} state"
+                detail=f"Cannot cancel task in {state} state",
             )
-        
+
         # Revoke the task
         celery.control.revoke(task_id, terminate=True)
-        
+
         assumptions.append(f"Task cancelled from {state} state")
-        
+
         return make_envelope(
             result={
                 "task_id": task_id,
@@ -125,13 +125,13 @@ async def cancel_task(
             code_version=get_code_version(),
             model_config=get_model_config(),
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error("task.cancel.error", task_id=task_id, error=str(e))
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to cancel task: {str(e)}"
+            detail=f"Failed to cancel task: {e!s}",
         )
 

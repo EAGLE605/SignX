@@ -1,5 +1,4 @@
-"""
-INSA: Integrated Neuro-Symbolic Architecture for Sign Manufacturing
+"""INSA: Integrated Neuro-Symbolic Architecture for Sign Manufacturing
 
 Core implementation combining symbolic reasoning (hard constraints, engineering rules)
 with neural learning (pattern recognition, adaptation) in a unified knowledge structure.
@@ -32,6 +31,7 @@ logger = structlog.get_logger(__name__)
 
 class EntityType(str, Enum):
     """Entity types in manufacturing knowledge graph."""
+
     JOB = "job"
     OPERATION = "operation"
     MACHINE = "machine"
@@ -43,6 +43,7 @@ class EntityType(str, Enum):
 
 class RelationType(str, Enum):
     """Relationship types in knowledge graph."""
+
     PRECEDES = "precedes"  # Operation A must happen before B
     REQUIRES = "requires"  # Job requires material/machine
     ASSIGNED_TO = "assigned_to"  # Operation assigned to machine
@@ -54,6 +55,7 @@ class RelationType(str, Enum):
 @dataclass
 class SymbolicRule:
     """Symbolic constraint or rule (System 2)."""
+
     name: str
     description: str
     condition: str  # Python expression or logic formula
@@ -83,6 +85,7 @@ class SymbolicRule:
 @dataclass
 class NeuralEmbedding:
     """Neural representation of entity (System 1)."""
+
     entity_id: str
     entity_type: EntityType
     embedding_vector: list[float] = field(default_factory=list)  # Learned representation
@@ -111,6 +114,7 @@ class NeuralEmbedding:
 @dataclass
 class KnowledgeNode:
     """Unified node in INSA knowledge graph (combines symbolic + neural)."""
+
     node_id: str
     entity_type: EntityType
     attributes: dict[str, Any] = field(default_factory=dict)  # Symbolic properties
@@ -216,8 +220,7 @@ class INSAKnowledgeBase:
         relation_type: RelationType,
         max_depth: int = 10,
     ) -> set[str]:
-        """
-        Propagate constraints through graph relationships.
+        """Propagate constraints through graph relationships.
 
         Used for precedence chains, dependency analysis.
         """
@@ -257,11 +260,11 @@ class SymbolicReasoner:
         context: dict[str, Any],
         hard_only: bool = True,
     ) -> tuple[bool, list[str]]:
-        """
-        Verify all constraints are satisfied.
+        """Verify all constraints are satisfied.
 
         Returns:
             (all_satisfied, violated_rule_names)
+
         """
         rules = self.kb.get_applicable_rules(hard_only=hard_only)
         violations = []
@@ -283,8 +286,7 @@ class SymbolicReasoner:
         initial_facts: dict[str, Any],
         max_iterations: int = 100,
     ) -> dict[str, Any]:
-        """
-        Forward chaining inference to derive new facts.
+        """Forward chaining inference to derive new facts.
 
         Used for planning, what-if analysis.
         """
@@ -313,8 +315,7 @@ class SymbolicReasoner:
         decision: str,
         context: dict[str, Any],
     ) -> list[str]:
-        """
-        Generate explanation for a decision.
+        """Generate explanation for a decision.
 
         Returns reasoning trace with applied rules.
         """
@@ -325,7 +326,7 @@ class SymbolicReasoner:
             if rule.evaluate(context):
                 explanation.append(
                     f"✓ {rule.name}: {rule.description} "
-                    f"[{'HARD' if rule.hard_constraint else 'SOFT'}]"
+                    f"[{'HARD' if rule.hard_constraint else 'SOFT'}]",
                 )
 
         return explanation
@@ -342,11 +343,11 @@ class NeuralReasoner:
         job_id: str,
         top_k: int = 3,
     ) -> list[tuple[str, float, dict[str, Any]]]:
-        """
-        Find similar historical jobs using neural embeddings.
+        """Find similar historical jobs using neural embeddings.
 
         Returns:
             [(job_id, similarity, attributes)]
+
         """
         similar = self.kb.query_similar(job_id, EntityType.JOB, top_k=top_k)
 
@@ -363,11 +364,11 @@ class NeuralReasoner:
         operation_type: str,
         context: dict[str, Any],
     ) -> tuple[float, float]:
-        """
-        Estimate operation duration using neural model.
+        """Estimate operation duration using neural model.
 
         Returns:
             (estimated_duration, confidence)
+
         """
         # TODO: Replace with actual trained model
         # For now, use simple heuristics
@@ -392,11 +393,11 @@ class NeuralReasoner:
         worker_id: str,
         machine_id: str,
     ) -> tuple[float, str]:
-        """
-        Predict quality risk for operation assignment.
+        """Predict quality risk for operation assignment.
 
         Returns:
             (risk_score_0_to_1, explanation)
+
         """
         # TODO: Integrate with VITRA quality data
         # For now, mock prediction
@@ -408,8 +409,7 @@ class NeuralReasoner:
 
 
 class HybridScheduler:
-    """
-    INSA Hybrid Scheduler - combines symbolic and neural reasoning.
+    """INSA Hybrid Scheduler - combines symbolic and neural reasoning.
 
     Architecture:
     1. Neural suggests initial schedule (fast heuristic)
@@ -428,14 +428,14 @@ class HybridScheduler:
         jobs: list[dict[str, Any]],
         max_iterations: int = 10,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-        """
-        Generate optimal schedule using hybrid reasoning.
+        """Generate optimal schedule using hybrid reasoning.
 
         Returns:
             (schedule, metadata) where metadata includes:
             - reasoning_trace: explanation of decisions
             - confidence: overall confidence
             - constraint_satisfaction: bool
+
         """
         start_time = time.time()
 
@@ -615,7 +615,6 @@ def create_signx_knowledge_base() -> INSAKnowledgeBase:
 
 def _add_core_manufacturing_rules(kb: INSAKnowledgeBase) -> None:
     """Add core manufacturing constraint rules."""
-
     # Precedence constraints
     kb.add_rule(SymbolicRule(
         name="cut_before_weld",

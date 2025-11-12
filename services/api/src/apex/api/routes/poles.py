@@ -66,7 +66,7 @@ async def pole_options(req: dict) -> ResponseEnvelope:
     """
     logger.info("poles.options", family=req.get("prefs", {}).get("family"))
     assumptions: list[str] = []
-    
+
     num_poles = int(req.get("num_poles", 1))
     material = req.get("material", "steel")
     height_ft = float(req.get("height_ft", 0.0))
@@ -75,22 +75,22 @@ async def pole_options(req: dict) -> ResponseEnvelope:
     prefs = req.get("prefs", {})
     family_order = prefs.get("family", ["pipe", "tube", "W"])
     sort_by = prefs.get("sort_by", "weight")  # weight, modulus, size
-    
+
     # Material lock validation
     if material == "aluminum" and height_ft > 15.0:
         raise HTTPException(
             status_code=422,
-            detail="Aluminum supports limited to 15 ft height per industry practice"
+            detail="Aluminum supports limited to 15 ft height per industry practice",
         )
-    
+
     add_assumption(assumptions, f"Material: {material}, num_poles: {num_poles}, Mu_per_pole={Mu_required_kipin:.1f} kip-in")
-    
+
     # Load catalogs
     catalog = catalogs_for_order(family_order)
-    
+
     # Pre-filter by strength
     feasible = [s for s in catalog if _check_section_strength(s, Mu_required_kipin)]
-    
+
     if not feasible:
         add_assumption(assumptions, "No feasible sections found for given loads")
         confidence = calc_confidence(assumptions)
@@ -102,7 +102,7 @@ async def pole_options(req: dict) -> ResponseEnvelope:
             intermediates={"catalog_size": len(catalog)},
             outputs={"feasible_count": 0},
         )
-    
+
     # Sort by preference
     if sort_by == "modulus":
         feasible.sort(key=lambda s: s.Sx_in3, reverse=True)
@@ -110,7 +110,7 @@ async def pole_options(req: dict) -> ResponseEnvelope:
         feasible.sort(key=lambda s: s.weight_lbf, reverse=True)
     else:  # weight (default - "value engineered")
         feasible.sort(key=lambda s: s.weight_lbf)
-    
+
     # Format results (rounding handled by make_envelope)
     options = [
         {
@@ -123,16 +123,16 @@ async def pole_options(req: dict) -> ResponseEnvelope:
         }
         for s in feasible
     ]
-    
+
     result = {
         "options": options,
         "recommended": options[0] if options else None,
         "feasible_count": len(feasible),
     }
-    
+
     add_assumption(assumptions, f"Filtered {len(feasible)}/{len(catalog)} sections by strength")
     confidence = calc_confidence(assumptions)
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

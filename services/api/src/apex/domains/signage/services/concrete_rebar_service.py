@@ -1,5 +1,4 @@
-"""
-Concrete and Rebar Design Service - ACI 318-19 Implementation
+"""Concrete and Rebar Design Service - ACI 318-19 Implementation
 
 Provides rebar detailing, development lengths, and concrete volume calculations
 for sign structure foundations with complete material takeoff for cost estimation.
@@ -29,6 +28,7 @@ logger = structlog.get_logger(__name__)
 
 class RebarSize(str, Enum):
     """Standard rebar sizes per ASTM A615."""
+
     NO3 = "#3"    # 0.375" diameter
     NO4 = "#4"    # 0.500" diameter
     NO5 = "#5"    # 0.625" diameter
@@ -42,6 +42,7 @@ class RebarSize(str, Enum):
 
 class ConcreteGrade(str, Enum):
     """Standard concrete compressive strengths."""
+
     FC_2500 = "2500"  # 2500 psi (residential)
     FC_3000 = "3000"  # 3000 psi (typical)
     FC_4000 = "4000"  # 4000 psi (commercial)
@@ -50,6 +51,7 @@ class ConcreteGrade(str, Enum):
 
 class FoundationType(str, Enum):
     """Foundation types for sign structures."""
+
     DIRECT_BURIAL = "direct_burial"      # Pole embedded in concrete
     DRILLED_PIER = "drilled_pier"        # Cylindrical pier
     SPREAD_FOOTING = "spread_footing"    # Rectangular footing with base plate
@@ -74,7 +76,7 @@ class RebarScheduleInput(BaseModel):
 
     foundation_type: FoundationType = Field(
         default=FoundationType.DIRECT_BURIAL,
-        description="Type of foundation"
+        description="Type of foundation",
     )
 
     # Foundation geometry
@@ -91,25 +93,25 @@ class RebarScheduleInput(BaseModel):
         default=3.0,
         gt=0,
         le=10,
-        description="Concrete compressive strength (ksi)"
+        description="Concrete compressive strength (ksi)",
     )
     fy_ksi: float = Field(
         default=60.0,
         gt=0,
         le=100,
-        description="Rebar yield strength (ksi)"
+        description="Rebar yield strength (ksi)",
     )
 
     # Design preferences
     min_rebar_size: RebarSize = Field(
         default=RebarSize.NO4,
-        description="Minimum rebar size"
+        description="Minimum rebar size",
     )
     cover_in: float = Field(
         default=3.0,
         ge=1.5,
         le=6,
-        description="Concrete cover (in)"
+        description="Concrete cover (in)",
     )
 
 
@@ -198,8 +200,7 @@ class DevelopmentLengthResult(BaseModel):
 # ============================================================================
 
 class ConcreteRebarService:
-    """
-    ACI 318-19 Concrete and Rebar Design Service.
+    """ACI 318-19 Concrete and Rebar Design Service.
 
     Provides deterministic rebar schedules, development lengths, and
     concrete volume calculations for sign structure foundations.
@@ -223,14 +224,15 @@ class ConcreteRebarService:
         ... )
         >>> print(f"Concrete: {schedule.concrete_cy_to_order:.2f} CY")
         Concrete: 2.34 CY
+
     """
 
     def __init__(self, code_version: str = "ACI318-19"):
-        """
-        Initialize concrete/rebar service.
+        """Initialize concrete/rebar service.
 
         Args:
             code_version: Code version string for traceability
+
         """
         self.code_version = code_version
         logger.info("concrete_rebar_service.initialized", code_version=code_version)
@@ -243,8 +245,7 @@ class ConcreteRebarService:
         coated: bool = False,
         top_bar: bool = False,
     ) -> DevelopmentLengthResult:
-        """
-        Calculate tension development length per ACI 318-19 Section 25.4.2.
+        """Calculate tension development length per ACI 318-19 Section 25.4.2.
 
         Implements: ld = (fy * ψt * ψe * ψs) / (25 * λ * √fc) * db
 
@@ -261,6 +262,7 @@ class ConcreteRebarService:
         References:
             - ACI 318-19 Section 25.4.2: Development of Deformed Bars in Tension
             - ACI 318-19 Table 25.4.2.4: Modification Factors
+
         """
         # Get bar properties
         props = REBAR_PROPERTIES[bar_size]
@@ -322,8 +324,7 @@ class ConcreteRebarService:
         thickness_ft: float | None = None,
         waste_factor: float = 1.10,
     ) -> ConcreteVolume:
-        """
-        Calculate concrete volume for foundation.
+        """Calculate concrete volume for foundation.
 
         Args:
             foundation_type: Type of foundation
@@ -339,6 +340,7 @@ class ConcreteRebarService:
 
         Raises:
             ValidationError: If required dimensions missing
+
         """
         # Calculate volume based on foundation type
         if foundation_type in {FoundationType.DIRECT_BURIAL, FoundationType.DRILLED_PIER}:
@@ -393,8 +395,7 @@ class ConcreteRebarService:
         self,
         input_data: RebarScheduleInput,
     ) -> RebarScheduleResult:
-        """
-        Design complete rebar schedule for foundation with material takeoff.
+        """Design complete rebar schedule for foundation with material takeoff.
 
         This is the main method for generating construction-ready rebar details
         and material quantities for cost estimation.
@@ -408,6 +409,7 @@ class ConcreteRebarService:
         References:
             - ACI 318-19 Section 13.3: Drilled Piers
             - ACI 318-19 Section 25.4: Development of Reinforcement
+
         """
         # Calculate development length for typical vertical bar
         dev_length = self.calculate_development_length(
@@ -494,8 +496,7 @@ class ConcreteRebarService:
         min_size: RebarSize,
         cover_in: float,
     ) -> tuple[list[RebarBar], list[RebarBar]]:
-        """
-        Design rebar for cylindrical direct burial or drilled pier.
+        """Design rebar for cylindrical direct burial or drilled pier.
 
         Per ACI 318-19 Section 13.3, drilled piers require:
         - Minimum 6 vertical bars (or 0.5% of gross area)
@@ -515,7 +516,7 @@ class ConcreteRebarService:
                 length_ft=vertical_length_ft,
                 spacing_in=None,
                 location="Vertical reinforcement, equally spaced around perimeter",
-            )
+            ),
         ]
 
         # Spiral or ties (use spiral for simplicity)
@@ -534,8 +535,8 @@ class ConcreteRebarService:
                 quantity=num_spirals,
                 length_ft=spiral_length_ft,
                 spacing_in=spiral_spacing_in,
-                location=f"Spiral @ {spiral_spacing_in}\" o.c.",
-            )
+                location=f'Spiral @ {spiral_spacing_in}" o.c.',
+            ),
         ]
 
         return vertical_bars, horizontal_bars
@@ -548,8 +549,7 @@ class ConcreteRebarService:
         min_size: RebarSize,
         cover_in: float,
     ) -> tuple[list[RebarBar], list[RebarBar]]:
-        """
-        Design rebar for spread footing.
+        """Design rebar for spread footing.
 
         Per ACI 318-19 Section 13.2, spread footings require:
         - Bottom reinforcement in both directions
@@ -583,7 +583,7 @@ class ConcreteRebarService:
                 quantity=num_bars_width,
                 length_ft=bar_length_width,
                 spacing_in=spacing_width_in,
-                location=f"Bottom mat, parallel to width @ {spacing_width_in:.1f}\" o.c.",
+                location=f'Bottom mat, parallel to width @ {spacing_width_in:.1f}" o.c.',
             ),
             RebarBar(
                 mark="B2",
@@ -591,7 +591,7 @@ class ConcreteRebarService:
                 quantity=num_bars_length,
                 length_ft=bar_length_length,
                 spacing_in=spacing_length_in,
-                location=f"Bottom mat, parallel to length @ {spacing_length_in:.1f}\" o.c.",
+                location=f'Bottom mat, parallel to length @ {spacing_length_in:.1f}" o.c.',
             ),
         ]
 

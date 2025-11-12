@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Batch Processing
+"""APEX Signage Engineering - Batch Processing
 
 Parallel processing for multiple project configurations.
 """
@@ -17,7 +16,7 @@ from .models import Cabinet, SiteLoads
 
 class ProjectConfig:
     """Configuration for a single project in batch."""
-    
+
     def __init__(
         self,
         project_id: str,
@@ -32,18 +31,18 @@ class ProjectConfig:
 
 
 def _solve_single_project(config: ProjectConfig) -> dict[str, Any]:
-    """
-    Solve a single project (used in multiprocessing).
+    """Solve a single project (used in multiprocessing).
     
     Args:
         config: Project configuration
     
     Returns:
         Dict with project_id, result, error (if any)
+
     """
     try:
         from .solvers import derive_loads
-        
+
         # Convert dicts to Cabinet objects
         cabinet_objs = [
             Cabinet(
@@ -54,10 +53,10 @@ def _solve_single_project(config: ProjectConfig) -> dict[str, Any]:
             )
             for c in config.cabinets
         ]
-        
+
         # Derive loads
         result = derive_loads(config.site, cabinet_objs, config.height_ft, seed=0)
-        
+
         return {
             "project_id": config.project_id,
             "result": {
@@ -81,8 +80,7 @@ def solve_batch(
     progress_callback: Callable[[int, int, int], None] | None = None,
     n_workers: int | None = None,
 ) -> list[dict[str, Any]]:
-    """
-    Solve multiple projects in parallel.
+    """Solve multiple projects in parallel.
     
     Args:
         projects: List of project configurations
@@ -93,38 +91,39 @@ def solve_batch(
         List of results (one per project)
     
     Target: Process 100 projects in <10s
+
     """
     n_workers = n_workers or min(multiprocessing.cpu_count(), 8)  # Cap at 8 workers
-    
+
     if len(projects) == 0:
         return []
-    
+
     if len(projects) == 1:
         # Single project, no need for multiprocessing
         result = _solve_single_project(projects[0])
         if progress_callback:
             progress_callback(1, 1, 0 if result["error"] is None else 1)
         return [result]
-    
+
     # Use multiprocessing pool
     with multiprocessing.Pool(processes=n_workers) as pool:
         results = []
         completed = 0
         failed = 0
-        
+
         # Process in batches to allow progress updates
         batch_size = max(10, len(projects) // 10)  # 10 batches
-        
+
         for i in range(0, len(projects), batch_size):
             batch = projects[i : i + batch_size]
             batch_results = pool.map(_solve_single_project, batch)
-            
+
             results.extend(batch_results)
             completed += len(batch_results)
             failed += sum(1 for r in batch_results if r["error"] is not None)
-            
+
             if progress_callback:
                 progress_callback(len(projects), completed, failed)
-    
+
     return results
 

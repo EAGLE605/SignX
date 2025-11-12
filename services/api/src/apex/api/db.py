@@ -54,7 +54,7 @@ class Project(Base):
     constants_version: Mapped[str_255 | None] = mapped_column(String(500), nullable=True)  # Tracks pack versions used
     content_sha256: Mapped[str_255 | None] = mapped_column(String(64), nullable=True)  # Deterministic caching key
     confidence: Mapped[float | None] = mapped_column(sa.Float, nullable=True)  # Last confidence score
-    
+
     # Relationships (eager loading for performance)
     payloads: Mapped[list[ProjectPayload]] = relationship(
         "ProjectPayload",
@@ -84,7 +84,7 @@ class ProjectPayload(Base):
     cost_snapshot: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     sha256: Mapped[str_255 | None] = mapped_column(String(64), nullable=True, index=True)  # Deterministic snapshot hash
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=sa.func.now())
-    
+
     # Relationships
     project: Mapped[Project] = relationship("Project", back_populates="payloads")
 
@@ -100,7 +100,7 @@ class ProjectEvent(Base):
     actor: Mapped[str_255]
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=sa.func.now(), index=True)
     data: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
-    
+
     # Relationships
     project: Mapped[Project] = relationship("Project", back_populates="events")
 

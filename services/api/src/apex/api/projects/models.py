@@ -32,7 +32,7 @@ class ProjectMeta(BaseModel):
     site_name: str | None = Field(None, description="Site name")
     street: str | None = Field(None, description="Street address")
     status: Literal["draft", "estimating", "submitted", "accepted", "rejected"] = Field(
-        "draft", description="Project status"
+        "draft", description="Project status",
     )
     created_by: str = Field(..., description="Creator user ID")
     updated_by: str = Field(..., description="Last updater user ID")

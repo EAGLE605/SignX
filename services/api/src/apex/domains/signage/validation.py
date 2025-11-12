@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Real-World Validation & Calibration
+"""APEX Signage Engineering - Real-World Validation & Calibration
 
 Compare solver predictions against field data and auto-tune parameters.
 """
@@ -18,13 +17,13 @@ from scipy import optimize
 
 class FieldDataValidator:
     """Validates solver predictions against actual field installations."""
-    
+
     def __init__(self, field_data_path: Path | None = None):
-        """
-        Initialize validator with field data.
+        """Initialize validator with field data.
         
         Args:
             field_data_path: Path to CSV with historical project data
+
         """
         self.field_data: list[dict[str, Any]] = []
         if field_data_path and field_data_path.exists():
@@ -33,14 +32,13 @@ class FieldDataValidator:
                 self.field_data = df.to_dict("records")
             except Exception:
                 pass
-    
+
     def validate_against_field_data(
         self,
         predictions: list[dict[str, Any]],
         actuals: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """
-        Compare predictions vs actual installations.
+        """Compare predictions vs actual installations.
         
         Args:
             predictions: List of prediction dicts with {pole_height, footing_depth, cost}
@@ -48,9 +46,10 @@ class FieldDataValidator:
         
         Returns:
             Dict with RMSE, R², MAE, biases, recommendations
+
         """
         actuals = actuals or self.field_data
-        
+
         if len(predictions) == 0 or len(actuals) == 0:
             return {
                 "rmse": {},
@@ -59,36 +58,36 @@ class FieldDataValidator:
                 "biases": {},
                 "recommendations": ["No field data available"],
             }
-        
+
         # Extract metrics
         metrics = ["pole_height", "footing_depth", "cost"]
         results = {}
-        
+
         for metric in metrics:
             pred_values = [p.get(metric, 0.0) for p in predictions if metric in p]
             actual_values = [a.get(metric, 0.0) for a in actuals if metric in a]
-            
+
             if len(pred_values) != len(actual_values) or len(pred_values) == 0:
                 continue
-            
+
             pred_array = np.array(pred_values)
             actual_array = np.array(actual_values)
-            
+
             # RMSE
             rmse = np.sqrt(np.mean((pred_array - actual_array) ** 2))
-            
+
             # R²
             ss_res = np.sum((actual_array - pred_array) ** 2)
             ss_tot = np.sum((actual_array - np.mean(actual_array)) ** 2)
             r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
-            
+
             # MAE
             mae = np.mean(np.abs(pred_array - actual_array))
-            
+
             # Bias (systematic error)
             bias = np.mean(pred_array - actual_array)
             bias_pct = (bias / np.mean(actual_array)) * 100.0 if np.mean(actual_array) > 0 else 0.0
-            
+
             results[metric] = {
                 "rmse": round(rmse, 2),
                 "rmse_pct": round((rmse / np.mean(actual_array)) * 100.0, 1) if np.mean(actual_array) > 0 else 0.0,
@@ -97,39 +96,39 @@ class FieldDataValidator:
                 "bias": round(bias, 2),
                 "bias_pct": round(bias_pct, 1),
             }
-        
+
         # Identify systematic biases
         biases = {}
         recommendations = []
-        
+
         for metric, stats_dict in results.items():
             if abs(stats_dict["bias_pct"]) > 5.0:  # >5% bias
                 biases[metric] = {
                     "direction": "overestimate" if stats_dict["bias"] > 0 else "underestimate",
                     "magnitude_pct": stats_dict["bias_pct"],
                 }
-                
+
                 if metric == "footing_depth" and stats_dict["bias"] > 0:
                     recommendations.append(
                         f"Systematically overestimating footing depth by {stats_dict['bias_pct']:.1f}%. "
-                        "Consider reducing soil bearing multiplier or calibration constant K."
+                        "Consider reducing soil bearing multiplier or calibration constant K.",
                     )
                 elif metric == "pole_height" and abs(stats_dict["bias_pct"]) > 10.0:
                     recommendations.append(
                         f"Pole height prediction bias: {stats_dict['bias_pct']:.1f}%. "
-                        "Review wind load factors or exposure category assumptions."
+                        "Review wind load factors or exposure category assumptions.",
                     )
-        
+
         # Overall assessment
         target_rmse_pct = 10.0  # Target <10% RMSE
         all_rmse_ok = all(stats["rmse_pct"] < target_rmse_pct for stats in results.values())
-        
+
         if not all_rmse_ok:
             recommendations.append(
                 f"RMSE exceeds {target_rmse_pct}% target for some metrics. "
-                "Consider retraining ML models or adjusting solver parameters."
+                "Consider retraining ML models or adjusting solver parameters.",
             )
-        
+
         return {
             "rmse": {k: v["rmse"] for k, v in results.items()},
             "rmse_pct": {k: v["rmse_pct"] for k, v in results.items()},
@@ -146,7 +145,7 @@ class FieldDataValidator:
 
 class SolverParameterTuner:
     """Auto-tune solver parameters based on field performance."""
-    
+
     def __init__(self):
         """Initialize tuner with default parameters."""
         self.current_params = {
@@ -155,14 +154,13 @@ class SolverParameterTuner:
             "safety_factor_base": 2.0,
             "wind_load_factor": 1.6,
         }
-    
+
     def tune_parameters(
         self,
         field_data: list[dict[str, Any]],
         objective: str = "minimize_error",
     ) -> dict[str, float]:
-        """
-        Auto-tune parameters to minimize prediction error.
+        """Auto-tune parameters to minimize prediction error.
         
         Args:
             field_data: List of {predicted, actual, inputs} dicts
@@ -170,30 +168,31 @@ class SolverParameterTuner:
         
         Returns:
             Dict of tuned parameter values
+
         """
         if len(field_data) < 10:
             return self.current_params  # Not enough data
-        
+
         def objective_function(params: np.ndarray) -> float:
             """Minimize prediction error."""
             k, soil_mult = params
-            
+
             errors = []
             for record in field_data:
                 # Simplified: adjust predicted based on params
                 predicted_adj = record.get("predicted_depth", 0.0) * k * soil_mult
                 actual = record.get("actual_depth", 0.0)
-                
+
                 if actual > 0:
                     error = abs(predicted_adj - actual) / actual
                     errors.append(error)
-            
+
             return np.mean(errors) if errors else 1000.0
-        
+
         # Optimize calibration constant K and soil multiplier
         initial_guess = [self.current_params["footing_calibration_k"], self.current_params["soil_bearing_multiplier"]]
         bounds = [(0.5, 2.0), (0.8, 1.5)]  # Reasonable bounds
-        
+
         try:
             result = optimize.minimize(
                 objective_function,
@@ -202,29 +201,28 @@ class SolverParameterTuner:
                 bounds=bounds,
                 options={"maxiter": 50},
             )
-            
+
             if result.success:
                 self.current_params["footing_calibration_k"] = round(result.x[0], 3)
                 self.current_params["soil_bearing_multiplier"] = round(result.x[1], 3)
         except Exception:
             pass  # Keep defaults if optimization fails
-        
+
         return self.current_params
-    
+
     def validate_safety(self, tuned_params: dict[str, float]) -> bool:
-        """
-        Validate that tuned parameters maintain safety.
+        """Validate that tuned parameters maintain safety.
         
         Returns False if parameters reduce safety factors below minimums.
         """
         # Ensure safety factors don't decrease too much
         if tuned_params.get("safety_factor_base", 2.0) < 1.5:
             return False
-        
+
         # Ensure calibration doesn't reduce capacity
         if tuned_params.get("soil_bearing_multiplier", 1.0) < 0.8:
             return False
-        
+
         return True
 
 
@@ -236,8 +234,7 @@ def generate_validation_report(
     output_path: Path,
     field_data: list[dict[str, Any]] | None = None,
 ) -> Path:
-    """
-    Generate PDF validation report with scatter plots and statistics.
+    """Generate PDF validation report with scatter plots and statistics.
     
     Args:
         validation_results: Results from validate_against_field_data()
@@ -246,9 +243,10 @@ def generate_validation_report(
     
     Returns:
         Path to generated PDF
+
     """
     from weasyprint import HTML
-    
+
     # Generate scatter plots
     html_content = """
     <!DOCTYPE html>
@@ -276,7 +274,7 @@ def generate_validation_report(
                 <th>Bias (%)</th>
             </tr>
     """
-    
+
     for metric in ["pole_height", "footing_depth", "cost"]:
         if metric in validation_results.get("rmse", {}):
             stats = {
@@ -294,39 +292,39 @@ def generate_validation_report(
                 <td>{stats['bias_pct']:.1f}</td>
             </tr>
             """
-    
+
     html_content += """
         </table>
         
         <h2>Recommendations</h2>
         <ul>
     """
-    
+
     for rec in validation_results.get("recommendations", []):
         html_content += f"<li>{rec}</li>"
-    
+
     html_content += """
         </ul>
         
         <h2>Assessment</h2>
         <p>
     """
-    
+
     if validation_results.get("meets_target", False):
         html_content += "✅ Validation PASSED: All metrics meet <10% RMSE target."
     else:
         html_content += "⚠️ Validation FAILED: Some metrics exceed <10% RMSE target. Parameter tuning recommended."
-    
+
     html_content += """
         </p>
     </body>
     </html>
     """
-    
+
     # Generate PDF
     pdf_bytes = HTML(string=html_content).write_pdf()
     output_path.write_bytes(pdf_bytes)
-    
+
     return output_path
 
 
@@ -337,8 +335,7 @@ def validate_against_field_data(
     predictions: list[dict[str, Any]],
     field_data_path: Path | None = None,
 ) -> dict[str, Any]:
-    """
-    Convenience function to validate predictions.
+    """Convenience function to validate predictions.
     
     Args:
         predictions: List of prediction dicts
@@ -346,6 +343,7 @@ def validate_against_field_data(
     
     Returns:
         Validation results dict
+
     """
     validator = FieldDataValidator(field_data_path)
     return validator.validate_against_field_data(predictions)
@@ -355,8 +353,7 @@ def auto_tune_parameters(
     field_data_path: Path,
     objective: str = "minimize_error",
 ) -> dict[str, float]:
-    """
-    Auto-tune solver parameters from field data.
+    """Auto-tune solver parameters from field data.
     
     Args:
         field_data_path: Path to CSV with field data
@@ -364,9 +361,10 @@ def auto_tune_parameters(
     
     Returns:
         Tuned parameter dict
+
     """
     tuner = SolverParameterTuner()
-    
+
     if field_data_path.exists():
         try:
             df = pd.read_csv(field_data_path)
@@ -374,6 +372,6 @@ def auto_tune_parameters(
             return tuner.tune_parameters(field_data, objective)
         except Exception:
             pass
-    
+
     return tuner.current_params
 

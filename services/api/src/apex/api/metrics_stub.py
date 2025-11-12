@@ -1,5 +1,4 @@
-"""
-Transaction Metrics Stub - REPL for metric implementation.
+"""Transaction Metrics Stub - REPL for metric implementation.
 
 This module defines transaction metrics to be implemented.
 Import and use in transaction decorators/context managers.

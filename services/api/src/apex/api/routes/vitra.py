@@ -1,5 +1,4 @@
-"""
-VITRA Vision Analysis API Endpoints
+"""VITRA Vision Analysis API Endpoints
 
 Provides 5 core vision capabilities:
 1. Sign Inspection - Automated damage/condition assessment
@@ -60,8 +59,7 @@ async def create_vision_inspection(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
-    """
-    Create new vision-based sign inspection.
+    """Create new vision-based sign inspection.
 
     Upload images or videos of installed signs for automated structural assessment,
     damage detection, and maintenance recommendations.
@@ -170,8 +168,7 @@ async def create_installation_video_analysis(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
-    """
-    Analyze installation process video.
+    """Analyze installation process video.
 
     Upload installation videos for automated procedure validation, safety monitoring,
     and quality control documentation.
@@ -250,8 +247,7 @@ async def create_component_recognition(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
-    """
-    Recognize and validate components from image.
+    """Recognize and validate components from image.
 
     Upload photos of fabricated components for automated identification,
     dimension verification, and BOM validation.
@@ -331,8 +327,7 @@ async def create_ar_design_review(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
-    """
-    AR-assisted design review on site photo.
+    """AR-assisted design review on site photo.
 
     Upload site photos to overlay proposed sign designs and assess feasibility,
     clearances, visual impact, and site constraints.
@@ -418,8 +413,7 @@ async def create_robotic_fabrication_session(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ResponseEnvelope:
-    """
-    Generate VLA action sequence for robotic fabrication.
+    """Generate VLA action sequence for robotic fabrication.
 
     Request vision-language-action sequences for automated fabrication tasks
     including welding, assembly, cutting, and quality inspection.
@@ -526,8 +520,7 @@ async def upload_inspection_image(
     file: UploadFile = File(...),  # noqa: B008
     user_id: str = Depends(get_current_user_id),
 ) -> ResponseEnvelope:
-    """
-    Upload image for vision analysis.
+    """Upload image for vision analysis.
 
     Helper endpoint to upload images to object storage and get URL
     for use in other VITRA endpoints.

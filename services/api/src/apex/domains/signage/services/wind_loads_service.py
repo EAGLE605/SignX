@@ -1,5 +1,4 @@
-"""
-Wind Load Service - ASCE 7-22 Implementation
+"""Wind Load Service - ASCE 7-22 Implementation
 
 Complete refactored service demonstrating best practices:
 - Service layer pattern with dependency injection
@@ -41,6 +40,7 @@ logger = structlog.get_logger(__name__)
 
 class ExposureCategory(str, Enum):
     """Wind exposure categories per ASCE 7-22 Section 26.7."""
+
     B = "B"  # Urban/suburban (many obstructions)
     C = "C"  # Open terrain (most common)
     D = "D"  # Flat coastal areas
@@ -48,6 +48,7 @@ class ExposureCategory(str, Enum):
 
 class RiskCategory(str, Enum):
     """Risk categories per ASCE 7-22 Table 1.5-1."""
+
     I = "I"      # noqa: E741 - Roman numeral per ASCE 7-22
     II = "II"    # Normal (most buildings)
     III = "III"  # Substantial hazard
@@ -60,23 +61,23 @@ class WindLoadInput(BaseModel):
     wind_speed_mph: float = Field(
         ge=ASCE7_22_WIND_SPEED_MIN_MPH,
         le=300,  # Allow higher for special regions
-        description="Basic wind speed (3-second gust) per ASCE 7-22 Figure 26.5-1"
+        description="Basic wind speed (3-second gust) per ASCE 7-22 Figure 26.5-1",
     )
 
     height_ft: float = Field(
         gt=0,
         le=500,  # Reasonable limit for sign structures
-        description="Height above ground level (ft)"
+        description="Height above ground level (ft)",
     )
 
     exposure: ExposureCategory = Field(
         default=ExposureCategory.C,
-        description="Wind exposure category per ASCE 7-22 Section 26.7"
+        description="Wind exposure category per ASCE 7-22 Section 26.7",
     )
 
     risk_category: RiskCategory = Field(
         default=RiskCategory.II,
-        description="Risk category per ASCE 7-22 Table 1.5-1"
+        description="Risk category per ASCE 7-22 Table 1.5-1",
     )
 
     # Optional factors (defaults per ASCE 7-22)
@@ -84,24 +85,24 @@ class WindLoadInput(BaseModel):
         default=1.0,
         ge=1.0,
         le=2.0,
-        description="Topographic factor per Section 26.8 (1.0 for flat terrain)"
+        description="Topographic factor per Section 26.8 (1.0 for flat terrain)",
     )
 
     kd: float = Field(
         default=ASCE7_22_WIND_DIRECTIONALITY_SIGNS,
         ge=0.85,
         le=1.0,
-        description="Wind directionality factor per Table 26.6-1"
+        description="Wind directionality factor per Table 26.6-1",
     )
 
     ke: float = Field(
         default=1.0,
         ge=0.9,
         le=1.2,
-        description="Elevation factor per Section 26.9"
+        description="Elevation factor per Section 26.9",
     )
 
-    @field_validator('wind_speed_mph')
+    @field_validator("wind_speed_mph")
     @classmethod
     def validate_wind_speed(cls, v: float) -> float:
         """Validate wind speed is within ASCE 7-22 range."""
@@ -110,7 +111,7 @@ class WindLoadInput(BaseModel):
                 "wind.speed_exceeds_typical_range",
                 wind_speed_mph=v,
                 typical_max=ASCE7_22_WIND_SPEED_MAX_MPH,
-                message="Verify with local jurisdiction for special wind regions"
+                message="Verify with local jurisdiction for special wind regions",
             )
         return v
 
@@ -156,8 +157,7 @@ class WindForceResult(BaseModel):
 # ============================================================================
 
 class WindLoadService:
-    """
-    ASCE 7-22 Wind Load Service.
+    """ASCE 7-22 Wind Load Service.
 
     Provides deterministic, code-compliant wind load calculations
     with comprehensive validation and error handling.
@@ -181,14 +181,15 @@ class WindLoadService:
         ... )
         >>> print(f"qz = {result.qz_psf:.2f} psf")
         qz = 24.46 psf
+
     """
 
     def __init__(self, code_version: str = "ASCE7-22"):
-        """
-        Initialize wind load service.
+        """Initialize wind load service.
 
         Args:
             code_version: Code version string for traceability
+
         """
         self.code_version = code_version
         logger.info("wind_service.initialized", code_version=code_version)
@@ -202,8 +203,7 @@ class WindLoadService:
         kd: float = ASCE7_22_WIND_DIRECTIONALITY_SIGNS,
         ke: float = 1.0,
     ) -> VelocityPressureResult:
-        """
-        Calculate velocity pressure qz per ASCE 7-22 Equation 26.10-1.
+        """Calculate velocity pressure qz per ASCE 7-22 Equation 26.10-1.
 
         Implements: qz = 0.00256 * Kz * Kzt * Kd * Ke * V²
 
@@ -226,6 +226,7 @@ class WindLoadService:
             - ASCE 7-22 Section 26.10: Velocity Pressure
             - ASCE 7-22 Equation 26.10-1
             - ASCE 7-22 Table 26.10-1: Velocity Pressure Exposure Coefficients
+
         """
         # Convert exposure to enum if string
         if isinstance(exposure, str):
@@ -286,8 +287,7 @@ class WindLoadService:
         height_ft: float,
         exposure: ExposureCategory,
     ) -> float:
-        """
-        Calculate velocity pressure exposure coefficient Kz.
+        """Calculate velocity pressure exposure coefficient Kz.
 
         Per ASCE 7-22 Table 26.10-1 and Section 26.10.1.
 
@@ -301,6 +301,7 @@ class WindLoadService:
         References:
             - ASCE 7-22 Table 26.10-1
             - ASCE 7-22 Equation 26.10-1 (for heights > 160 ft)
+
         """
         # Use minimum height of 15 ft per code
         z = max(15.0, height_ft)
@@ -309,88 +310,84 @@ class WindLoadService:
         if exposure == ExposureCategory.B:
             if z <= 30:
                 return 0.57
-            elif z <= 40:
+            if z <= 40:
                 return 0.62
-            elif z <= 50:
+            if z <= 50:
                 return 0.66
-            elif z <= 60:
+            if z <= 60:
                 return 0.70
-            elif z <= 70:
+            if z <= 70:
                 return 0.73
-            elif z <= 80:
+            if z <= 80:
                 return 0.76
-            elif z <= 90:
+            if z <= 90:
                 return 0.79
-            elif z <= 100:
+            if z <= 100:
                 return 0.81
-            else:
-                # Power law for heights > 100 ft
-                alpha = 7.0  # Exposure B
-                zg = 1200.0  # Gradient height (ft)
-                return 2.01 * ((z / zg) ** (2.0 / alpha))
+            # Power law for heights > 100 ft
+            alpha = 7.0  # Exposure B
+            zg = 1200.0  # Gradient height (ft)
+            return 2.01 * ((z / zg) ** (2.0 / alpha))
 
         # Exposure C: Open terrain (most common)
-        elif exposure == ExposureCategory.C:
+        if exposure == ExposureCategory.C:
             if z <= 20:
                 return 0.85
-            elif z <= 25:
+            if z <= 25:
                 return 0.90
-            elif z <= 30:
+            if z <= 30:
                 return 0.94
-            elif z <= 40:
+            if z <= 40:
                 return 1.00
-            elif z <= 50:
+            if z <= 50:
                 return 1.04
-            elif z <= 60:
+            if z <= 60:
                 return 1.09
-            elif z <= 70:
+            if z <= 70:
                 return 1.13
-            elif z <= 80:
+            if z <= 80:
                 return 1.17
-            elif z <= 90:
+            if z <= 90:
                 return 1.20
-            elif z <= 100:
+            if z <= 100:
                 return 1.24
-            else:
-                # Power law for heights > 100 ft
-                alpha = 9.5  # Exposure C
-                zg = 900.0  # Gradient height (ft)
-                return 2.01 * ((z / zg) ** (2.0 / alpha))
+            # Power law for heights > 100 ft
+            alpha = 9.5  # Exposure C
+            zg = 900.0  # Gradient height (ft)
+            return 2.01 * ((z / zg) ** (2.0 / alpha))
 
         # Exposure D: Flat coastal
-        elif exposure == ExposureCategory.D:
+        if exposure == ExposureCategory.D:
             if z <= 20:
                 return 1.03
-            elif z <= 25:
+            if z <= 25:
                 return 1.08
-            elif z <= 30:
+            if z <= 30:
                 return 1.12
-            elif z <= 40:
+            if z <= 40:
                 return 1.19
-            elif z <= 50:
+            if z <= 50:
                 return 1.25
-            elif z <= 60:
+            if z <= 60:
                 return 1.31
-            elif z <= 70:
+            if z <= 70:
                 return 1.36
-            elif z <= 80:
+            if z <= 80:
                 return 1.41
-            elif z <= 90:
+            if z <= 90:
                 return 1.45
-            elif z <= 100:
+            if z <= 100:
                 return 1.49
-            else:
-                # Power law for heights > 100 ft
-                alpha = 11.5  # Exposure D
-                zg = 700.0  # Gradient height (ft)
-                return 2.01 * ((z / zg) ** (2.0 / alpha))
+            # Power law for heights > 100 ft
+            alpha = 11.5  # Exposure D
+            zg = 700.0  # Gradient height (ft)
+            return 2.01 * ((z / zg) ** (2.0 / alpha))
 
-        else:
-            raise CalculationError(
-                message=f"Invalid exposure category: {exposure}",
-                code_ref="ASCE 7-22 Section 26.7",
-                exposure=exposure,
-            )
+        raise CalculationError(
+            message=f"Invalid exposure category: {exposure}",
+            code_ref="ASCE 7-22 Section 26.7",
+            exposure=exposure,
+        )
 
     def calculate_wind_force(
         self,
@@ -402,8 +399,7 @@ class WindLoadService:
         force_coefficient: float = ASCE7_22_FORCE_COEFF_FLAT_SIGN,
         gust_effect_factor: float = ASCE7_22_GUST_EFFECT_RIGID,
     ) -> WindForceResult:
-        """
-        Calculate total wind force on sign per ASCE 7-22 Chapter 29.
+        """Calculate total wind force on sign per ASCE 7-22 Chapter 29.
 
         Implements complete wind force calculation for sign structures.
 
@@ -422,6 +418,7 @@ class WindLoadService:
         References:
             - ASCE 7-22 Chapter 29: Wind Loads on Building Appurtenances
             - ASCE 7-22 Figure 29.4-1: Force Coefficients
+
         """
         # Convert to enums if strings
         if isinstance(exposure, str):

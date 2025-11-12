@@ -33,6 +33,7 @@ async def generate_pe_stamped_report(
     
     Returns:
         Dict with sha256, pdf_ref, cached, pe_stamp_info
+
     """
     # Generate base report
     report_result = await generate_report_from_payload(
@@ -40,26 +41,26 @@ async def generate_pe_stamped_report(
         payload=payload,
         root_path=root_path,
     )
-    
+
     # Get PE stamp if provided
     pe_stamp = None
     if pe_stamp_id:
         result = await db.execute(select(PEStamp).where(PEStamp.stamp_id == pe_stamp_id))
         pe_stamp = result.scalar_one_or_none()
-    
+
     # If no stamp ID provided, get latest PE stamp for this project
     if not pe_stamp:
         result = await db.execute(
             select(PEStamp)
             .where(PEStamp.project_id == project_id)
             .where(not PEStamp.is_revoked)
-            .order_by(PEStamp.stamped_at.desc())
+            .order_by(PEStamp.stamped_at.desc()),
         )
         pe_stamp = result.scalar_one_or_none()
-    
+
     # Get compliance records
     compliance_records = await get_project_compliance(db=db, project_id=project_id)
-    
+
     # Add PE stamp info to result
     report_result["pe_stamp"] = None
     if pe_stamp:
@@ -72,7 +73,7 @@ async def generate_pe_stamped_report(
             "methodology": pe_stamp.methodology,
             "code_references": pe_stamp.code_references,
         }
-    
+
     report_result["compliance"] = [
         {
             "requirement_type": r.requirement_type,
@@ -82,14 +83,14 @@ async def generate_pe_stamped_report(
         }
         for r in compliance_records
     ]
-    
+
     logger.info(
         "pdf.pe_stamped_report",
         project_id=project_id,
         pe_stamp_id=pe_stamp.stamp_id if pe_stamp else None,
         compliance_count=len(compliance_records),
     )
-    
+
     return report_result
 
 
@@ -109,21 +110,22 @@ async def add_pe_stamp_to_pdf(
     
     Returns:
         Path to stamped PDF
+
     """
     try:
         from PyPDF2 import PdfReader, PdfWriter
         from reportlab.lib.pagesizes import letter
         from reportlab.pdfgen import canvas
-        
+
         # Generate certification page
         cert_buffer = io.BytesIO()
         c = canvas.Canvas(cert_buffer, pagesize=letter)
-        
+
         # Certification text
         c.setFont("Helvetica-Bold", 16)
         c.drawString(72, 750, "PROFESSIONAL ENGINEER CERTIFICATION")
         c.setFont("Helvetica", 12)
-        
+
         y = 720
         lines = [
             f"License Number: {pe_stamp.pe_license_number}",
@@ -138,40 +140,40 @@ async def add_pe_stamp_to_pdf(
             "",
             "Code References:",
         ]
-        
+
         for code_ref in pe_stamp.code_references:
             lines.append(f"  - {code_ref}")
-        
+
         for line in lines:
             c.drawString(72, y, line)
             y -= 20
-        
+
         c.save()
-        
+
         # Merge certification page with original PDF
         original_reader = PdfReader(str(pdf_path))
         cert_reader = PdfReader(cert_buffer)
-        
+
         writer = PdfWriter()
-        
+
         # Add original pages
         for page in original_reader.pages:
             writer.add_page(page)
-        
+
         # Add certification page
         writer.add_page(cert_reader.pages[0])
-        
+
         # Write output
         if output_path is None:
             output_path = pdf_path.parent / f"{pdf_path.stem}.stamped.pdf"
-        
+
         with open(output_path, "wb") as output_file:
             writer.write(output_file)
-        
+
         logger.info("pdf.stamp_added", output_path=str(output_path))
-        
+
         return output_path
-        
+
     except ImportError:
         logger.warning("pdf.stamp_libraries_not_available", reason="reportlab/PyPDF2 not installed")
         # Return original PDF if libraries not available

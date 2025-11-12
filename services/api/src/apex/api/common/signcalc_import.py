@@ -20,12 +20,13 @@ def get_signcalc_import(module_name: str, function_name: str, fallback: Callable
     
     Returns:
         Imported function or fallback
+
     """
     # Add signcalc-service to path
     _signcalc_path = Path(__file__).parent.parent.parent.parent.parent / "signcalc-service"
     if str(_signcalc_path) not in sys.path:
         sys.path.insert(0, str(_signcalc_path))
-    
+
     try:
         module = __import__(module_name, fromlist=[function_name])
         return getattr(module, function_name)

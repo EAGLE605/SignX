@@ -33,7 +33,6 @@ _PROJECT_SEARCH_FIELDS = ("project_id", "name", "status", "customer", "created_a
 
 def _serialize_project_model(project: Project) -> dict[str, Any]:
     """Serialize a ``Project`` ORM model into the search payload shape."""
-
     return {
         "project_id": project.project_id,
         "name": project.name,
@@ -45,7 +44,6 @@ def _serialize_project_model(project: Project) -> dict[str, Any]:
 
 def _coerce_search_record(record: dict[str, Any]) -> dict[str, Any]:
     """Normalize OpenSearch/DB records so both paths return identical envelopes."""
-
     normalized: dict[str, Any] = {}
     for field in _PROJECT_SEARCH_FIELDS:
         value = record.get(field)
@@ -60,8 +58,7 @@ def _coerce_search_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _compute_etag(project: Project) -> str:
-    """
-    Compute ETag for optimistic locking with strong collision resistance.
+    """Compute ETag for optimistic locking with strong collision resistance.
     
     Uses full SHA256 hash for maximum collision resistance.
     Returns RFC 7232 compliant weak validator format.
@@ -71,6 +68,7 @@ def _compute_etag(project: Project) -> str:
         
     Returns:
         ETag string with W/ prefix for weak validator per RFC 7232
+
     """
     # Include more fields for better change detection
     content = (
@@ -98,6 +96,7 @@ def _compute_project_content_sha256(project: Project) -> str:
     
     Returns:
         SHA256 hex digest (64 characters)
+
     """
     # Normalize project data (exclude timestamps and envelope fields)
     normalized = {
@@ -131,6 +130,7 @@ async def _db_search_projects(skip: int, limit: int, status: ProjectStatus | Non
         
     Raises:
         ValueError: If status is not a valid ProjectStatus enum value
+
     """
     query = select(Project)
     if status:
@@ -174,8 +174,8 @@ async def list_projects(
                     "must": [
                         {"match": {"status": status.value}},
                         {"multi_match": {"query": q, "fields": ["name^2", "customer"]}},
-                    ]
-                }
+                    ],
+                },
             }
     else:
         search_query = {"query": {"match_all": {}}, "from": skip, "size": limit}
@@ -216,7 +216,7 @@ async def create_project(
     # Use authenticated user if available, otherwise use request value
     created_by = current_user.user_id if current_user else req.created_by
     account_id = current_user.account_id if current_user and current_user.account_id else req.account_id
-    
+
     logger.info("projects.create", name=req.name, account_id=account_id, created_by=created_by)
 
     project_id = f"proj_{uuid.uuid4().hex[:12]}"
@@ -235,7 +235,7 @@ async def create_project(
         updated_at=now,
     )
     project.etag = _compute_etag(project)
-    
+
     # Set envelope fields for audit trail and deterministic caching
     project.constants_version = get_constants_version_string()
     project.content_sha256 = _compute_project_content_sha256(project)
@@ -352,14 +352,14 @@ async def update_project(
 
     # ETag validation - return current ETag if mismatch
     # Strip quotes from incoming ETag for comparison (RFC 7232)
-    normalized_if_match = if_match.strip('"').replace('W/', '') if if_match else None
-    normalized_project_etag = project.etag.strip('"').replace('W/', '') if project.etag else None
-    
+    normalized_if_match = if_match.strip('"').replace("W/", "") if if_match else None
+    normalized_project_etag = project.etag.strip('"').replace("W/", "") if project.etag else None
+
     if normalized_if_match and normalized_project_etag != normalized_if_match:
         raise HTTPException(
             status_code=412,
             detail=f"ETag mismatch: expected {project.etag}, got {if_match}",
-            headers={"ETag": project.etag}
+            headers={"ETag": project.etag},
         )
 
     # State machine validation if status change requested
@@ -384,7 +384,7 @@ async def update_project(
 
     project.updated_at = datetime.now(UTC)
     project.etag = _compute_etag(project)
-    
+
     # Update envelope fields for audit trail
     project.constants_version = get_constants_version_string()
     project.content_sha256 = _compute_project_content_sha256(project)
@@ -402,10 +402,10 @@ async def update_project(
         "status": project.status,
         "etag": project.etag,
     }
-    
+
     # Extract actor from current user or request
     actor = current_user.sub if current_user else "system"
-    
+
     await db.commit()
 
     # Log audit event with before/after states and request metadata
@@ -495,7 +495,7 @@ async def get_project_events(
         .where(ProjectEvent.project_id == project_id)
         .order_by(ProjectEvent.timestamp.desc())
         .offset(skip)
-        .limit(limit)
+        .limit(limit),
     )
     events = events_query.scalars().all()
 

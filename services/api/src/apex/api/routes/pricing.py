@@ -82,7 +82,7 @@ async def estimate(project_id: str, req: dict) -> ResponseEnvelope:
             "amount_usd": base_rate,
             "quantity": 1,
             "subtotal_usd": base_rate,
-        }
+        },
     ]
 
     # Add-ons
@@ -105,7 +105,7 @@ async def estimate(project_id: str, req: dict) -> ResponseEnvelope:
                     "amount_usd": amount,
                     "quantity": 1,
                     "subtotal_usd": amount,
-                }
+                },
             )
         else:
             unknown_addons.append(code)

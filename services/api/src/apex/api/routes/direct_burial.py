@@ -14,19 +14,19 @@ def _fallback_design_embed(F_lbf: float, M_inlb: float, constraints: dict | None
     base = max(1.0, math.sqrt(max(M_inlb, 1.0)) / 10.0)
     dia_in = max(18.0, 12.0 * base)
     depth_in = max(36.0, 24.0 * base)
-    
+
     if constraints:
         if constraints.get("max_foundation_dia_in") and dia_in > constraints["max_foundation_dia_in"]:
             depth_in *= 1.25
             dia_in = constraints["max_foundation_dia_in"]
         if constraints.get("max_embed_in") and depth_in > constraints["max_embed_in"]:
             depth_in = constraints["max_embed_in"]
-    
+
     OT_sf = min(2.0, 0.5 + 0.01 * depth_in)
     BRG_sf = min(2.0, 0.6 + 0.005 * dia_in)
     SLIDE_sf = min(2.0, 1.0 + 0.002 * dia_in)
     UPLIFT_sf = min(2.0, 0.5 + 0.008 * depth_in)
-    
+
     return {"shape": "cyl", "dia_in": round(dia_in, 1), "depth_in": round(depth_in, 1)}, {
         "OT_sf": round(OT_sf, 2),
         "BRG_sf": round(BRG_sf, 2),
@@ -66,26 +66,26 @@ async def footing_solve(req: dict) -> ResponseEnvelope:
     """
     logger.info("footing.solve", diameter=req.get("footing", {}).get("diameter_ft"))
     assumptions: list[str] = []
-    
+
     footing = req.get("footing", {})
     diameter_ft = float(footing.get("diameter_ft", 3.0))
     soil_psf = float(req.get("soil_psf", 3000.0))
     num_poles = int(req.get("num_poles", 1))
     M_pole_kipft = float(req.get("M_pole_kipft", 10.0))  # Moment per pole in kip-ft
-    
+
     add_assumption(assumptions, f"soil_bearing={soil_psf}psf, K=calib_v1")
     if num_poles > 1:
         add_assumption(assumptions, "two_pole_split=0.5 each")
-    
+
     # Use deterministic solver
     depth_in = solve_footing_interactive(diameter_ft, M_pole_kipft, soil_psf, num_poles)
     depth_ft = depth_in / 12.0
-    
+
     # Concrete yardage calculator
     import math
     volume_cf = math.pi * (diameter_ft / 2.0) ** 2 * depth_ft
     concrete_yards = round(volume_cf / 27.0, 2)
-    
+
     result = {
         "min_depth_ft": depth_ft,  # Will be rounded by make_envelope
         "min_depth_in": depth_in,
@@ -93,9 +93,9 @@ async def footing_solve(req: dict) -> ResponseEnvelope:
         "concrete_yards": concrete_yards,
         "monotonic": True,  # diameter↓ ⇒ depth↑ verified
     }
-    
+
     confidence = calc_confidence(assumptions)
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,
@@ -115,33 +115,33 @@ async def footing_design(req: dict) -> ResponseEnvelope:
     """
     logger.info("footing.design")
     assumptions: list[str] = []
-    
+
     loads = req.get("loads", {})
     F_lbf = float(loads.get("F_lbf", 0.0))
     M_inlb = float(loads.get("M_inlb", 120000.0))  # Default 120 kip-in = 10 kip-ft
-    
+
     constraints = req.get("constraints", {})
-    
+
     # Use design_embed for complete design
     fdim, fchecks = design_embed(F_lbf, M_inlb, constraints=constraints)
-    
+
     # Calculate concrete yardage
     import math
     dia_ft = fdim["dia_in"] / 12.0
     depth_ft = fdim["depth_in"] / 12.0
     volume_cf = math.pi * (dia_ft / 2.0) ** 2 * depth_ft
     concrete_yards = round(volume_cf / 27.0, 2)
-    
+
     add_assumption(assumptions, "Direct burial with Broms-style lateral capacity")
     if constraints:
         add_assumption(assumptions, f"Constraints applied: {list(constraints.keys())}")
-    
+
     # Check for low margins and add warnings
     margins = [fchecks["OT_sf"], fchecks["BRG_sf"], fchecks["SLIDE_sf"], fchecks["UPLIFT_sf"]]
     min_margin = min(margins)
     if min_margin < 1.5:
         add_assumption(assumptions, f"Warning: minimum safety factor {min_margin:.2f} < 1.5")
-    
+
     result = {
         "foundation": {
             "shape": fdim["shape"],
@@ -156,9 +156,9 @@ async def footing_design(req: dict) -> ResponseEnvelope:
         },
         "concrete_yards": concrete_yards,
     }
-    
+
     confidence = calc_confidence(assumptions)
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

@@ -41,7 +41,7 @@ async def presign_upload(
     # Generate unique upload ID and blob key
     upload_id = uuid.uuid4().hex[:16]
     blob_key = f"projects/{project_id}/files/{upload_id}/{filename}"
-    
+
     # Get presigned URL from storage client
     presigned_url = storage_client.presign_put(
         object_name=blob_key,
@@ -94,7 +94,7 @@ async def attach_file(
 
     # Verify file exists in storage
     file_exists = storage_client.object_exists(blob_key)
-    
+
     # Verify SHA256 if storage client is configured
     sha256_valid = False
     if storage_client._client and file_exists:
@@ -104,10 +104,10 @@ async def attach_file(
             logger.error("files.sha256_mismatch", blob_key=blob_key, expected=sha256[:16], got=stored_sha256[:16] if stored_sha256 else None)
             # Log event with error flag
             await log_event(db, project_id, "file.validation_failed", actor, {
-                "blob_key": blob_key, 
-                "expected_sha256": sha256[:16], 
+                "blob_key": blob_key,
+                "expected_sha256": sha256[:16],
                 "got_sha256": stored_sha256[:16] if stored_sha256 else None,
-                "reason": "sha256_mismatch"
+                "reason": "sha256_mismatch",
             })
             raise HTTPException(status_code=422, detail=f"SHA256 mismatch for {blob_key}: expected {sha256[:16]}..., got {stored_sha256[:16] if stored_sha256 else 'none'}")
 

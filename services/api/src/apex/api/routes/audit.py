@@ -45,7 +45,7 @@ async def get_audit_logs(
     # Non-admins can only view their own account's logs
     if "admin" not in current_user.roles:
         account_id = current_user.account_id
-    
+
     logs = await query_audit_logs(
         db=db,
         user_id=user_id,
@@ -58,7 +58,7 @@ async def get_audit_logs(
         limit=limit,
         offset=offset,
     )
-    
+
     return make_envelope(
         result=[
             {

@@ -67,10 +67,10 @@ class Settings(BaseSettings):
     # tracing exporter: stdout or otlp
     OTEL_EXPORTER: str = Field(default="stdout")
     OTEL_ENDPOINT: str | None = None
-    
+
     # JWT auth
     JWT_SECRET_KEY: str | None = Field(default=None)
-    
+
     # CRM Integration (KeyedIn)
     KEYEDIN_WEBHOOK_URL: str | None = Field(default=None, description="KeyedIn CRM webhook endpoint")
     KEYEDIN_API_KEY: str | None = Field(default=None, description="KeyedIn API key for webhook authentication")

@@ -21,6 +21,7 @@ router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 
 class WebhookPayload(BaseModel):
     """Inbound webhook payload from KeyedIn."""
+
     event_type: str
     project_id: str | None = None
     data: dict
@@ -43,10 +44,10 @@ async def receive_keyedin_webhook(
     """
     # Extract IP and user agent
     request.headers.get("user-agent")
-    
+
     # Validate webhook (in production, verify signature)
     # TODO: Add webhook signature validation
-    
+
     # Convert to CRMWebhookPayload
     crm_payload = CRMWebhookPayload(
         event_type=payload.event_type,
@@ -54,7 +55,7 @@ async def receive_keyedin_webhook(
         project_id=payload.project_id,
         data=payload.data,
     )
-    
+
     # Handle webhook
     result = await crm_client.handle_inbound_webhook(
         payload=crm_payload,
@@ -62,7 +63,7 @@ async def receive_keyedin_webhook(
         user_id="keyedin-system",
         account_id=payload.data.get("account_id", "unknown"),
     )
-    
+
     return make_envelope(
         result=result,
         assumptions=["Webhook received from KeyedIn CRM"],
@@ -90,14 +91,14 @@ async def send_webhook_to_keyedin(
     """
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
-    
+
     success = await crm_client.send_webhook(
         event_type=event_type,
         data=data,
         direction="outbound",
         db=db,
     )
-    
+
     return make_envelope(
         result={"sent": success, "event_type": event_type},
         assumptions=["Webhook sent to KeyedIn CRM"],

@@ -23,10 +23,10 @@ async def derive_cabinets(req: dict) -> ResponseEnvelope:  # type: ignore
     """
     logger.info("cabinets.derive")
     assumptions: list[str] = []
-    
+
     overall_height = req.get("overall_height_ft", 0.0)
     cabinets = req.get("cabinets", [])
-    
+
     if not cabinets:
         total_area = 0.0
         total_weight = 0.0
@@ -36,37 +36,37 @@ async def derive_cabinets(req: dict) -> ResponseEnvelope:  # type: ignore
         total_area = 0.0
         total_weight = 0.0
         moment_sum = 0.0
-        
+
         for cab in cabinets:
             w = float(cab.get("width_ft", 0.0))
             h = float(cab.get("height_ft", 0.0))
             psf = float(cab.get("weight_psf", 10.0))
             A_cab = w * h
             W_cab = A_cab * psf
-            
+
             # CG at mid-height of cabinet
             z_cab = float(cab.get("z_offset_ft", 0.0)) + h / 2.0
-            
+
             total_area += A_cab
             total_weight += W_cab
             moment_sum += W_cab * z_cab
-            
+
         z_cg = moment_sum / total_weight if total_weight > 0 else 0.0
-        
+
         add_assumption(assumptions, f"{len(cabinets)} cabinet(s) processed")
-    
+
     view_token = f"cab_{hash(str(cabinets)) % 10000}"  # deterministic
-    
+
     result = {
         "A_ft2": total_area,  # Will be rounded by make_envelope
         "z_cg_ft": z_cg,
         "weight_estimate_lb": total_weight,
         "view_token": view_token,
     }
-    
+
     # Calculate confidence from assumptions
     confidence = calc_confidence(assumptions)
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,
@@ -89,21 +89,21 @@ async def add_cabinet(
     """
     logger.info("cabinets.add", project_id=project_id)
     assumptions: list[str] = []
-    
+
     # Recompute with new cabinet added
     cabinets = req.get("existing_cabinets", [])
     new_cabinet = req.get("cabinet", {})
-    
+
     if new_cabinet:
         cabinets.append(new_cabinet)
-    
+
     # Use derive logic to recompute
     overall_height = req.get("overall_height_ft", 0.0)
-    
+
     total_area = 0.0
     total_weight = 0.0
     moment_sum = 0.0
-    
+
     for cab in cabinets:
         w = float(cab.get("width_ft", 0.0))
         h = float(cab.get("height_ft", 0.0))
@@ -111,14 +111,14 @@ async def add_cabinet(
         A_cab = w * h
         W_cab = A_cab * psf
         z_cab = float(cab.get("z_offset_ft", 0.0)) + h / 2.0
-        
+
         total_area += A_cab
         total_weight += W_cab
         moment_sum += W_cab * z_cab
-    
+
     z_cg = moment_sum / total_weight if total_weight > 0 else 0.0
     view_token = f"cab_{hash(str(cabinets)) % 10000}"
-    
+
     result = {
         "A_ft2": total_area,  # Will be rounded by make_envelope
         "z_cg_ft": z_cg,
@@ -126,15 +126,15 @@ async def add_cabinet(
         "view_token": view_token,
         "cabinet_count": len(cabinets),
     }
-    
+
     add_assumption(assumptions, f"{len(cabinets)} cabinet(s) in stack")
-    
+
     # TODO: If project_id provided, update project payload with new cabinet config
     # Would require payload save endpoint integration
-    
+
     # Calculate confidence from assumptions
     confidence = calc_confidence(assumptions)
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

@@ -31,6 +31,7 @@ def hash_password(password: str) -> str:
     
     Returns:
         Bcrypt hashed password string
+
     """
     salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
     hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
@@ -46,6 +47,7 @@ def verify_password(password: str, hashed: str) -> bool:
     
     Returns:
         True if password matches, False otherwise
+
     """
     try:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
@@ -56,7 +58,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 class PasswordStrength:
     """Password strength validation."""
-    
+
     @staticmethod
     def validate(password: str) -> tuple[bool, list[str]]:
         """Validate password strength.
@@ -66,29 +68,30 @@ class PasswordStrength:
         
         Returns:
             Tuple of (is_valid: bool, errors: list[str])
+
         """
         errors: list[str] = []
-        
+
         # Length check
         if len(password) < MIN_PASSWORD_LENGTH:
             errors.append(f"Password must be at least {MIN_PASSWORD_LENGTH} characters")
-        
+
         # Common password check
         if password.lower() in COMMON_PASSWORDS:
             errors.append("Password is too common. Please choose a more unique password")
-        
+
         # Complexity checks
         has_upper = any(c.isupper() for c in password)
         has_lower = any(c.islower() for c in password)
         has_digit = any(c.isdigit() for c in password)
         has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
-        
+
         complexity_count = sum([has_upper, has_lower, has_digit, has_special])
         if complexity_count < 3:
             errors.append("Password must contain at least 3 of: uppercase, lowercase, digit, special character")
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
     def get_strength_score(password: str) -> int:
         """Calculate password strength score (0-100).
@@ -98,9 +101,10 @@ class PasswordStrength:
         
         Returns:
             Strength score (0-100)
+
         """
         score = 0
-        
+
         # Length contribution (max 40 points)
         length = len(password)
         if length >= 12:
@@ -111,22 +115,22 @@ class PasswordStrength:
             score += 20
         else:
             score += 10
-        
+
         # Complexity contribution (max 60 points)
         has_upper = any(c.isupper() for c in password)
         has_lower = any(c.islower() for c in password)
         has_digit = any(c.isdigit() for c in password)
         has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
-        
+
         complexity = sum([has_upper, has_lower, has_digit, has_special])
         score += complexity * 15
-        
+
         return min(score, 100)
 
 
 class AccountLockoutManager:
     """Manage account lockout after failed login attempts."""
-    
+
     def __init__(self):
         """Initialize lockout manager with in-memory storage.
         
@@ -134,7 +138,7 @@ class AccountLockoutManager:
         """
         self.failed_attempts: dict[str, list[float]] = {}  # email -> timestamps
         self.locked_until: dict[str, float] = {}  # email -> unlock timestamp
-    
+
     def record_failed_attempt(self, email: str) -> bool:
         """Record a failed login attempt.
         
@@ -143,30 +147,31 @@ class AccountLockoutManager:
         
         Returns:
             True if account is now locked, False otherwise
+
         """
         now = time.time()
-        
+
         # Clean old attempts (older than lockout duration)
         if email in self.failed_attempts:
             cutoff = now - LOCKOUT_DURATION_SECONDS
             self.failed_attempts[email] = [
                 ts for ts in self.failed_attempts[email] if ts > cutoff
             ]
-        
+
         # Add new attempt
         if email not in self.failed_attempts:
             self.failed_attempts[email] = []
         self.failed_attempts[email].append(now)
-        
+
         # Check if lockout threshold reached
         if len(self.failed_attempts[email]) >= MAX_FAILED_ATTEMPTS:
             unlock_time = now + LOCKOUT_DURATION_SECONDS
             self.locked_until[email] = unlock_time
             logger.warning("account.locked", email=email, unlock_at=unlock_time)
             return True
-        
+
         return False
-    
+
     def record_successful_attempt(self, email: str) -> None:
         """Record successful login - clear failed attempts."""
         if email in self.failed_attempts:
@@ -174,7 +179,7 @@ class AccountLockoutManager:
         if email in self.locked_until:
             del self.locked_until[email]
         logger.debug("account.unlocked", email=email)
-    
+
     def is_locked(self, email: str) -> tuple[bool, float | None]:
         """Check if account is locked.
         
@@ -183,22 +188,23 @@ class AccountLockoutManager:
         
         Returns:
             Tuple of (is_locked: bool, unlock_timestamp: Optional[float])
+
         """
         if email not in self.locked_until:
             return False, None
-        
+
         unlock_time = self.locked_until[email]
         now = time.time()
-        
+
         if now < unlock_time:
             return True, unlock_time
-        
+
         # Lockout expired
         del self.locked_until[email]
         if email in self.failed_attempts:
             del self.failed_attempts[email]
         return False, None
-    
+
     def get_remaining_attempts(self, email: str) -> int:
         """Get remaining login attempts before lockout.
         
@@ -207,14 +213,15 @@ class AccountLockoutManager:
         
         Returns:
             Number of remaining attempts
+
         """
         if email not in self.failed_attempts:
             return MAX_FAILED_ATTEMPTS
-        
+
         now = time.time()
         cutoff = now - LOCKOUT_DURATION_SECONDS
         recent_attempts = [ts for ts in self.failed_attempts[email] if ts > cutoff]
-        
+
         remaining = MAX_FAILED_ATTEMPTS - len(recent_attempts)
         return max(0, remaining)
 
@@ -240,6 +247,7 @@ def generate_reset_token(email: str, secret: str) -> str:
     
     Returns:
         Secure reset token
+
     """
     timestamp = str(int(time.time()))
     data = f"{email}:{timestamp}:{secret}"
@@ -258,6 +266,7 @@ def validate_reset_token(token: str, email: str, secret: str, max_age_seconds: i
     
     Returns:
         True if token is valid, False otherwise
+
     """
     # In production, store tokens in database with expiry
     # For now, validate format and age
@@ -265,11 +274,11 @@ def validate_reset_token(token: str, email: str, secret: str, max_age_seconds: i
         # Token should be SHA256 hash
         if len(token) != 64:
             return False
-        
+
         # Re-verify token matches expected format
         # In production, check database for token existence and expiry
         return True
-        
+
     except Exception:
         return False
 

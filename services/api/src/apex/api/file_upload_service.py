@@ -39,28 +39,28 @@ async def scan_file_for_viruses(file_content: bytes, filename: str) -> tuple[str
     Returns:
         Tuple of (status, error_message)
         Status: "clean", "infected", "error", "pending"
+
     """
     # In production, integrate with ClamAV daemon or cloud scanning service
     # For now, return "pending" if no scanner available
-    
+
     # Check if ClamAV is available
     try:
         import clamd
-        
+
         # Connect to ClamAV daemon (default: localhost:3310)
         cd = clamd.ClamdUnixSocket()  # or ClamdNetworkSocket() for remote
-        
+
         # Scan file content
         result = cd.instream(io.BytesIO(file_content))
-        
+
         if result["stream"][0] == "OK":
             return "clean", None
-        elif result["stream"][0].startswith("FOUND"):
+        if result["stream"][0].startswith("FOUND"):
             virus_name = result["stream"][0].split()[1]
             return "infected", f"Virus detected: {virus_name}"
-        else:
-            return "error", "Scan failed"
-            
+        return "error", "Scan failed"
+
     except ImportError:
         logger.warning("virus_scan.not_available", reason="clamd package not installed")
         return "pending", None
@@ -78,18 +78,19 @@ async def generate_thumbnail(
     
     Returns:
         Thumbnail bytes (JPEG) or None if not an image
+
     """
     if not PIL_AVAILABLE:
         logger.warning("thumbnail.pil_not_available")
         return None
-    
+
     if content_type not in ALLOWED_IMAGE_TYPES:
         return None
-    
+
     try:
         from PIL import Image
         image = Image.open(io.BytesIO(file_content))
-        
+
         # Convert to RGB if necessary (handles PNG transparency)
         if image.mode in ("RGBA", "P"):
             background = Image.new("RGB", image.size, (255, 255, 255))
@@ -97,15 +98,15 @@ async def generate_thumbnail(
                 image = image.convert("RGBA")
             background.paste(image, mask=image.split()[-1] if image.mode == "RGBA" else None)
             image = background
-        
+
         # Resize maintaining aspect ratio
         image.thumbnail(max_size, Image.Resampling.LANCZOS)
-        
+
         # Convert to JPEG bytes
         output = io.BytesIO()
         image.save(output, format="JPEG", quality=85, optimize=True)
         return output.getvalue()
-        
+
     except Exception as e:
         logger.error("thumbnail.generation_failed", error=str(e))
         return None
@@ -138,6 +139,7 @@ async def upload_file(
     
     Raises:
         HTTPException: If file type/size invalid or virus detected
+
     """
     # Validate file type
     if file.content_type not in ALLOWED_TYPES:
@@ -145,33 +147,33 @@ async def upload_file(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File type not allowed: {file.content_type}. Allowed: {ALLOWED_TYPES}",
         )
-    
+
     # Read file content
     content = await file.read()
     file_size = len(content)
-    
+
     # Validate file size
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File too large: {file_size} bytes. Max: {MAX_FILE_SIZE} bytes",
         )
-    
+
     if file_size == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File is empty",
         )
-    
+
     # Compute SHA256
     sha256 = hashlib.sha256(content).hexdigest()
-    
+
     # Check if file already exists (deduplication)
     existing = await db.execute(
-        select(FileUpload).where(FileUpload.sha256 == sha256)
+        select(FileUpload).where(FileUpload.sha256 == sha256),
     )
     existing_upload = existing.scalar_one_or_none()
-    
+
     if existing_upload:
         logger.info("file.duplicate_detected", sha256=sha256[:16], existing_id=existing_upload.upload_id)
         # Return existing file but create new association if different project
@@ -195,10 +197,10 @@ async def upload_file(
             await db.refresh(new_upload)
             return new_upload
         return existing_upload
-    
+
     # Virus scan
     scan_status, scan_error = await scan_file_for_viruses(content, file.filename or "unknown")
-    
+
     if scan_status == "infected":
         # Log audit event for security
         await log_audit(
@@ -211,21 +213,21 @@ async def upload_file(
             user_agent=user_agent,
             error_details={"reason": "virus_detected", "message": scan_error, "filename": file.filename},
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File rejected: {scan_error}",
         )
-    
+
     # Generate storage key
     from uuid import uuid4
     upload_id = uuid4().hex[:16]
     file_key = f"uploads/{account_id}/{upload_id}/{file.filename or 'file'}"
-    
+
     # Upload to storage
     if storage._client:
         try:
-            
+
             storage._client.put_object(
                 storage.bucket,
                 file_key,
@@ -242,7 +244,7 @@ async def upload_file(
             )
     else:
         logger.warning("file.storage_not_configured", file_key=file_key)
-    
+
     # Generate thumbnail if image
     thumbnail_key = None
     if file.content_type in ALLOWED_IMAGE_TYPES:
@@ -262,7 +264,7 @@ async def upload_file(
                 except Exception as e:
                     logger.error("file.thumbnail_upload_failed", error=str(e))
                     # Don't fail the upload if thumbnail fails
-    
+
     # Create database record
     upload_record = FileUpload(
         file_key=file_key,
@@ -277,11 +279,11 @@ async def upload_file(
         uploaded_by=user_id,
         account_id=account_id,
     )
-    
+
     db.add(upload_record)
     await db.commit()
     await db.refresh(upload_record)
-    
+
     # Log audit event
     await log_audit(
         db=db,
@@ -299,7 +301,7 @@ async def upload_file(
         ip_address=ip_address,
         user_agent=user_agent,
     )
-    
+
     logger.info(
         "file.upload_complete",
         upload_id=upload_record.upload_id,
@@ -307,7 +309,7 @@ async def upload_file(
         sha256=sha256[:16],
         virus_scan_status=scan_status,
     )
-    
+
     return upload_record
 
 
@@ -320,13 +322,14 @@ async def get_presigned_download_url(
     
     Returns:
         Presigned URL or None if storage not configured
+
     """
     if not storage._client:
         return None
-    
+
     try:
         from datetime import timedelta
-        
+
         url = storage._client.presigned_get_object(
             storage.bucket,
             file_key,

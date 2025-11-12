@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Solver Versioning
+"""APEX Signage Engineering - Solver Versioning
 
 Track solver function versions for A/B testing and traceability.
 """
@@ -30,8 +29,7 @@ _SOLVER_VERSIONS: dict[str, str] = {
 
 
 def solver_version(version: str):
-    """
-    Decorator to tag solver functions with version.
+    """Decorator to tag solver functions with version.
     
     Usage:
         @solver_version("1.2.0")
@@ -40,24 +38,24 @@ def solver_version(version: str):
     """
     def decorator(func: Callable) -> Callable:
         _SOLVER_VERSIONS[func.__name__] = version
-        
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return func(*args, **kwargs)
-        
+
         return wrapper
     return decorator
 
 
 def get_solver_versions(called_functions: list[str] | None = None) -> dict[str, str]:
-    """
-    Get solver versions for traceability.
+    """Get solver versions for traceability.
     
     Args:
         called_functions: Optional list of function names called in this request
     
     Returns:
         Dict of {function_name: version}
+
     """
     if called_functions:
         return {name: _SOLVER_VERSIONS.get(name, "unknown") for name in called_functions}

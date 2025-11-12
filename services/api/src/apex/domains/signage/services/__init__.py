@@ -1,5 +1,4 @@
-"""
-Domain Services for Signage Engineering
+"""Domain Services for Signage Engineering
 
 Service layer provides business logic for structural calculations
 with dependency injection, comprehensive error handling, and audit trails.

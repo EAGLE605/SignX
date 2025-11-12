@@ -1,5 +1,4 @@
-"""
-Single Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
+"""Single Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
 
 This module analyzes single-pole sign structures (monuments, pylons, cantilever posts)
 using current building code standards.
@@ -27,13 +26,13 @@ from apex.domains.signage.asce7_wind import (
 # IBC 2024 Section 1605.2.1 - Required Load Combinations (ASD)
 # All 7 combinations per IBC 2024 for Allowable Stress Design
 IBC_LOAD_COMBINATIONS = {
-    'LC1': {'D': 1.0},                              # D
-    'LC2': {'D': 1.0, 'L': 1.0},                   # D + L
-    'LC3': {'D': 1.0, 'Lr': 1.0},                  # D + Lr (roof live load)
-    'LC4': {'D': 1.0, 'S': 1.0},                   # D + S (snow)
-    'LC5': {'D': 1.0, 'L': 0.75, 'W': 0.75},       # D + 0.75L + 0.75W
-    'LC6': {'D': 1.0, 'W': 1.0},                   # D + W
-    'LC7': {'D': 0.6, 'W': 1.0},                   # 0.6D + W (uplift check)
+    "LC1": {"D": 1.0},                              # D
+    "LC2": {"D": 1.0, "L": 1.0},                   # D + L
+    "LC3": {"D": 1.0, "Lr": 1.0},                  # D + Lr (roof live load)
+    "LC4": {"D": 1.0, "S": 1.0},                   # D + S (snow)
+    "LC5": {"D": 1.0, "L": 0.75, "W": 0.75},       # D + 0.75L + 0.75W
+    "LC6": {"D": 1.0, "W": 1.0},                   # D + W
+    "LC7": {"D": 0.6, "W": 1.0},                   # 0.6D + W (uplift check)
 }
 
 
@@ -57,12 +56,12 @@ MAX_SLENDERNESS_RATIO = 200  # L/r ≤ 200 per AISC
 
 @dataclass
 class PoleSection:
-    """
-    Steel pole section properties from AISC Shapes Database v16.
+    """Steel pole section properties from AISC Shapes Database v16.
 
     All properties are from AISC Manual, typically HSS (Hollow Structural Sections)
     or PIPE sections for sign poles.
     """
+
     designation: str  # AISC manual label (e.g., "HSS8X8X1/4")
     type: str  # HSS, PIPE, etc.
     area_in2: float  # Cross-sectional area (in²)
@@ -79,6 +78,7 @@ class PoleSection:
 @dataclass
 class SinglePoleConfig:
     """Configuration for single-pole sign analysis."""
+
     # Pole geometry
     pole_height_ft: float
     pole_section: PoleSection
@@ -110,6 +110,7 @@ class SinglePoleConfig:
 
 class SinglePoleResults(NamedTuple):
     """Complete results from single-pole structural analysis."""
+
     # Wind load analysis
     velocity_pressure_qz_psf: float
     exposure_coefficient_kz: float
@@ -165,8 +166,7 @@ class SinglePoleResults(NamedTuple):
 
 
 def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
-    """
-    Complete structural analysis of single-pole sign per IBC 2024 / ASCE 7-22 / AISC 360-22.
+    """Complete structural analysis of single-pole sign per IBC 2024 / ASCE 7-22 / AISC 360-22.
 
     This is a deterministic, pure function - same inputs always produce same outputs.
 
@@ -178,6 +178,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
 
     Raises:
         ValueError: If configuration is invalid (negative values, etc.)
+
     """
     warnings = []
     code_refs = []
@@ -237,12 +238,12 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
         combined_moment = 0.0
 
         # Dead load component
-        if 'D' in factors:
-            combined_moment += factors['D'] * dead_load_moment_kipft
+        if "D" in factors:
+            combined_moment += factors["D"] * dead_load_moment_kipft
 
         # Wind load component
-        if 'W' in factors:
-            combined_moment += factors['W'] * wind_moment
+        if "W" in factors:
+            combined_moment += factors["W"] * wind_moment
 
         # Live load, roof live, snow (typically zero for sign structures)
         # These would be included for more complex structures
@@ -267,12 +268,12 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
         raise ValueError(
             f"Invalid section modulus: sx_in3={config.pole_section.sx_in3:.3f} in³. "
             f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'. "
-            f"Check that the section designation '{config.pole_section.designation}' exists in the AISC shapes database."
+            f"Check that the section designation '{config.pole_section.designation}' exists in the AISC shapes database.",
         )
     if config.pole_section.area_in2 <= 0:
         raise ValueError(
             f"Invalid cross-sectional area: area_in2={config.pole_section.area_in2:.3f} in². "
-            f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'."
+            f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'.",
         )
 
     # Bending stress: fb = M / Sx
@@ -318,7 +319,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
     if deflection_in > 0:
         deflection_ratio = pole_height_in / deflection_in
     else:
-        deflection_ratio = float('inf')
+        deflection_ratio = float("inf")
 
     code_refs.append("AISC 360-22 Chapter L: Serviceability (Deflection)")
 
@@ -364,7 +365,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
     if overturning_moment > 0:
         safety_factor_overturning = total_resisting_moment / overturning_moment
     else:
-        safety_factor_overturning = float('inf')
+        safety_factor_overturning = float("inf")
 
     # Soil bearing pressure (simplified)
     foundation_area_sqft = math.pi * math.pow(foundation_diameter / 2.0, 2)
@@ -426,7 +427,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
     if slenderness_ratio > MAX_SLENDERNESS_RATIO:
         warnings.append(
             f"Slenderness ratio L/r = {slenderness_ratio:.1f} exceeds {MAX_SLENDERNESS_RATIO} "
-            f"(AISC limit). Pole may be susceptible to buckling."
+            f"(AISC limit). Pole may be susceptible to buckling.",
         )
 
     if bending_ratio > 0.9:
@@ -435,7 +436,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
     if safety_factor_overturning < 2.0:
         warnings.append(
             f"Overturning safety factor {safety_factor_overturning:.2f} is below 2.0 "
-            f"(exceeds IBC minimum 1.5 but low margin)"
+            f"(exceeds IBC minimum 1.5 but low margin)",
         )
 
     # =========================================================================
@@ -505,8 +506,7 @@ def _calculate_foundation_diameter(
     soil_bearing_capacity_psf: float,
     target_safety_factor: float = 1.5,
 ) -> float:
-    """
-    Calculate required foundation diameter to meet overturning safety factor.
+    """Calculate required foundation diameter to meet overturning safety factor.
 
     Uses iterative approach to find minimum diameter that provides adequate
     resistance against overturning.
@@ -520,6 +520,7 @@ def _calculate_foundation_diameter(
 
     Returns:
         Required foundation diameter in feet
+
     """
     # Start with minimum practical diameter
     min_diameter = 3.0  # 3 ft minimum

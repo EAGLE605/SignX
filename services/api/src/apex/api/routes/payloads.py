@@ -39,22 +39,22 @@ async def save_payload(
     """
     logger.info("payload.save", project_id=project_id, module=payload.get("module"))
     assumptions: list[str] = []
-    
+
     # Verify project exists
     await require_project(project_id, db)
-    
+
     # Validate required fields
     module = validate_module(payload.get("module", ""))
-    
+
     # Compute SHA256
     sha256 = compute_payload_sha256(payload)
-    
+
     # Check for duplicate payload (same SHA256)
     existing_query = await db.execute(
         select(ProjectPayload).where(
             ProjectPayload.project_id == project_id,
             ProjectPayload.sha256 == sha256,
-        ).limit(1)
+        ).limit(1),
     )
     existing = existing_query.scalar_one_or_none()
     if existing:
@@ -69,7 +69,7 @@ async def save_payload(
             code_version=get_code_version(),
             model_config=get_model_config(),
         )
-    
+
     # Create new payload
     payload_row = ProjectPayload(
         project_id=project_id,
@@ -80,10 +80,10 @@ async def save_payload(
         sha256=sha256,
         created_at=datetime.now(UTC),
     )
-    
+
     db.add(payload_row)
     await db.flush()  # Get payload_id
-    
+
     # Log event
     from ..common.helpers import log_event
     await log_event(
@@ -93,17 +93,17 @@ async def save_payload(
         actor,
         {"payload_id": payload_row.payload_id, "module": module, "sha256": sha256},
     )
-    
+
     # Transaction auto-commits via decorator
-    
+
     result = {
         "payload_id": payload_row.payload_id,
         "sha256": sha256,
         "duplicate": False,
     }
-    
+
     add_assumption(assumptions, f"Payload saved with SHA256: {sha256[:16]}...")
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

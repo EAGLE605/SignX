@@ -25,29 +25,29 @@ async def calculate_concrete_yards(req: dict) -> ResponseEnvelope:
     """
     logger.info("concrete.yards", diameter=req.get("diameter_ft"))
     assumptions: list[str] = []
-    
+
     from ..common.validation import require_positive
-    
+
     diameter_ft = require_positive(float(req.get("diameter_ft", 0.0)), "diameter_ft")
     depth_ft = require_positive(float(req.get("depth_ft", 0.0)), "depth_ft")
-    
+
     # Volume in cubic feet: V = π * r² * h
     radius_ft = diameter_ft / 2.0
     volume_cf = math.pi * (radius_ft ** 2) * depth_ft
-    
+
     # Convert to cubic yards: 1 cu yd = 27 cu ft
     concrete_yards = round(volume_cf / 27.0, 2)
     volume_cf_rounded = round(volume_cf, 2)
-    
+
     result = {
         "concrete_yards": concrete_yards,
         "volume_cf": volume_cf_rounded,
         "diameter_ft": diameter_ft,
         "depth_ft": depth_ft,
     }
-    
+
     add_assumption(assumptions, "Formula: V = π × (d/2)² × h / 27")
-    
+
     return make_envelope(
         result=result,
         assumptions=assumptions,

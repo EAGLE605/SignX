@@ -18,7 +18,7 @@ async def geocode_address(address: str, api_key: str | None = None) -> dict[str,
     """
     if not address or address.strip() == "":
         return None
-    
+
     # Try OpenStreetMap Nominatim first (free, rate-limited)
     try:
         async with aiohttp.ClientSession() as session:
@@ -42,7 +42,7 @@ async def geocode_address(address: str, api_key: str | None = None) -> dict[str,
                         }
     except Exception:
         pass  # Fallback to Google or return None
-    
+
     # Try Google Geocoding API if key provided
     google_key = api_key or os.getenv("GOOGLE_GEOCODING_API_KEY")
     if google_key:
@@ -62,6 +62,6 @@ async def geocode_address(address: str, api_key: str | None = None) -> dict[str,
                             }
         except Exception:
             pass
-    
+
     return None
 

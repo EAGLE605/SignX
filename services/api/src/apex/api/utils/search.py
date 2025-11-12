@@ -44,12 +44,11 @@ async def _index_with_retry(project_id: str, project_data: dict[str, Any]) -> bo
         ) as resp:
             if resp.status in (200, 201):
                 return True
-            elif resp.status >= 500:
+            if resp.status >= 500:
                 # Server error - worth retrying
                 raise aiohttp.ClientError(f"Server error: {resp.status}")
-            else:
-                # Client error - don't retry
-                return False
+            # Client error - don't retry
+            return False
 
 
 async def index_project(project_id: str, project_data: dict[str, Any]) -> bool:
@@ -91,12 +90,11 @@ async def _search_with_retry(query: dict[str, Any]) -> list[dict[str, Any]] | No
                 hits = data.get("hits", {}).get("hits", [])
                 results = [hit["_source"] for hit in hits]
                 return results
-            elif resp.status >= 500:
+            if resp.status >= 500:
                 # Server error - worth retrying
                 raise aiohttp.ClientError(f"Server error: {resp.status}")
-            else:
-                # Client error - don't retry
-                return None
+            # Client error - don't retry
+            return None
 
 
 async def search_projects(query: dict[str, Any], fallback_db_query: Any = None) -> tuple[list[dict[str, Any]], bool]:
@@ -108,6 +106,7 @@ async def search_projects(query: dict[str, Any], fallback_db_query: Any = None) 
     
     Returns:
         (results, used_fallback)
+
     """
     try:
         results = await _search_with_retry(query)
@@ -116,15 +115,14 @@ async def search_projects(query: dict[str, Any], fallback_db_query: Any = None) 
             # Track success metric
             logger.info("metrics.search.query.success", count=len(results))
             return results, False
-        else:
-            logger.warning("search.query_failed")
-            # Track failure metric
-            logger.info("metrics.search.query.failure")
-            if fallback_db_query:
-                results = await fallback_db_query()
-                logger.info("metrics.search.query.fallback", count=len(results))
-                return results, True
-            return [], True
+        logger.warning("search.query_failed")
+        # Track failure metric
+        logger.info("metrics.search.query.failure")
+        if fallback_db_query:
+            results = await fallback_db_query()
+            logger.info("metrics.search.query.fallback", count=len(results))
+            return results, True
+        return [], True
     except Exception as e:
         logger.warning("search.query_error", error=str(e))
         # Track error metric
@@ -145,7 +143,7 @@ async def ensure_index_exists() -> bool:
             async with session.head(url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
                 if resp.status == 200:
                     return True
-            
+
             # Create index with mapping
             mapping = {
                 "mappings": {
@@ -156,8 +154,8 @@ async def ensure_index_exists() -> bool:
                         "customer": {"type": "text"},
                         "created_at": {"type": "date"},
                         "updated_at": {"type": "date"},
-                    }
-                }
+                    },
+                },
             }
             async with session.put(url, json=mapping, timeout=aiohttp.ClientTimeout(total=5)) as resp:
                 if resp.status in (200, 201):

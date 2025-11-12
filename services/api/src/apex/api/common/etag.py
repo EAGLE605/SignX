@@ -20,11 +20,12 @@ def compute_etag(content: dict[str, Any], updated_at: datetime | str | None = No
     
     Returns:
         SHA256 hex digest (truncated to 32 chars for readability)
+
     """
     # Sort keys for deterministic hash
     sorted_items = sorted(content.items())
     content_str = str(sorted_items)
-    
+
     # Add timestamp if provided
     if updated_at:
         if isinstance(updated_at, datetime):
@@ -32,7 +33,7 @@ def compute_etag(content: dict[str, Any], updated_at: datetime | str | None = No
         else:
             timestamp_str = str(updated_at)
         content_str = f"{content_str}:{timestamp_str}"
-    
+
     # Compute hash
     etag = hashlib.sha256(content_str.encode()).hexdigest()[:32]
     return etag
@@ -54,16 +55,17 @@ def compute_project_etag(
     
     Returns:
         ETag hex digest
+
     """
     content = {
         "project_id": project_id,
         "status": status,
     }
-    
+
     # Include additional fields if provided
     if additional_fields:
         content.update(additional_fields)
-    
+
     return compute_etag(content, updated_at)
 
 
@@ -76,13 +78,14 @@ def validate_if_match(current_etag: str, if_match_header: str | None) -> tuple[b
     
     Returns:
         Tuple of (is_valid, error_message)
+
     """
     if not if_match_header:
         return True, None  # No If-Match header, proceed
-    
+
     # Clean header value (remove quotes if present)
     if_match_etag = if_match_header.strip().strip('"')
-    
+
     if current_etag != if_match_etag:
         logger.warning(
             "etag_mismatch",
@@ -90,6 +93,6 @@ def validate_if_match(current_etag: str, if_match_header: str | None) -> tuple[b
             received=if_match_etag,
         )
         return False, f"ETag mismatch: expected {current_etag}, got {if_match_etag}"
-    
+
     return True, None
 

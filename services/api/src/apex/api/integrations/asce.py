@@ -34,6 +34,7 @@ async def fetch_asce_hazards(
     Returns:
         ASCEHazardResponse with wind speed, snow load, exposure category, and metadata.
         Returns None if API key is missing, request fails, or response is invalid.
+
     """
     api_key = os.getenv("ASCE_API_KEY")
     if not api_key:

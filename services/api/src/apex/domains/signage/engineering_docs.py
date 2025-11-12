@@ -1,5 +1,4 @@
-"""
-APEX Signage Engineering - Engineering Documentation Generation
+"""APEX Signage Engineering - Engineering Documentation Generation
 
 Calculation sheets (LaTeX) and load diagrams (matplotlib/SVG).
 """
@@ -84,8 +83,7 @@ def generate_calc_sheet(
     cabinets: list[Cabinet],
     output_format: str = "latex",
 ) -> str:
-    """
-    Generate calculation sheet with equations and references.
+    """Generate calculation sheet with equations and references.
     
     Args:
         site: Site loads
@@ -96,15 +94,16 @@ def generate_calc_sheet(
     
     Returns:
         LaTeX or HTML string (can be compiled to PDF via pdflatex or weasyprint)
+
     """
     # Prepare template variables
     area_ft2 = sum(c.width_ft * c.height_ft for c in cabinets)
-    
+
     # Recalculate for template (or use derived values)
     kz = 1.0  # Simplified
     q_psf = 0.00256 * kz * 1.0 * 0.85 * (site.wind_speed_mph**2) * 0.85
     m_svc_kipft = (q_psf * area_ft2 * derived_loads.z_cg_ft) / 1000.0
-    
+
     template_vars = {
         "wind_speed_mph": site.wind_speed_mph,
         "exposure": site.exposure,
@@ -116,7 +115,7 @@ def generate_calc_sheet(
         "m_svc_kipft": round(m_svc_kipft, 2),
         "mu_kipft": round(derived_loads.mu_kipft, 2),
     }
-    
+
     if output_format == "html":
         # HTML version for weasyprint
         html_template = Template("""
@@ -160,15 +159,13 @@ def generate_calc_sheet(
         </html>
         """)
         return html_template.render(**template_vars)
-    else:
-        # LaTeX version
-        template = Template(CALC_SHEET_TEMPLATE)
-        return template.render(**template_vars)
+    # LaTeX version
+    template = Template(CALC_SHEET_TEMPLATE)
+    return template.render(**template_vars)
 
 
 def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: str | None = None) -> bytes:
-    """
-    Convert calculation sheet to PDF.
+    """Convert calculation sheet to PDF.
     
     Args:
         calc_sheet_content: LaTeX or HTML content
@@ -176,14 +173,15 @@ def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: str | None = N
     
     Returns:
         PDF bytes
+
     """
     # For HTML, use weasyprint
     if calc_sheet_content.strip().startswith("<!DOCTYPE"):
         from weasyprint import HTML
-        
+
         pdf_bytes = HTML(string=calc_sheet_content).write_pdf()
         return pdf_bytes
-    
+
     # For LaTeX, would need pdflatex (external command)
     # Placeholder - would execute: pdflatex -output-directory /tmp file.tex
     raise NotImplementedError("LaTeX to PDF compilation requires pdflatex (not implemented)")
@@ -197,8 +195,7 @@ def generate_load_diagram(
     height_ft: float,
     output_format: str = "svg",
 ) -> str:
-    """
-    Generate free-body diagram and moment diagram.
+    """Generate free-body diagram and moment diagram.
     
     Args:
         derived_loads: Derived load calculations
@@ -207,46 +204,47 @@ def generate_load_diagram(
     
     Returns:
         Base64-encoded SVG string or PNG bytes
+
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    
+
     # Free-body diagram (left)
     ax1.set_aspect("equal")
     ax1.set_xlim(-2, 2)
     ax1.set_ylim(0, height_ft + 2)
-    
+
     # Sign representation
     sign_width = 1.0
     sign_height = height_ft * 0.3
     sign_x = -sign_width / 2.0
     sign_y = height_ft - sign_height
-    
+
     # Draw sign
     rect = plt.Rectangle((sign_x, sign_y), sign_width, sign_height, fill=True, color="lightblue", edgecolor="black")
     ax1.add_patch(rect)
-    
+
     # Draw pole
     ax1.plot([0, 0], [0, height_ft], "k-", linewidth=3, label="Pole")
-    
+
     # Draw loads
     wind_load_lbf = derived_loads.mu_kipft * 1000.0 / (derived_loads.z_cg_ft if derived_loads.z_cg_ft > 0 else height_ft)
     ax1.arrow(0.5, derived_loads.z_cg_ft, 0.5, 0, head_width=0.2, head_length=0.1, fc="red", ec="red")
     ax1.text(1.2, derived_loads.z_cg_ft, f"F={wind_load_lbf:.0f} lbf", fontsize=10)
-    
+
     # Ground reaction
     ax1.arrow(0, 0, 0, -0.5, head_width=0.2, head_length=0.1, fc="green", ec="green")
     ax1.text(-0.5, -0.5, "R", fontsize=10)
-    
+
     ax1.set_xlabel("Distance (ft)")
     ax1.set_ylabel("Height (ft)")
     ax1.set_title("Free-Body Diagram")
     ax1.grid(True, alpha=0.3)
     ax1.legend()
-    
+
     # Moment diagram (right)
     z_points = np.linspace(0, height_ft, 100)
     moment_points = derived_loads.mu_kipft * (z_points / height_ft)
-    
+
     ax2.plot(moment_points, z_points, "b-", linewidth=2, label="Moment")
     ax2.fill_betweenx(z_points, 0, moment_points, alpha=0.3, color="blue")
     ax2.set_xlabel("Moment (kip-ft)")
@@ -254,20 +252,19 @@ def generate_load_diagram(
     ax2.set_title("Moment Diagram")
     ax2.grid(True, alpha=0.3)
     ax2.legend()
-    
+
     # Save to buffer
     buf = io.BytesIO()
-    
+
     if output_format == "svg":
         fig.savefig(buf, format="svg", bbox_inches="tight")
         buf.seek(0)
         svg_content = buf.read().decode("utf-8")
         plt.close(fig)
         return base64.b64encode(svg_content.encode("utf-8")).decode("utf-8")
-    else:
-        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
-        buf.seek(0)
-        png_bytes = buf.read()
-        plt.close(fig)
-        return base64.b64encode(png_bytes).decode("utf-8")
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    buf.seek(0)
+    png_bytes = buf.read()
+    plt.close(fig)
+    return base64.b64encode(png_bytes).decode("utf-8")
 

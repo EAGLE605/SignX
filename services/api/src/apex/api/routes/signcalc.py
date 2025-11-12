@@ -19,7 +19,7 @@ router = APIRouter(prefix="/v1/signcalc")
 
 
 async def _proxy(
-    method: str, path: str, body: dict[str, Any] | None
+    method: str, path: str, body: dict[str, Any] | None,
 ) -> tuple[int, dict[str, Any] | str]:
     base = "http://signcalc:8002"
     url = f"{base}/{path.lstrip('/')}"
@@ -40,8 +40,7 @@ async def gateway(
     model_config=Depends(get_model_config),
     code_version=Depends(get_code_version),
 ):  # type: ignore[no-untyped-def]
-    """
-    Gateway proxy to signcalc service with rate limiting.
+    """Gateway proxy to signcalc service with rate limiting.
     
     Rate limit: 100 requests per minute per IP address.
     This helps prevent DoS attacks and resource exhaustion from expensive calculations.

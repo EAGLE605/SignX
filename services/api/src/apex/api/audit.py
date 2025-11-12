@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import structlog
-from fastapi import Request, Response
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models_audit import AuditLog
+
+if TYPE_CHECKING:
+    from fastapi import Request, Response
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -30,10 +32,10 @@ async def log_audit(
     error_details: dict | None = None,
 ) -> int:
     """Log an audit event to the immutable audit log.
-    
+
     This is an append-only operation - no updates or deletes.
     Critical for engineering liability and compliance.
-    
+
     Returns:
         The log_id of the created audit entry
 
@@ -72,7 +74,7 @@ async def log_audit(
     except Exception as e:
         # Never fail the main operation due to audit logging failure
         # But log the error for monitoring
-        logger.error("audit.log_failed", action=action, error=str(e))
+        logger.exception("audit.log_failed", action=action, error=str(e))
         return 0
 
 
@@ -93,17 +95,16 @@ async def audit_middleware_handler(
     This middleware is a placeholder for future request-level audit logging.
     """
     # Process request
-    response = await call_next(request)
+    return await call_next(request)
 
     # Note: Request metadata (IP, user agent, request ID) should be extracted
     # in route handlers where audit logging is actually performed
 
-    return response
 
 
 def extract_resource_from_path(path: str, method: str) -> tuple[str, str | None]:
     """Extract resource type and ID from API path.
-    
+
     Examples:
         /projects/{id} -> ("project", id)
         /projects/{id}/files/{file_id} -> ("file", file_id)
@@ -156,7 +157,7 @@ async def query_audit_logs(
     offset: int = 0,
 ) -> list[AuditLog]:
     """Query audit logs for compliance reporting.
-    
+
     Returns:
         List of audit log entries matching criteria
 

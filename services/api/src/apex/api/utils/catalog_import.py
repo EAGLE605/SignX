@@ -5,22 +5,26 @@ Agent 3: Importing AISC steel sections and ASCE wind load references for materia
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import structlog
 from sqlalchemy import insert, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import CodeReference, MaterialCatalog
+from api.db import CodeReference, MaterialCatalog
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
 
 async def import_aisc_sections(db: AsyncSession, sections: list[dict]) -> int:
     """Import AISC steel sections into material_catalog.
-    
+
     Args:
         db: Database session
         sections: List of section dicts with keys: material_id, standard, grade, shape, properties, dimensions, source_table
-    
+
     Returns:
         Number of sections imported
 
@@ -40,11 +44,11 @@ async def import_aisc_sections(db: AsyncSession, sections: list[dict]) -> int:
 
 async def import_asce_references(db: AsyncSession, refs: list[dict]) -> int:
     """Import ASCE/AISC code references into code_references.
-    
+
     Args:
         db: Database session
         refs: List of reference dicts with keys: ref_id, code, section, title, formula, application
-    
+
     Returns:
         Number of references imported
 

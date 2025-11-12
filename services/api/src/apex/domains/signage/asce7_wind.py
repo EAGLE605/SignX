@@ -1,4 +1,4 @@
-"""ASCE 7-22 Wind Load Calculations - Exact Code Implementation
+"""ASCE 7-22 Wind Load Calculations - Exact Code Implementation.
 
 This module implements wind load calculations per ASCE 7-22 (American Society of Civil Engineers
 Minimum Design Loads and Associated Criteria for Buildings and Other Structures, 2022 Edition).
@@ -267,9 +267,8 @@ def calculate_velocity_pressure(
     kz = calculate_kz(height_ft, exposure)
 
     # ASCE 7-22 Equation 26.10-1
-    qz = 0.00256 * kz * kzt * kd * ke * math.pow(wind_speed_mph, 2)
+    return 0.00256 * kz * kzt * kd * ke * math.pow(wind_speed_mph, 2)
 
-    return qz
 
 
 def calculate_design_wind_pressure(
@@ -326,9 +325,8 @@ def calculate_design_wind_pressure(
     iw = calculate_wind_importance_factor(risk_category)
 
     # Design pressure per ASCE 7-22 Chapter 29
-    p = qz * gust_effect_factor * force_coefficient * iw
+    return qz * gust_effect_factor * force_coefficient * iw
 
-    return p
 
 
 def calculate_wind_force_on_sign(
@@ -443,19 +441,14 @@ def calculate_wind_moment_at_base(
     moment_arm_ft = pole_height_ft + (sign_height_ft / 2.0)
 
     # Moment at base (convert lbs to kips)
-    moment_kipft = (total_wind_force_lbs / 1000.0) * moment_arm_ft
+    return (total_wind_force_lbs / 1000.0) * moment_arm_ft
 
-    return moment_kipft
 
 
 # Example usage and validation
 if __name__ == "__main__":
-    print("ASCE 7-22 Wind Load Calculator - Example Calculations\n")
-    print("=" * 70)
 
     # Example 1: Monument sign in Grimes, Iowa
-    print("\nExample 1: 15 ft monument sign, 8×3 ft face, 115 mph wind")
-    print("-" * 70)
 
     result = calculate_wind_force_on_sign(
         wind_speed_mph=115,
@@ -466,26 +459,13 @@ if __name__ == "__main__":
         risk_category=RiskCategory.II,
     )
 
-    print("  Wind speed:             115 mph (3-sec gust)")
-    print("  Exposure:               C (open terrain)")
-    print("  Risk category:          II (normal structures)")
-    print(f"  Sign centroid height:   {12.0 + 1.5:.1f} ft")
-    print(f"  Kz coefficient:         {result.exposure_coefficient_kz:.3f}")
-    print(f"  Iw importance factor:   {result.wind_importance_factor_iw:.2f}")
-    print(f"  Velocity pressure qz:   {result.velocity_pressure_qz_psf:.2f} psf")
-    print(f"  Design pressure p:      {result.design_wind_pressure_psf:.2f} psf")
-    print(f"  Total wind force:       {result.total_wind_force_lbs:.1f} lbs")
 
     moment = calculate_wind_moment_at_base(result.total_wind_force_lbs, 12.0, 3.0)
-    print(f"  Moment at base:         {moment:.2f} kip-ft")
 
-    print("\n  Code References:")
-    for ref in result.code_references:
-        print(f"    • {ref}")
+    for _ref in result.code_references:
+        pass
 
     # Example 2: Tall pylon sign
-    print("\n\nExample 2: 40 ft pylon sign, 10×6 ft face, 120 mph wind")
-    print("-" * 70)
 
     result2 = calculate_wind_force_on_sign(
         wind_speed_mph=120,
@@ -496,18 +476,6 @@ if __name__ == "__main__":
         risk_category=RiskCategory.II,
     )
 
-    print("  Wind speed:             120 mph (3-sec gust)")
-    print("  Exposure:               C (open terrain)")
-    print("  Risk category:          II (normal structures)")
-    print(f"  Sign centroid height:   {34.0 + 3.0:.1f} ft")
-    print(f"  Kz coefficient:         {result2.exposure_coefficient_kz:.3f}")
-    print(f"  Velocity pressure qz:   {result2.velocity_pressure_qz_psf:.2f} psf")
-    print(f"  Design pressure p:      {result2.design_wind_pressure_psf:.2f} psf")
-    print(f"  Total wind force:       {result2.total_wind_force_lbs:.1f} lbs")
 
     moment2 = calculate_wind_moment_at_base(result2.total_wind_force_lbs, 34.0, 6.0)
-    print(f"  Moment at base:         {moment2:.2f} kip-ft")
 
-    print("\n" + "=" * 70)
-    print("All calculations conform to ASCE 7-22 standards")
-    print("=" * 70)

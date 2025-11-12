@@ -11,7 +11,7 @@ logger = structlog.get_logger(__name__)
 
 async def audit_mutations(request: Any, response: Any) -> None:
     """Log mutations to audit trail.
-    
+
     Currently uses ProjectEvent table via log_event helper.
     This middleware is a placeholder for future enhancement.
     """
@@ -34,7 +34,7 @@ async def audit_mutations(request: Any, response: Any) -> None:
 
 async def audit_request_middleware(request: Any, call_next: Any) -> Any:
     """Middleware to audit all mutations.
-    
+
     Note: Actual audit logging happens in routes via log_event.
     This is just a pass-through for now.
     """

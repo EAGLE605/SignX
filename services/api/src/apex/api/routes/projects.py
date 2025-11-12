@@ -6,12 +6,11 @@ import hashlib
 import json
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import TokenData, get_current_user_optional
 from ..common.constants import get_constants_version_string
@@ -23,6 +22,9 @@ from ..projects.models import ProjectCreateRequest, ProjectStatus, ProjectUpdate
 from ..schemas import ResponseEnvelope, add_assumption
 from ..utils.search import ensure_index_exists, index_project, search_projects
 from ..utils.state_machine import validate_transition
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -59,13 +61,13 @@ def _coerce_search_record(record: dict[str, Any]) -> dict[str, Any]:
 
 def _compute_etag(project: Project) -> str:
     """Compute ETag for optimistic locking with strong collision resistance.
-    
+
     Uses full SHA256 hash for maximum collision resistance.
     Returns RFC 7232 compliant weak validator format.
-    
+
     Args:
         project: Project instance
-        
+
     Returns:
         ETag string with W/ prefix for weak validator per RFC 7232
 
@@ -88,12 +90,12 @@ def _compute_etag(project: Project) -> str:
 
 def _compute_project_content_sha256(project: Project) -> str:
     """Compute deterministic SHA256 hash of project content for audit trail.
-    
+
     Excludes timestamps and envelope fields for deterministic hashing.
-    
+
     Args:
         project: Project model instance
-    
+
     Returns:
         SHA256 hex digest (64 characters)
 
@@ -118,16 +120,16 @@ def _compute_project_content_sha256(project: Project) -> str:
 
 async def _db_search_projects(skip: int, limit: int, status: ProjectStatus | None, db: AsyncSession) -> list[dict[str, Any]]:
     """DB fallback query for project search.
-    
+
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
         status: Validated ProjectStatus enum or None
         db: Database session
-        
+
     Returns:
         List of project dictionaries
-        
+
     Raises:
         ValueError: If status is not a valid ProjectStatus enum value
 
@@ -136,7 +138,8 @@ async def _db_search_projects(skip: int, limit: int, status: ProjectStatus | Non
     if status:
         # Explicitly validate against enum (type safety ensures this, but add runtime check for defense in depth)
         if not isinstance(status, ProjectStatus):
-            raise ValueError(f"Invalid status: {status}. Must be a valid ProjectStatus enum value.")
+            msg = f"Invalid status: {status}. Must be a valid ProjectStatus enum value."
+            raise ValueError(msg)
         query = query.where(Project.status == status.value)
     query = query.order_by(Project.created_at.desc()).offset(skip).limit(limit)
 
@@ -148,14 +151,14 @@ async def _db_search_projects(skip: int, limit: int, status: ProjectStatus | Non
 
 @router.get("/", response_model=ResponseEnvelope)
 async def list_projects(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=500),  # Default 50, max 500
-    status: ProjectStatus | None = Query(None, description="Filter by project status"),
-    q: str | None = Query(None, description="Text search query"),
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=500)] = 50,  # Default 50, max 500
+    status: Annotated[ProjectStatus | None, Query(description="Filter by project status")] = None,
+    q: Annotated[str | None, Query(description="Text search query")] = None,
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """List projects with OpenSearch (DB fallback).
-    
+
     Supports text search via `q` parameter. Falls back to DB if OpenSearch unavailable.
     """
     logger.info("projects.list", skip=skip, limit=limit, status=status, q=q)
@@ -206,11 +209,11 @@ async def list_projects(
 @router.post("/", response_model=ResponseEnvelope)
 async def create_project(
     req: ProjectCreateRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user: TokenData | None = Depends(get_current_user_optional),  # type: ignore
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[TokenData | None, Depends(get_current_user_optional)],  # type: ignore
 ) -> ResponseEnvelope:
     """Create new project from Overview tab data.
-    
+
     Requires authentication. The user_id from the token will be used as created_by.
     """
     # Use authenticated user if available, otherwise use request value
@@ -278,7 +281,7 @@ async def create_project(
 
 
 @router.get("/{project_id}", response_model=ResponseEnvelope)
-async def get_project(project_id: str, db: AsyncSession = Depends(get_db)) -> ResponseEnvelope:
+async def get_project(project_id: str, db: Annotated[AsyncSession, Depends(get_db)]) -> ResponseEnvelope:
     """Fetch project metadata and latest snapshot."""
     logger.info("projects.get", project_id=project_id)
 
@@ -320,14 +323,14 @@ async def get_project(project_id: str, db: AsyncSession = Depends(get_db)) -> Re
 async def update_project(
     project_id: str,
     req: ProjectUpdateRequest,
-    if_match: str | None = Header(None, alias="If-Match"),
+    if_match: Annotated[str | None, Header(alias="If-Match")] = None,
     new_status: str | None = None,
     request: Request | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: TokenData | None = Depends(get_current_user_optional),
 ) -> ResponseEnvelope:
     """Update project metadata with optional state transition.
-    
+
     Requires If-Match header with current ETag for optimistic locking.
     Returns 412 Precondition Failed if ETag mismatch.
     """
@@ -454,7 +457,7 @@ async def update_project(
 
 
 @router.get("/{project_id}/final", response_model=ResponseEnvelope)
-async def get_project_final(project_id: str, db: AsyncSession = Depends(get_db)) -> ResponseEnvelope:
+async def get_project_final(project_id: str, db: Annotated[AsyncSession, Depends(get_db)]) -> ResponseEnvelope:
     """Non-destructive edit view landing on final screen."""
     logger.info("projects.get_final", project_id=project_id)
 
@@ -480,8 +483,8 @@ async def get_project_final(project_id: str, db: AsyncSession = Depends(get_db))
 @router.get("/{project_id}/events", response_model=ResponseEnvelope)
 async def get_project_events(
     project_id: str,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=1000)] = 100,
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """Fetch immutable audit feed for project."""

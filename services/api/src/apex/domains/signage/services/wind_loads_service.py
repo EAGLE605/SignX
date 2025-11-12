@@ -1,4 +1,4 @@
-"""Wind Load Service - ASCE 7-22 Implementation
+"""Wind Load Service - ASCE 7-22 Implementation.
 
 Complete refactored service demonstrating best practices:
 - Service layer pattern with dependency injection
@@ -21,7 +21,7 @@ from typing import Literal
 import structlog
 from pydantic import BaseModel, Field, field_validator
 
-from ..constants import (
+from signage.constants import (
     ASCE7_22_FORCE_COEFF_FLAT_SIGN,
     ASCE7_22_GUST_EFFECT_RIGID,
     ASCE7_22_VELOCITY_PRESSURE_COEFFICIENT,
@@ -29,7 +29,7 @@ from ..constants import (
     ASCE7_22_WIND_SPEED_MAX_MPH,
     ASCE7_22_WIND_SPEED_MIN_MPH,
 )
-from ..exceptions import CalculationError, ValidationError
+from signage.exceptions import CalculationError, ValidationError
 
 logger = structlog.get_logger(__name__)
 
@@ -184,7 +184,7 @@ class WindLoadService:
 
     """
 
-    def __init__(self, code_version: str = "ASCE7-22"):
+    def __init__(self, code_version: str = "ASCE7-22") -> None:
         """Initialize wind load service.
 
         Args:

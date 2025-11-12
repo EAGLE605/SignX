@@ -1,4 +1,4 @@
-"""INSA: Integrated Neuro-Symbolic Architecture for Sign Manufacturing
+"""INSA: Integrated Neuro-Symbolic Architecture for Sign Manufacturing.
 
 Core implementation combining symbolic reasoning (hard constraints, engineering rules)
 with neural learning (pattern recognition, adaptation) in a unified knowledge structure.
@@ -147,7 +147,7 @@ class KnowledgeNode:
 class INSAKnowledgeBase:
     """Unified knowledge base combining symbolic rules and neural embeddings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.nodes: dict[str, KnowledgeNode] = {}
         self.rules: dict[str, SymbolicRule] = {}
         self.neural_models: dict[str, Any] = {}  # Trained models per entity type
@@ -252,7 +252,7 @@ class INSAKnowledgeBase:
 class SymbolicReasoner:
     """Symbolic reasoning engine (System 2) - deliberate, logical."""
 
-    def __init__(self, kb: INSAKnowledgeBase):
+    def __init__(self, kb: INSAKnowledgeBase) -> None:
         self.kb = kb
 
     def verify_constraints(
@@ -335,7 +335,7 @@ class SymbolicReasoner:
 class NeuralReasoner:
     """Neural reasoning engine (System 1) - fast, pattern-based."""
 
-    def __init__(self, kb: INSAKnowledgeBase):
+    def __init__(self, kb: INSAKnowledgeBase) -> None:
         self.kb = kb
 
     def predict_similar_jobs(
@@ -418,7 +418,7 @@ class HybridScheduler:
     4. Iterate until feasible or timeout
     """
 
-    def __init__(self, kb: INSAKnowledgeBase):
+    def __init__(self, kb: INSAKnowledgeBase) -> None:
         self.kb = kb
         self.symbolic = SymbolicReasoner(kb)
         self.neural = NeuralReasoner(kb)

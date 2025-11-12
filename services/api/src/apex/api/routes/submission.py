@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.helpers import log_event, require_project
 from ..common.models import make_envelope
@@ -18,6 +18,9 @@ from ..schemas import ResponseEnvelope, add_assumption
 from ..utils.celery_client import enqueue_email, enqueue_pm_dispatch
 from ..utils.report import generate_report_from_payload
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/projects", tags=["submission"])
@@ -26,15 +29,15 @@ router = APIRouter(prefix="/projects", tags=["submission"])
 @router.post("/{project_id}/submit", response_model=ResponseEnvelope)
 async def submit_project(
     project_id: str,
-    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
     db: AsyncSession = Depends(get_db),
     actor: str = "system",
 ) -> ResponseEnvelope:
     """Submit project for formal engineering (idempotent).
-    
+
     Flow: finalize pricing → push to PM → record project_number → email PM
     State transition: estimating → submitted
-    
+
     Idempotent: If already submitted with same idempotency_key, returns existing result.
     """
     logger.info("project.submit", project_id=project_id, idempotency_key=idempotency_key)
@@ -126,7 +129,7 @@ async def submit_project(
             )
             # Transaction auto-commits on successful exit
     except Exception as e:
-        logger.error("submission.transaction_failed", project_id=project_id, error=str(e))
+        logger.exception("submission.transaction_failed", project_id=project_id, error=str(e))
         raise HTTPException(
             status_code=500,
             detail="Failed to complete project submission. Changes rolled back.",
@@ -169,12 +172,12 @@ async def submit_project(
 @router.post("/{project_id}/report", response_model=ResponseEnvelope)
 async def generate_report(
     project_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Generate PDF report (free, instant, cached).
-    
+
     Pages: (1) Cover, (2) Elevation, (3) Design Output, (4) Notes
-    
+
     Caching: Reports are cached by payload SHA256 for deterministic reuse.
     """
     logger.info("project.generate_report", project_id=project_id)

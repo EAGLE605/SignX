@@ -19,7 +19,7 @@ PG_POOL_USED = Gauge("apex_pg_pool_used", "Number of used connections in the Pos
 CACHE_HIT_RATIO = Gauge("apex_cache_hit_ratio", "Cache hit ratio (0..1), -1 if unknown")
 
 
-def setup_metrics(app):  # type: ignore[no-untyped-def]
+def setup_metrics(app) -> None:  # type: ignore[no-untyped-def]
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
     # Background task creation moved to startup event handler in main.py
 

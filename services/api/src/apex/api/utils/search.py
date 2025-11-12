@@ -16,7 +16,7 @@ from tenacity import (
     wait_exponential,
 )
 
-from ..deps import settings
+from api.deps import settings
 
 logger = structlog.get_logger(__name__)
 
@@ -46,14 +46,15 @@ async def _index_with_retry(project_id: str, project_data: dict[str, Any]) -> bo
                 return True
             if resp.status >= 500:
                 # Server error - worth retrying
-                raise aiohttp.ClientError(f"Server error: {resp.status}")
+                msg = f"Server error: {resp.status}"
+                raise aiohttp.ClientError(msg)
             # Client error - don't retry
             return False
 
 
 async def index_project(project_id: str, project_data: dict[str, Any]) -> bool:
     """Index project in OpenSearch with retry logic.
-    
+
     Returns: True if indexed, False if failed (will fallback to DB)
     """
     try:
@@ -88,22 +89,22 @@ async def _search_with_retry(query: dict[str, Any]) -> list[dict[str, Any]] | No
             if resp.status == 200:
                 data = await resp.json()
                 hits = data.get("hits", {}).get("hits", [])
-                results = [hit["_source"] for hit in hits]
-                return results
+                return [hit["_source"] for hit in hits]
             if resp.status >= 500:
                 # Server error - worth retrying
-                raise aiohttp.ClientError(f"Server error: {resp.status}")
+                msg = f"Server error: {resp.status}"
+                raise aiohttp.ClientError(msg)
             # Client error - don't retry
             return None
 
 
 async def search_projects(query: dict[str, Any], fallback_db_query: Any = None) -> tuple[list[dict[str, Any]], bool]:
     """Search projects in OpenSearch with DB fallback and retry logic.
-    
+
     Args:
         query: OpenSearch query dict
         fallback_db_query: Callable that returns DB results if search fails
-    
+
     Returns:
         (results, used_fallback)
 

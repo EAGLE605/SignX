@@ -1,4 +1,4 @@
-"""INSA Production Scheduler for Sign Manufacturing
+"""INSA Production Scheduler for Sign Manufacturing.
 
 Integrates:
 - INSA knowledge base (symbolic rules + neural embeddings)
@@ -29,7 +29,7 @@ logger = structlog.get_logger(__name__)
 class SignXProductionScheduler:
     """INSA-powered production scheduler for sign manufacturing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Initialize INSA components
         self.kb = get_knowledge_base()
         load_all_rules(self.kb)

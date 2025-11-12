@@ -32,17 +32,17 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def with_transaction(func: F) -> F:
     """Decorator to wrap async functions with automatic transaction management.
-    
+
     Automatically commits on success, rolls back on exception.
     Works with FastAPI dependency injection where `db` is a dependency.
-    
+
     Usage:
         @with_transaction
         async def my_route(db: AsyncSession = Depends(get_db)):
             # ... database operations ...
             # Auto-commits on success, auto-rollbacks on exception
             return result
-    
+
     Note: Only commits if function completes without exception.
     """
     @functools.wraps(func)
@@ -96,7 +96,7 @@ def with_transaction(func: F) -> F:
             if DB_TRANSACTIONS_TOTAL:
                 DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="failure").inc()
 
-            logger.error(
+            logger.exception(
                 "transaction.rolled_back",
                 func=func.__name__,
                 error=str(e),
@@ -110,17 +110,17 @@ def with_transaction(func: F) -> F:
 @asynccontextmanager
 async def transaction(db: AsyncSession, operation: str = "unknown"):
     """Context manager for explicit transaction control.
-    
+
     Usage:
         async with transaction(db, operation="create_project") as tx:
             # ... database operations ...
             # Auto-commits on successful exit
             # Auto-rollbacks on exception
-    
+
     Args:
         db: Database session
         operation: Operation name for metrics (default: "unknown")
-    
+
     Returns:
         The database session (for convenience)
 
@@ -155,7 +155,7 @@ async def transaction(db: AsyncSession, operation: str = "unknown"):
         if DB_TRANSACTIONS_TOTAL:
             DB_TRANSACTIONS_TOTAL.labels(operation=operation, status="failure").inc()
 
-        logger.error(
+        logger.exception(
             "transaction.rolled_back",
             operation=operation,
             error=str(e),

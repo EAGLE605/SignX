@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Engineering Documentation Generation
+"""APEX Signage Engineering - Engineering Documentation Generation.
 
 Calculation sheets (LaTeX) and load diagrams (matplotlib/SVG).
 """
@@ -7,12 +7,14 @@ from __future__ import annotations
 
 import base64
 import io
+from typing import TYPE_CHECKING
 
 import numpy as np
 from jinja2 import Template
 from matplotlib import pyplot as plt
 
-from .models import Cabinet, LoadDerivation, SiteLoads
+if TYPE_CHECKING:
+    from .models import Cabinet, LoadDerivation, SiteLoads
 
 # ========== Calculation Sheet Generation (LaTeX/PDF) ==========
 
@@ -84,14 +86,14 @@ def generate_calc_sheet(
     output_format: str = "latex",
 ) -> str:
     """Generate calculation sheet with equations and references.
-    
+
     Args:
         site: Site loads
         derived_loads: Derived load calculations
         height_ft: Sign height
         cabinets: Cabinet list
         output_format: "latex" or "html"
-    
+
     Returns:
         LaTeX or HTML string (can be compiled to PDF via pdflatex or weasyprint)
 
@@ -131,7 +133,7 @@ def generate_calc_sheet(
         </head>
         <body>
             <h1>APEX Engineering Calculation Sheet</h1>
-            
+
             <h2>Input Parameters</h2>
             <ul>
                 <li>Wind Speed: {{ wind_speed_mph }} mph</li>
@@ -139,7 +141,7 @@ def generate_calc_sheet(
                 <li>Sign Height: {{ height_ft }} ft</li>
                 <li>Cabinet Area: {{ area_ft2 }} ft²</li>
             </ul>
-            
+
             <h2>Load Derivation</h2>
             <p>Per ASCE 7-22 Chapter 26:</p>
             <div class="equation">
@@ -147,7 +149,7 @@ def generate_calc_sheet(
             </div>
             <p>Velocity pressure: q<sub>z</sub> = {{ q_psf }} psf</p>
             <p>Ultimate moment: M<sub>u</sub> = {{ mu_kipft }} kip-ft</p>
-            
+
             <div class="references">
                 <h2>References</h2>
                 <ul>
@@ -166,11 +168,11 @@ def generate_calc_sheet(
 
 def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: str | None = None) -> bytes:
     """Convert calculation sheet to PDF.
-    
+
     Args:
         calc_sheet_content: LaTeX or HTML content
         output_path: Optional output file path
-    
+
     Returns:
         PDF bytes
 
@@ -179,12 +181,12 @@ def generate_calc_sheet_pdf(calc_sheet_content: str, output_path: str | None = N
     if calc_sheet_content.strip().startswith("<!DOCTYPE"):
         from weasyprint import HTML
 
-        pdf_bytes = HTML(string=calc_sheet_content).write_pdf()
-        return pdf_bytes
+        return HTML(string=calc_sheet_content).write_pdf()
 
     # For LaTeX, would need pdflatex (external command)
     # Placeholder - would execute: pdflatex -output-directory /tmp file.tex
-    raise NotImplementedError("LaTeX to PDF compilation requires pdflatex (not implemented)")
+    msg = "LaTeX to PDF compilation requires pdflatex (not implemented)"
+    raise NotImplementedError(msg)
 
 
 # ========== Load Diagram Generation (Matplotlib/SVG) ==========
@@ -196,12 +198,12 @@ def generate_load_diagram(
     output_format: str = "svg",
 ) -> str:
     """Generate free-body diagram and moment diagram.
-    
+
     Args:
         derived_loads: Derived load calculations
         height_ft: Sign height
         output_format: "svg" or "png"
-    
+
     Returns:
         Base64-encoded SVG string or PNG bytes
 

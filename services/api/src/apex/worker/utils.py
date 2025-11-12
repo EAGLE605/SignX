@@ -39,9 +39,7 @@ def dlq_push(queue: str, item: dict[str, Any]) -> None:
 def breaker_allow(name: str, threshold: int = 3, cool_off_seconds: int = 60) -> bool:
     r = _redis()
     state_key = f"breaker:{name}:state"
-    if r.get(state_key):
-        return False
-    return True
+    return not r.get(state_key)
 
 
 def breaker_record_failure(name: str, threshold: int = 3, cool_off_seconds: int = 60) -> None:

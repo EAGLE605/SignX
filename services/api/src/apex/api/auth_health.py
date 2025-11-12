@@ -54,7 +54,7 @@ class ProviderHealth:
 
 class CircuitBreaker:
     """Circuit breaker for provider health checks.
-    
+
     Implements exponential backoff and automatic recovery.
     """
 
@@ -63,9 +63,9 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: int = 60,
         half_open_attempts: int = 3,
-    ):
+    ) -> None:
         """Initialize circuit breaker.
-        
+
         Args:
             failure_threshold: Number of consecutive failures before opening circuit
             recovery_timeout: Seconds to wait before attempting recovery
@@ -135,11 +135,11 @@ class CircuitBreaker:
 
 class AuthProviderHealthMonitor:
     """Monitor health of authentication providers.
-    
+
     Tracks metrics, implements circuit breakers, and provides health status.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize health monitor."""
         self.providers: dict[str, ProviderHealth] = {}
         self.circuit_breakers: dict[str, CircuitBreaker] = {}
@@ -147,10 +147,10 @@ class AuthProviderHealthMonitor:
 
     async def check_provider_health(self, provider: str) -> ProviderStatus:
         """Perform health check for a provider.
-        
+
         Args:
             provider: Provider name ("azure", "google", "apple", "password")
-        
+
         Returns:
             ProviderStatus enum
 
@@ -200,7 +200,7 @@ class AuthProviderHealthMonitor:
 
         except Exception as e:
             response_time = time.time() - start_time
-            logger.error("auth.health.check_error", provider=provider, error=str(e))
+            logger.exception("auth.health.check_error", provider=provider, error=str(e))
 
             async with self._lock:
                 health.last_check = time.time()
@@ -215,10 +215,10 @@ class AuthProviderHealthMonitor:
 
     async def _perform_health_check(self, provider: str) -> bool:
         """Perform actual health check for provider.
-        
+
         Args:
             provider: Provider name
-        
+
         Returns:
             True if healthy, False otherwise
 
@@ -255,10 +255,10 @@ class AuthProviderHealthMonitor:
 
     async def select_healthy_provider(self, preferred: str | None = None) -> str | None:
         """Select a healthy provider, preferring the specified one.
-        
+
         Args:
             preferred: Preferred provider name
-        
+
         Returns:
             Provider name if healthy, None if all are down
 

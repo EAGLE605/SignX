@@ -1,4 +1,4 @@
-"""Double Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
+"""Double Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant.
 
 This module analyzes double-pole sign structures (typically large monument signs,
 pylon signs, or multi-column supports) using current building code standards.
@@ -166,7 +166,8 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
 
     # Validate configuration
     if config.pole_spacing_ft < 3.0:
-        raise ValueError(f"Pole spacing {config.pole_spacing_ft} ft is too small (minimum 3 ft)")
+        msg = f"Pole spacing {config.pole_spacing_ft} ft is too small (minimum 3 ft)"
+        raise ValueError(msg)
 
     # =========================================================================
     # STEP 1: Wind Load Analysis (ASCE 7-22) - Same as Single Pole
@@ -219,7 +220,8 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
         code_refs.append("Load Distribution: Proportional (symmetric assumed)")
 
     else:
-        raise ValueError(f"Invalid load distribution method: {config.load_distribution_method}")
+        msg = f"Invalid load distribution method: {config.load_distribution_method}"
+        raise ValueError(msg)
 
     # =========================================================================
     # STEP 3: Lateral Stability Check
@@ -307,10 +309,7 @@ def analyze_double_pole_sign(config: DoublePoleConfig) -> DoublePoleResults:
     ) / (3.0 * E_STEEL_KSI * 1000.0 * config.pole_section.ix_in4)
 
     # Deflection ratio: L/δ
-    if deflection_in > 0:
-        deflection_ratio = pole_height_in / deflection_in
-    else:
-        deflection_ratio = float("inf")
+    deflection_ratio = pole_height_in / deflection_in if deflection_in > 0 else float("inf")
 
     code_refs.append("AISC 360-22 Chapter L: Serviceability (Deflection)")
 
@@ -537,8 +536,6 @@ def _calculate_foundation_diameter_double_pole(
 
 # Example usage
 if __name__ == "__main__":
-    print("Double Pole Sign Structural Analysis Example\n")
-    print("=" * 70)
 
     # Example: 20 ft double-pole monument with HSS6×6×1/4
     from apex.domains.signage.single_pole_solver import PoleSection
@@ -572,45 +569,12 @@ if __name__ == "__main__":
 
     result = analyze_double_pole_sign(config)
 
-    print("Configuration:")
-    print(f"  Poles: Two {pole.designation}, {config.pole_height_ft} ft tall")
-    print(f"  Spacing: {config.pole_spacing_ft} ft center-to-center")
-    print(f"  Sign: {config.sign_width_ft}×{config.sign_height_ft} ft ({config.sign_area_sqft} sqft)")
-    print(f"  Wind: {config.basic_wind_speed_mph} mph, Exposure {config.exposure_category.value}")
-    print()
 
-    print("Wind Loads (ASCE 7-22):")
-    print(f"  Total wind force:      {result.total_wind_force_lbs:.0f} lbs")
-    print(f"  Load per pole:         {result.load_per_pole_lbs:.0f} lbs (50%)")
-    print(f"  Moment per pole:       {result.moment_per_pole_kipft:.2f} kip-ft")
-    print()
 
-    print("Structural Analysis (AISC 360-22 ASD) - Per Pole:")
-    print(f"  Bending stress ratio:  {result.bending_stress_ratio:.3f}")
-    print(f"  Shear stress ratio:    {result.shear_stress_ratio:.3f}")
-    print(f"  Deflection:            {result.max_deflection_in:.2f} in (L/{result.deflection_ratio_l_over:.0f})")
-    print()
 
-    print("Foundation (IBC 2024) - Per Pole:")
-    print(f"  Diameter required:     {result.foundation_diameter_ft:.1f} ft")
-    print(f"  Embedment depth:       {result.foundation_depth_ft:.1f} ft")
-    print(f"  Overturning SF:        {result.safety_factor_overturning:.2f}")
-    print(f"  Total concrete:        {result.concrete_volume_total_cuyd:.2f} cu yd (both)")
-    print()
 
-    print("Design Status:")
-    print(f"  ✓ Strength check:         {'PASS' if result.passes_strength_check else 'FAIL'}")
-    print(f"  ✓ Deflection check:       {'PASS' if result.passes_deflection_check else 'FAIL'}")
-    print(f"  ✓ Overturning check:      {'PASS' if result.passes_overturning_check else 'FAIL'}")
-    print(f"  ✓ Soil bearing check:     {'PASS' if result.passes_soil_bearing_check else 'FAIL'}")
-    print(f"  ✓ Lateral stability:      {'PASS' if result.passes_lateral_stability_check else 'FAIL'}")
-    print(f"  ✓ Overall:                {'PASS' if result.passes_all_checks else 'FAIL'}")
 
     if result.warnings:
-        print("\nWarnings:")
-        for warning in result.warnings:
-            print(f"  ⚠ {warning}")
+        for _warning in result.warnings:
+            pass
 
-    print("\n" + "=" * 70)
-    print("Advantage: Reduced moment per pole = smaller sections possible")
-    print("=" * 70)

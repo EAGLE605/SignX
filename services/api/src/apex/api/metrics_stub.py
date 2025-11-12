@@ -10,7 +10,7 @@ Usage:
         DB_TRANSACTION_FAILURES,
         DB_ROLLBACKS_TOTAL,
     )
-    
+
     # In transaction context manager
     with DB_TRANSACTION_DURATION.labels(operation="create_project").time():
         DB_TRANSACTIONS_TOTAL.labels(operation="create_project", status="start").inc()

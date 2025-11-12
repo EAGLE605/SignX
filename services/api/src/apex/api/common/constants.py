@@ -19,7 +19,7 @@ logger = structlog.get_logger(__name__)
 class ConstantsPack:
     """A versioned pack of engineering constants."""
 
-    def __init__(self, name: str, version: str, sha256: str, data: dict[str, Any]):
+    def __init__(self, name: str, version: str, sha256: str, data: dict[str, Any]) -> None:
         self.name = name
         self.version = version
         self.sha256 = sha256
@@ -34,10 +34,10 @@ _PACKS: dict[str, ConstantsPack] = {}
 
 def load_constants_packs(base_dir: Path | None = None) -> dict[str, ConstantsPack]:
     """Load all constants packs from packs/constants/ directory.
-    
+
     Args:
         base_dir: Optional base directory (defaults to services/api/)
-    
+
     Returns:
         Dict mapping pack_name to ConstantsPack
 
@@ -61,7 +61,7 @@ def load_constants_packs(base_dir: Path | None = None) -> dict[str, ConstantsPac
         try:
             _load_pack(yaml_file)
         except Exception as e:
-            logger.error("constants_pack_load_failed", file=str(yaml_file), error=str(e))
+            logger.exception("constants_pack_load_failed", file=str(yaml_file), error=str(e))
 
     logger.info("constants_packs_loaded", count=len(_PACKS))
     return _PACKS
@@ -69,10 +69,10 @@ def load_constants_packs(base_dir: Path | None = None) -> dict[str, ConstantsPac
 
 def _load_pack(path: Path) -> ConstantsPack:
     """Load a single constants pack and compute SHA256.
-    
+
     Args:
         path: Path to YAML file
-    
+
     Returns:
         ConstantsPack instance
 
@@ -104,7 +104,7 @@ def _load_pack(path: Path) -> ConstantsPack:
 
 def get_constants_version_string() -> str:
     """Generate version string for all loaded packs.
-    
+
     Returns:
         Comma-separated string: "name:version:sha256,name:version:sha256..."
 
@@ -119,7 +119,7 @@ def get_constants_version_string() -> str:
 
 def get_pack_metadata() -> dict[str, Any]:
     """Get metadata dict for all loaded packs (for trace.pack_metadata).
-    
+
     Returns:
         Dict with pack names as keys and metadata as values
 
@@ -139,10 +139,10 @@ def get_pack_metadata() -> dict[str, Any]:
 
 def _extract_refs(data: dict[str, Any]) -> list[str]:
     """Extract references/citations from constants pack data.
-    
+
     Args:
         data: Parsed YAML data
-    
+
     Returns:
         List of reference strings
 
@@ -164,10 +164,10 @@ def _extract_refs(data: dict[str, Any]) -> list[str]:
 
 def get_constants(name: str) -> dict[str, Any] | None:
     """Get a specific constants pack by name.
-    
+
     Args:
         name: Pack name (e.g., "pricing")
-    
+
     Returns:
         Parsed data dict or None if not found
 

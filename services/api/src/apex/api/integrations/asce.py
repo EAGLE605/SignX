@@ -25,12 +25,12 @@ async def fetch_asce_hazards(
     risk_category: str = "II",
 ) -> ASCEHazardResponse | None:
     """Fetch ASCE 7-22 hazard data for a given location.
-    
+
     Args:
         lat: Latitude (decimal degrees)
         lon: Longitude (decimal degrees)
         risk_category: Risk category (I, II, III, or IV). Defaults to II.
-    
+
     Returns:
         ASCEHazardResponse with wind speed, snow load, exposure category, and metadata.
         Returns None if API key is missing, request fails, or response is invalid.

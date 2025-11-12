@@ -53,12 +53,12 @@ def create_access_token(
     mfa_verified: bool = False,
 ) -> str:
     """Create JWT access token with enhanced claims.
-    
+
     Args:
         data: Token payload data (must include "sub", "email", "account_id", etc.)
         expires_delta: Token expiration time (defaults to 7 days)
         mfa_verified: Whether 2FA was completed for this session
-    
+
     Returns:
         Encoded JWT token string
 
@@ -84,17 +84,17 @@ def create_session_token(
     expires_minutes: int = 10,
 ) -> str:
     """Create short-lived session token for 2FA flow.
-    
+
     Used after initial authentication, before 2FA verification.
     Short expiration (default 10 minutes) for security.
-    
+
     Args:
         user_id: User identifier
         email: User email
         account_id: Account identifier
         provider: Auth provider
         expires_minutes: Token expiration in minutes (default 10)
-    
+
     Returns:
         Encoded JWT session token
 
@@ -111,9 +111,9 @@ def create_session_token(
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> TokenData:
     """Extract and validate JWT from Authorization header.
-    
+
     Supports both Supabase tokens (preferred) and legacy APEX JWT tokens.
-    
+
     Raises:
         HTTPException: 401 if token invalid/expired/missing
 
@@ -211,7 +211,7 @@ async def get_current_user_optional(
     credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
 ) -> TokenData | None:
     """Optional authentication - returns None if no token provided.
-    
+
     Use for endpoints that work with or without authentication.
     """
     if not credentials:
@@ -225,7 +225,7 @@ async def get_current_user_optional(
 
 def require_role(allowed_roles: list[str]):
     """Dependency factory for role-based access control.
-    
+
     Example:
         @router.get("/admin/users")
         async def list_users(

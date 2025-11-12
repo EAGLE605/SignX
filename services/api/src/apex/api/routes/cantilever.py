@@ -11,12 +11,13 @@ from pathlib import Path
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add domain path for imports
 _domains_path = Path(__file__).parent.parent.parent / "domains" / "signage"
 if str(_domains_path) not in sys.path:
     sys.path.insert(0, str(_domains_path))
+
+from typing import TYPE_CHECKING, Annotated
 
 from cantilever_solver import (
     CantileverConfig,
@@ -34,6 +35,9 @@ from ..db import Project, get_db
 from ..deps import get_code_version, get_model_config
 from ..schemas import ResponseEnvelope, add_assumption
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/signage/cantilever", tags=["cantilever"])
@@ -42,10 +46,10 @@ router = APIRouter(prefix="/signage/cantilever", tags=["cantilever"])
 @router.post("/analyze", response_model=ResponseEnvelope)
 async def analyze_cantilever(
     req: dict,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Analyze cantilever sign structure for loads and stresses.
-    
+
     Request body:
     ```json
     {
@@ -71,7 +75,7 @@ async def analyze_cantilever(
         "design_life_years": 50  // Optional, default 50
     }
     ```
-    
+
     Returns cantilever analysis with moments, stresses, deflections, and fatigue assessment.
     """
     logger.info("cantilever.analyze", project_id=req.get("project_id"))
@@ -158,7 +162,7 @@ async def analyze_cantilever(
         )
 
     except ValueError as e:
-        logger.error("cantilever.analyze.validation_error", error=str(e))
+        logger.exception("cantilever.analyze.validation_error", error=str(e))
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.exception("cantilever.analyze.error", error=str(e))
@@ -168,7 +172,7 @@ async def analyze_cantilever(
 @router.post("/optimize", response_model=ResponseEnvelope)
 async def optimize_cantilever(req: dict) -> ResponseEnvelope:
     """Optimize cantilever design for given loads and constraints.
-    
+
     Request body:
     ```json
     {
@@ -185,7 +189,7 @@ async def optimize_cantilever(req: dict) -> ResponseEnvelope:
         "target_stress_ratio": 0.9   // Optional, default 0.9
     }
     ```
-    
+
     Returns optimized cantilever configuration with minimum weight.
     """
     logger.info("cantilever.optimize")
@@ -242,7 +246,7 @@ async def optimize_cantilever(req: dict) -> ResponseEnvelope:
         )
 
     except ValueError as e:
-        logger.error("cantilever.optimize.error", error=str(e))
+        logger.exception("cantilever.optimize.error", error=str(e))
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.exception("cantilever.optimize.error", error=str(e))
@@ -256,11 +260,11 @@ async def get_cantilever_sections(
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """Get available cantilever sections from catalog.
-    
+
     Query parameters:
     - max_span_ft: Filter sections by maximum recommended span
     - shape_type: Filter by shape (HSS, PIPE, W-SHAPE)
-    
+
     Returns list of suitable cantilever sections with properties.
     """
     logger.info("cantilever.sections", max_span=max_span_ft, shape=shape_type)
@@ -320,7 +324,7 @@ async def get_cantilever_sections(
 @router.post("/check", response_model=ResponseEnvelope)
 async def check_cantilever_feasibility(req: dict) -> ResponseEnvelope:
     """Quick feasibility check for cantilever sign.
-    
+
     Request body:
     ```json
     {
@@ -331,7 +335,7 @@ async def check_cantilever_feasibility(req: dict) -> ResponseEnvelope:
         "wind_speed_mph": 90.0
     }
     ```
-    
+
     Returns feasibility assessment with recommendations.
     """
     logger.info("cantilever.check")
@@ -417,7 +421,8 @@ async def _save_cantilever_to_project(
         project = project_result.scalar_one_or_none()
 
         if not project:
-            raise ValueError(f"Project {project_id} not found")
+            msg = f"Project {project_id} not found"
+            raise ValueError(msg)
 
         # Update project to indicate cantilever
         project.has_cantilever = True
@@ -427,5 +432,5 @@ async def _save_cantilever_to_project(
 
     except Exception as e:
         await db.rollback()
-        logger.error("cantilever.save_error", error=str(e))
+        logger.exception("cantilever.save_error", error=str(e))
         raise

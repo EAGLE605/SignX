@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
 import aiohttp
 import anyio
@@ -22,8 +22,8 @@ def _get_celery() -> Celery:
 
 @router.get("/ready", response_model=ResponseEnvelope, status_code=status.HTTP_200_OK)
 async def ready(
-    model_config: ModelConfigModel = Depends(get_model_config),
-    code_version: CodeVersionModel = Depends(get_code_version),
+    model_config: Annotated[ModelConfigModel, Depends(get_model_config)],
+    code_version: Annotated[CodeVersionModel, Depends(get_code_version)],
     request: Request = None,  # type: ignore[assignment]
 ):
     checks: dict[str, Any] = {}

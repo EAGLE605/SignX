@@ -1,4 +1,4 @@
-"""Enhanced pole/support selection with real AISC data"""
+"""Enhanced pole/support selection with real AISC data."""
 
 from __future__ import annotations
 
@@ -19,14 +19,14 @@ DATABASE_URL = "postgresql://apex:apex@localhost:5432/apex"
 
 
 async def get_aisc_connection():
-    """Get database connection for AISC data"""
+    """Get database connection for AISC data."""
     return await asyncpg.connect(DATABASE_URL)
 
 
 @router.post("/cantilever-options", response_model=ResponseEnvelope)
 async def get_cantilever_options(req: dict) -> ResponseEnvelope:
     """Get optimal cantilever pole options from AISC database.
-    
+
     Body: {
         moment_kipft: float,  # Required moment capacity
         arm_length_ft: float,  # Cantilever arm length
@@ -58,7 +58,7 @@ async def get_cantilever_options(req: dict) -> ResponseEnvelope:
 
         # Query optimal sections
         query = """
-        SELECT 
+        SELECT
             aisc_manual_label as designation,
             type,
             w as weight_plf,
@@ -70,7 +70,7 @@ async def get_cantilever_options(req: dict) -> ResponseEnvelope:
             -- Calculate stress ratio
             $1 * 12 / (sx * $2 * $3) as stress_ratio,
             -- Estimate deflection (simplified)
-            CASE 
+            CASE
                 WHEN ix > 0 THEN $4 * 12 * POW($4 * 12, 2) / (3 * 29000 * ix)
                 ELSE 999
             END as deflection_estimate_in
@@ -79,7 +79,7 @@ async def get_cantilever_options(req: dict) -> ResponseEnvelope:
             AND sx >= $5
             AND w <= $6
             AND ($7 = false OR is_astm_a1085 = true)
-        ORDER BY 
+        ORDER BY
             CASE WHEN $7 AND is_astm_a1085 THEN 0 ELSE 1 END,
             w
         LIMIT $8
@@ -167,7 +167,7 @@ async def get_cantilever_options(req: dict) -> ResponseEnvelope:
 @router.post("/single-pole-options", response_model=ResponseEnvelope)
 async def get_single_pole_options(req: dict) -> ResponseEnvelope:
     """Get optimal single pole options from AISC database.
-    
+
     Body: {
         height_ft: float,      # Pole height
         moment_kipft: float,   # Base moment
@@ -208,7 +208,7 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
         # Query optimal sections with buckling check
         query = f"""
         WITH pole_analysis AS (
-            SELECT 
+            SELECT
                 aisc_manual_label as designation,
                 type,
                 w as weight_plf,
@@ -220,9 +220,9 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
                 {height_ft * 12} / rx as lambda_x,
                 {height_ft * 12} / GREATEST(ry, 0.1) as lambda_y,
                 -- Euler buckling load (conservative)
-                CASE 
-                    WHEN rx > 0 THEN 
-                        3.14159 * 3.14159 * 29000 * area / 
+                CASE
+                    WHEN rx > 0 THEN
+                        3.14159 * 3.14159 * 29000 * area /
                         POWER({height_ft * 12} / rx, 2)
                     ELSE 0
                 END as pe_kips,
@@ -233,7 +233,7 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
                 AND sx >= {required_sx}
                 AND rx >= {min_r * 0.8}  -- Some margin on r
         )
-        SELECT 
+        SELECT
             designation,
             type,
             weight_plf,
@@ -245,7 +245,7 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
             lambda_y,
             pe_kips,
             flexure_ratio,
-            CASE 
+            CASE
                 WHEN lambda_x > 200 OR lambda_y > 200 THEN 'Slender - Check Required'
                 WHEN pe_kips < 10 THEN 'Low Buckling Capacity'
                 ELSE 'OK'
@@ -332,7 +332,7 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
 @router.get("/material-cost", response_model=ResponseEnvelope)
 async def get_material_cost(weight_lb: float = 100) -> ResponseEnvelope:
     """Get current material cost estimate from database.
-    
+
     Query params:
     - weight_lb: Weight in pounds
     """
@@ -389,7 +389,7 @@ async def get_material_cost(weight_lb: float = 100) -> ResponseEnvelope:
 @router.get("/shape-properties/{designation}", response_model=ResponseEnvelope)
 async def get_shape_properties(designation: str) -> ResponseEnvelope:
     """Get detailed properties for a specific AISC shape.
-    
+
     Path params:
     - designation: AISC designation (e.g., "HSS8x8x1/2")
     """
@@ -400,7 +400,7 @@ async def get_shape_properties(designation: str) -> ResponseEnvelope:
     try:
         # Query shape properties
         result = await conn.fetchrow("""
-            SELECT 
+            SELECT
                 aisc_manual_label as designation,
                 type,
                 w as weight_plf,

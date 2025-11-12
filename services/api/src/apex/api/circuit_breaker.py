@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import structlog
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = structlog.get_logger(__name__)
 
@@ -34,14 +36,14 @@ class CircuitBreakerConfig:
 
 class CircuitBreaker:
     """Circuit breaker implementation with exponential backoff.
-    
+
     Prevents cascading failures by temporarily blocking requests
     to failing services.
     """
 
-    def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
+    def __init__(self, name: str, config: CircuitBreakerConfig | None = None) -> None:
         """Initialize circuit breaker.
-        
+
         Args:
             name: Service name for logging
             config: Circuit breaker configuration
@@ -58,13 +60,13 @@ class CircuitBreaker:
 
     async def call(self, func: Callable[[], Any]) -> Any:
         """Execute function with circuit breaker protection.
-        
+
         Args:
             func: Async function to call
-        
+
         Returns:
             Function result
-        
+
         Raises:
             CircuitBreakerOpen: If circuit is open
 
@@ -79,9 +81,12 @@ class CircuitBreaker:
                     self.success_count = 0
                 else:
                     remaining = int(self.config.recovery_timeout - (time.time() - (self.last_failure_time or 0)))
-                    raise CircuitBreakerOpen(
+                    msg = (
                         f"Circuit breaker open for {self.name}. "
-                        f"Retry in {remaining}s",
+                        f"Retry in {remaining}s"
+                    )
+                    raise CircuitBreakerOpen(
+                        msg,
                     )
 
         # Execute function
@@ -165,11 +170,11 @@ _circuit_breakers: dict[str, CircuitBreaker] = {}
 
 def get_circuit_breaker(name: str, config: CircuitBreakerConfig | None = None) -> CircuitBreaker:
     """Get or create circuit breaker for a service.
-    
+
     Args:
         name: Service name
         config: Optional configuration
-    
+
     Returns:
         CircuitBreaker instance
 

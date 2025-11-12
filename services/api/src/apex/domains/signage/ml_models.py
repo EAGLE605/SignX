@@ -1,23 +1,25 @@
-"""APEX Signage Engineering - ML Models for AI Recommendations
+"""APEX Signage Engineering - ML Models for AI Recommendations.
 
 Predicts initial configurations and detects anomalous designs.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.tree import DecisionTreeRegressor
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # ========== Rule-Based Heuristics (Fallback) ==========
 
 
 def _heuristic_pole_suggestion(cabinet_area_ft2: float, height_ft: float, wind_speed_mph: float) -> dict[str, Any]:
     """Rule-based heuristic for pole suggestion when no training data.
-    
+
     Simple rules based on engineering experience.
     """
     # Estimate required moment (simplified)
@@ -69,7 +71,7 @@ def _heuristic_footing_suggestion(mu_kipft: float, soil_psf: float) -> dict[str,
 class ConfigPredictor:
     """ML model for predicting initial design configurations."""
 
-    def __init__(self, model_path: Path | None = None):
+    def __init__(self, model_path: Path | None = None) -> None:
         """Initialize predictor, load model if available."""
         self.model = None
         self.trained = False
@@ -85,7 +87,7 @@ class ConfigPredictor:
 
     def train(self, training_data: list[dict[str, Any]]) -> bool:
         """Train model on historical project data.
-        
+
         Features: cabinet_area, height, wind_speed, soil_bearing
         Target: pole_shape, footing_diameter, footing_depth
         """
@@ -124,7 +126,7 @@ class ConfigPredictor:
         soil_bearing_psf: float,
     ) -> dict[str, Any]:
         """Predict initial configuration.
-        
+
         Returns:
             Dict with suggested_pole, suggested_footing, confidence
 
@@ -168,16 +170,16 @@ def predict_initial_config(
     training_data_path: Path | None = None,
 ) -> dict[str, Any]:
     """Predict initial design configuration.
-    
+
     Uses ML model if trained, otherwise rule-based heuristics.
-    
+
     Args:
         cabinet_area_ft2: Total cabinet area
         height_ft: Sign height
         wind_speed_mph: Wind speed
         soil_bearing_psf: Soil bearing capacity
         training_data_path: Optional path to training data CSV
-    
+
     Returns:
         Dict with suggested_pole, suggested_footing, confidence, method
 
@@ -204,7 +206,7 @@ def predict_initial_config(
 class AnomalyDetector:
     """Isolation Forest-based anomaly detector for unusual configurations."""
 
-    def __init__(self, contamination: float = 0.1):
+    def __init__(self, contamination: float = 0.1) -> None:
         """Initialize detector with contamination rate (expected anomaly fraction)."""
         self.model = IsolationForest(contamination=contamination, random_state=42)
         self.trained = False
@@ -247,7 +249,7 @@ class AnomalyDetector:
         pole_sx_in3: float,
     ) -> dict[str, Any]:
         """Detect if configuration is anomalous.
-        
+
         Returns:
             Dict with is_anomaly, anomaly_score, reason
 
@@ -326,14 +328,14 @@ def detect_unusual_config(
     training_data_path: Path | None = None,
 ) -> dict[str, Any]:
     """Detect unusual configuration using isolation forest.
-    
+
     Args:
         cabinet_area_ft2: Cabinet area
         height_ft: Sign height
         wind_speed_mph: Wind speed
         pole_sx_in3: Selected pole section modulus
         training_data_path: Optional training data path
-    
+
     Returns:
         Dict with is_anomaly, anomaly_score, reason
 

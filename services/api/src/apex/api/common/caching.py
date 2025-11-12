@@ -19,11 +19,11 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def cache_result(ttl_seconds: int = 3600, key_prefix: str = "cache"):
     """Decorator to cache function results in Redis.
-    
+
     Args:
         ttl_seconds: Cache TTL in seconds
         key_prefix: Prefix for cache keys
-        
+
     Example:
         @cache_result(ttl_seconds=3600, key_prefix="poles")
         async def get_pole_options(...):

@@ -1,4 +1,4 @@
-"""VITRA Vision-Language-Action Integration for SignX
+"""VITRA Vision-Language-Action Integration for SignX.
 
 Provides vision analysis capabilities for:
 1. Sign inspection from images/video
@@ -34,7 +34,7 @@ class VitraVisionModel:
     - Local inference server
     """
 
-    def __init__(self, model_version: str = "vitra-v1.0"):
+    def __init__(self, model_version: str = "vitra-v1.0") -> None:
         self.model_version = model_version
         logger.info("vitra.init", version=model_version)
 

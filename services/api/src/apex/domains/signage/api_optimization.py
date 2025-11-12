@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Solver API Optimizations
+"""APEX Signage Engineering - Solver API Optimizations.
 
 Request coalescing, progressive enhancement, caching.
 """
@@ -8,8 +8,10 @@ from __future__ import annotations
 import hashlib
 import time
 from collections import OrderedDict
-from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Request coalescing cache (content_sha256 -> result)
 _COALESCING_CACHE: OrderedDict[str, tuple[Any, float]] = OrderedDict()
@@ -19,10 +21,10 @@ _COALESCING_WINDOW_MS = 100  # 100ms window
 
 def compute_content_sha256(content: dict[str, Any]) -> str:
     """Compute SHA256 hash of request content for deduplication.
-    
+
     Args:
         content: Request content dict
-    
+
     Returns:
         SHA256 hex digest
 
@@ -41,13 +43,13 @@ def coalesce_request(
     solver_kwargs: dict[str, Any],
 ) -> Any:
     """Coalesce identical requests within 100ms window.
-    
+
     Args:
         content_sha256: SHA256 of request content
         solver_func: Solver function to call
         solver_args: Positional arguments
         solver_kwargs: Keyword arguments
-    
+
     Returns:
         Solver result (cached or computed)
 
@@ -84,7 +86,7 @@ def coalesce_request(
 class ProgressiveResult:
     """Result container for progressive enhancement."""
 
-    def __init__(self, quick_estimate: Any, full_result: Any | None = None):
+    def __init__(self, quick_estimate: Any, full_result: Any | None = None) -> None:
         self.quick_estimate = quick_estimate
         self.full_result = full_result
         self.is_complete = full_result is not None
@@ -105,13 +107,13 @@ def derive_loads_progressive(
     quick_only: bool = False,
 ) -> ProgressiveResult:
     """Progressive enhancement: Quick estimate + full analysis.
-    
+
     Args:
         site: Site loads
         cabinets: Cabinet list
         height_ft: Height
         quick_only: If True, return only quick estimate (<50ms)
-    
+
     Returns:
         ProgressiveResult with quick_estimate and optional full_result
 

@@ -6,7 +6,7 @@ from typing import Any
 
 from celery import Celery
 
-from ..deps import settings
+from api.deps import settings
 
 # Singleton Celery client to avoid creating new instances on every call
 _celery_client: Celery | None = None
@@ -34,7 +34,7 @@ def get_celery_client() -> Celery:
 
 def enqueue_report_generation(project_id: str, payload: dict[str, Any]) -> str:
     """Enqueue PDF report generation task.
-    
+
     Returns: Task ID
     """
     celery = get_celery_client()
@@ -44,7 +44,7 @@ def enqueue_report_generation(project_id: str, payload: dict[str, Any]) -> str:
 
 def enqueue_pm_dispatch(project_id: str, project_data: dict[str, Any], idempotency_key: str | None = None) -> str:
     """Enqueue project management dispatch task.
-    
+
     Returns: Task ID
     """
     celery = get_celery_client()
@@ -54,7 +54,7 @@ def enqueue_pm_dispatch(project_id: str, project_data: dict[str, Any], idempoten
 
 def enqueue_email(to_email: str, subject: str, template: str, context: dict[str, Any]) -> str:
     """Enqueue email notification task.
-    
+
     Returns: Task ID
     """
     celery = get_celery_client()

@@ -21,18 +21,19 @@ async def send_email(self, to: str, subject: str, body: str, meta: dict[str, Any
         logger.warning("email.breaker_open", to=to)
         dlq_push("email", {"to": to, "subject": subject, "reason": "breaker_open", "meta": meta or {}})
         self.update_state(state=states.FAILURE, meta={"reason": "breaker_open"})
-        raise Ignore()
+        raise Ignore
 
     url = os.getenv("APEX_EMAIL_URL", "http://mailer.local/send")
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
             r = await client.post(url, json={"to": to, "subject": subject, "body": body, "meta": meta or {}})
         if r.status_code >= 500:
-            raise RuntimeError(f"mailer 5xx: {r.status_code}")
+            msg = f"mailer 5xx: {r.status_code}"
+            raise RuntimeError(msg)
         if r.status_code >= 400:
             dlq_push("email", {"to": to, "subject": subject, "status": r.status_code, "body": r.text})
             self.update_state(state=states.FAILURE, meta={"status": r.status_code})
-            raise Ignore()
+            raise Ignore
         breaker_record_success(breaker_name)
         logger.info("email.sent", to=to)
         return {"to": to, "status": r.status_code}

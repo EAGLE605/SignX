@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Failure Mode Analysis
+"""APEX Signage Engineering - Failure Mode Analysis.
 
 Detect and handle solver failures with diagnostics.
 """
@@ -29,10 +29,10 @@ class SolverFailureDetector:
 
     def detect_nan_inf(self, outputs: dict[str, Any]) -> list[str]:
         """Detect NaN/Inf in outputs.
-        
+
         Args:
             outputs: Output dictionary
-        
+
         Returns:
             List of field names containing NaN/Inf
 
@@ -57,10 +57,10 @@ class SolverFailureDetector:
 
     def detect_non_converged(self, optimization_result: dict[str, Any]) -> bool:
         """Detect non-converged optimization.
-        
+
         Args:
             optimization_result: Result from optimization
-        
+
         Returns:
             True if non-converged
 
@@ -87,11 +87,11 @@ class SolverFailureDetector:
         variable_bounds: dict[str, tuple[float, float]],
     ) -> list[str]:
         """Detect contradictory constraints.
-        
+
         Args:
             constraints: Constraint dict
             variable_bounds: Variable bounds {name: (min, max)}
-        
+
         Returns:
             List of contradictory constraint descriptions
 
@@ -121,13 +121,13 @@ class SolverFailureDetector:
         error: Exception | None = None,
     ) -> dict[str, Any]:
         """Generate diagnostics for troubleshooting.
-        
+
         Args:
             inputs: Input parameters
             outputs: Output values
             solver_name: Name of solver function
             error: Optional exception that occurred
-        
+
         Returns:
             Diagnostics dict
 
@@ -208,10 +208,10 @@ TROUBLESHOOTING_GUIDE = {
 
 def get_troubleshooting_advice(failure_type: str) -> dict[str, Any]:
     """Get troubleshooting advice for failure type.
-    
+
     Args:
         failure_type: Type of failure
-    
+
     Returns:
         Troubleshooting guide entry
 

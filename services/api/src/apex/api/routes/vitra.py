@@ -1,4 +1,4 @@
-"""VITRA Vision Analysis API Endpoints
+"""VITRA Vision Analysis API Endpoints.
 
 Provides 5 core vision capabilities:
 1. Sign Inspection - Automated damage/condition assessment
@@ -20,23 +20,17 @@ from pathlib import Path
 
 import structlog
 from fastapi import APIRouter, Depends, File, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.envelope import make_envelope
 from ..common.models import ResponseEnvelope
 from ..db import get_session
 from ..deps import get_current_user_id
-from ..schemas_vitra import (
-    ARDesignReviewRequest,
-    ComponentRecognitionRequest,
-    InspectionCreateRequest,
-    InstallationVideoCreateRequest,
-    RoboticFabricationRequest,
-)
 
 _domains_path = Path(__file__).parent.parent.parent / "domains" / "signage"
 if str(_domains_path) not in sys.path:
     sys.path.insert(0, str(_domains_path))
+
+from typing import TYPE_CHECKING, Annotated
 
 from vitra_service import (  # noqa: E402
     analyze_installation_video,
@@ -45,6 +39,17 @@ from vitra_service import (  # noqa: E402
     recognize_components,
     review_ar_design,
 )
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from ..schemas_vitra import (
+        ARDesignReviewRequest,
+        ComponentRecognitionRequest,
+        InspectionCreateRequest,
+        InstallationVideoCreateRequest,
+        RoboticFabricationRequest,
+    )
 
 logger = structlog.get_logger(__name__)
 
@@ -56,8 +61,8 @@ router = APIRouter(prefix="/vitra", tags=["vitra-vision"])
 @router.post("/inspections", response_model=ResponseEnvelope)
 async def create_vision_inspection(
     request: InspectionCreateRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Create new vision-based sign inspection.
 
@@ -141,8 +146,8 @@ async def create_vision_inspection(
 @router.get("/inspections/{inspection_id}", response_model=ResponseEnvelope)
 async def get_inspection(
     inspection_id: str,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Get inspection details by ID."""
     logger.info("vitra.inspection.get", user_id=user_id, inspection_id=inspection_id)
@@ -165,8 +170,8 @@ async def get_inspection(
 @router.post("/installation-videos", response_model=ResponseEnvelope)
 async def create_installation_video_analysis(
     request: InstallationVideoCreateRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Analyze installation process video.
 
@@ -244,8 +249,8 @@ async def create_installation_video_analysis(
 @router.post("/component-recognition", response_model=ResponseEnvelope)
 async def create_component_recognition(
     request: ComponentRecognitionRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Recognize and validate components from image.
 
@@ -324,8 +329,8 @@ async def create_component_recognition(
 @router.post("/ar-design-review", response_model=ResponseEnvelope)
 async def create_ar_design_review(
     request: ARDesignReviewRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """AR-assisted design review on site photo.
 
@@ -410,8 +415,8 @@ async def create_ar_design_review(
 @router.post("/robotic-fabrication", response_model=ResponseEnvelope)
 async def create_robotic_fabrication_session(
     request: RoboticFabricationRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Generate VLA action sequence for robotic fabrication.
 
@@ -496,8 +501,8 @@ async def create_robotic_fabrication_session(
 @router.get("/robotic-fabrication/{session_id}", response_model=ResponseEnvelope)
 async def get_robotic_session(
     session_id: str,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResponseEnvelope:
     """Get robotic fabrication session status and results."""
     logger.info("vitra.robotic.get", user_id=user_id, session_id=session_id)
@@ -517,8 +522,8 @@ async def get_robotic_session(
 
 @router.post("/upload-image", response_model=ResponseEnvelope)
 async def upload_inspection_image(
-    file: UploadFile = File(...),  # noqa: B008
-    user_id: str = Depends(get_current_user_id),
+    file: Annotated[UploadFile, File()],
+    user_id: Annotated[str, Depends(get_current_user_id)],
 ) -> ResponseEnvelope:
     """Upload image for vision analysis.
 

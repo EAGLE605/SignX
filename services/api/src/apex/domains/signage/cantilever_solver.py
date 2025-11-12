@@ -53,13 +53,17 @@ class CantileverConfig:
     def __post_init__(self):
         """Validate configuration."""
         if self.arm_length_ft <= 0:
-            raise ValueError(f"Arm length must be positive, got {self.arm_length_ft}")
+            msg = f"Arm length must be positive, got {self.arm_length_ft}"
+            raise ValueError(msg)
         if self.arm_length_ft > 30:
-            raise ValueError(f"Arm length {self.arm_length_ft}ft exceeds practical limit of 30ft")
+            msg = f"Arm length {self.arm_length_ft}ft exceeds practical limit of 30ft"
+            raise ValueError(msg)
         if abs(self.arm_angle_deg) > 15:
-            raise ValueError(f"Arm angle {self.arm_angle_deg}° exceeds typical range of ±15°")
+            msg = f"Arm angle {self.arm_angle_deg}° exceeds typical range of ±15°"
+            raise ValueError(msg)
         if self.num_arms < 1 or self.num_arms > 4:
-            raise ValueError(f"Number of arms must be 1-4, got {self.num_arms}")
+            msg = f"Number of arms must be 1-4, got {self.num_arms}"
+            raise ValueError(msg)
 
 
 class CantileverLoads(BaseModel):
@@ -143,14 +147,14 @@ def analyze_cantilever_sign(
     design_life_years: int = 50,
 ) -> CantileverAnalysisResult:
     """Analyze cantilever sign structure for strength, stability, and fatigue.
-    
+
     This function computes all critical design parameters for cantilever signs:
     - Moments and shears at pole base
     - Torsional effects from eccentric loading
     - Arm stresses and deflections
     - Connection design forces
     - Fatigue life assessment
-    
+
     Args:
         config: Cantilever configuration parameters
         loads: Applied loads on the sign
@@ -158,10 +162,10 @@ def analyze_cantilever_sign(
         include_fatigue: Whether to perform fatigue analysis
         wind_cycles_per_year: Estimated wind load cycles per year
         design_life_years: Design life for fatigue assessment
-    
+
     Returns:
         Complete analysis results with all design parameters
-    
+
     Raises:
         ValueError: If inputs are out of valid ranges
 
@@ -176,7 +180,8 @@ def analyze_cantilever_sign(
 
     # Validate pole height
     if pole_height_ft <= 0 or pole_height_ft > 60:
-        raise ValueError(f"Pole height {pole_height_ft}ft out of range (0-60ft)")
+        msg = f"Pole height {pole_height_ft}ft out of range (0-60ft)"
+        raise ValueError(msg)
 
     # Calculate loads
     # Wind force on sign
@@ -293,7 +298,7 @@ def analyze_cantilever_sign(
         assumptions.append("Second-order effects may be significant for long cantilevers")
 
     # Build result
-    result = CantileverAnalysisResult(
+    return CantileverAnalysisResult(
         moment_x_kipft=moment_x_ftlb / 1000.0,
         moment_y_kipft=moment_y_ftlb / 1000.0,
         moment_z_kipft=moment_z_ftlb / 1000.0,
@@ -317,7 +322,6 @@ def analyze_cantilever_sign(
         assumptions=assumptions,
     )
 
-    return result
 
 
 @validate_call
@@ -329,20 +333,20 @@ def optimize_cantilever_design(
     target_stress_ratio: float = 0.9,
 ) -> tuple[CantileverConfig, CantileverAnalysisResult]:
     """Optimize cantilever design for given loads and constraints.
-    
+
     Finds the most economical cantilever configuration that satisfies:
     - Strength requirements
     - Deflection limits
     - Fatigue life
     - Constructability constraints
-    
+
     Args:
         loads: Design loads on the sign
         pole_height_ft: Supporting pole height
         max_arm_length_ft: Maximum allowable arm length
         min_arm_length_ft: Minimum practical arm length
         target_stress_ratio: Target utilization ratio (0.9 = 90% stressed)
-    
+
     Returns:
         Tuple of (optimal configuration, analysis results)
 
@@ -403,7 +407,8 @@ def optimize_cantilever_design(
                 continue
 
     if best_config is None:
-        raise ValueError("No feasible cantilever design found for given constraints")
+        msg = "No feasible cantilever design found for given constraints"
+        raise ValueError(msg)
 
     return best_config, best_result
 
@@ -414,12 +419,12 @@ def calculate_cantilever_foundation_loads(
     overstrength_factor: float = 1.1,
 ) -> dict[str, float]:
     """Calculate foundation design loads from cantilever analysis.
-    
+
     Args:
         analysis_result: Results from cantilever analysis
         include_overstrength: Whether to include overstrength factor
         overstrength_factor: Factor to account for material overstrength
-    
+
     Returns:
         Dictionary with foundation design loads
 

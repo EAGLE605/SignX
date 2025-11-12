@@ -60,7 +60,7 @@ router = APIRouter(prefix="/signage/direct_burial", tags=["foundation"])
 @router.post("/footing/solve", response_model=ResponseEnvelope)
 async def footing_solve(req: dict) -> ResponseEnvelope:
     """Solve footing with interactive diameter → depth recalculation.
-    
+
     Body: {loads: dict, footing: {diameter_ft, shape}, soil_psf: float, num_poles: int, M_pole_kipft: float}
     Returns: {min_depth_ft, min_depth_in, concrete_yards} with monotonic validation
     """
@@ -109,7 +109,7 @@ async def footing_solve(req: dict) -> ResponseEnvelope:
 @router.post("/footing/design", response_model=ResponseEnvelope)
 async def footing_design(req: dict) -> ResponseEnvelope:
     """Design complete foundation with safety factors.
-    
+
     Body: {loads: {F_lbf, M_inlb}, constraints: {max_foundation_dia_in?, max_embed_in?}}
     Returns: Complete design with safety factors
     """

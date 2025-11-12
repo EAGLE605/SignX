@@ -16,7 +16,7 @@ logger = structlog.get_logger(__name__)
 
 async def enforce_idempotency(request: Request, call_next) -> Response:  # type: ignore[no-untyped-def]
     """Middleware to enforce idempotency via Redis caching.
-    
+
     Checks for Idempotency-Key header. If found, checks Redis cache.
     On cache hit: returns 200 with cached response.
     On cache miss: executes request and stores response in cache for 24h.

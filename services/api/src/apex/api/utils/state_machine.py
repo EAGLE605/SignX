@@ -26,8 +26,11 @@ def can_transition(from_status: ProjectStatus, to_status: ProjectStatus) -> bool
 def validate_transition(from_status: ProjectStatus, to_status: ProjectStatus) -> None:
     """Validate transition and raise ValueError if invalid."""
     if not can_transition(from_status, to_status):
-        raise ValueError(
+        msg = (
             f"Invalid state transition: {from_status} → {to_status}. "
-            f"Allowed transitions from {from_status}: {VALID_TRANSITIONS.get(from_status, [])}",
+            f"Allowed transitions from {from_status}: {VALID_TRANSITIONS.get(from_status, [])}"
+        )
+        raise ValueError(
+            msg,
         )
 

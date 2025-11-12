@@ -25,10 +25,10 @@ COMMON_PASSWORDS = {
 
 def hash_password(password: str) -> str:
     """Hash password using bcrypt.
-    
+
     Args:
         password: Plain text password
-    
+
     Returns:
         Bcrypt hashed password string
 
@@ -40,11 +40,11 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     """Verify password against hash.
-    
+
     Args:
         password: Plain text password
         hashed: Bcrypt hashed password
-    
+
     Returns:
         True if password matches, False otherwise
 
@@ -62,10 +62,10 @@ class PasswordStrength:
     @staticmethod
     def validate(password: str) -> tuple[bool, list[str]]:
         """Validate password strength.
-        
+
         Args:
             password: Password to validate
-        
+
         Returns:
             Tuple of (is_valid: bool, errors: list[str])
 
@@ -95,10 +95,10 @@ class PasswordStrength:
     @staticmethod
     def get_strength_score(password: str) -> int:
         """Calculate password strength score (0-100).
-        
+
         Args:
             password: Password to score
-        
+
         Returns:
             Strength score (0-100)
 
@@ -131,9 +131,9 @@ class PasswordStrength:
 class AccountLockoutManager:
     """Manage account lockout after failed login attempts."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize lockout manager with in-memory storage.
-        
+
         In production, this should use Redis or database.
         """
         self.failed_attempts: dict[str, list[float]] = {}  # email -> timestamps
@@ -141,10 +141,10 @@ class AccountLockoutManager:
 
     def record_failed_attempt(self, email: str) -> bool:
         """Record a failed login attempt.
-        
+
         Args:
             email: User email address
-        
+
         Returns:
             True if account is now locked, False otherwise
 
@@ -182,10 +182,10 @@ class AccountLockoutManager:
 
     def is_locked(self, email: str) -> tuple[bool, float | None]:
         """Check if account is locked.
-        
+
         Args:
             email: User email address
-        
+
         Returns:
             Tuple of (is_locked: bool, unlock_timestamp: Optional[float])
 
@@ -207,10 +207,10 @@ class AccountLockoutManager:
 
     def get_remaining_attempts(self, email: str) -> int:
         """Get remaining login attempts before lockout.
-        
+
         Args:
             email: User email address
-        
+
         Returns:
             Number of remaining attempts
 
@@ -240,30 +240,29 @@ def get_lockout_manager() -> AccountLockoutManager:
 
 def generate_reset_token(email: str, secret: str) -> str:
     """Generate secure password reset token.
-    
+
     Args:
         email: User email address
         secret: Secret key for token generation
-    
+
     Returns:
         Secure reset token
 
     """
     timestamp = str(int(time.time()))
     data = f"{email}:{timestamp}:{secret}"
-    token = hashlib.sha256(data.encode("utf-8")).hexdigest()
-    return token
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
 def validate_reset_token(token: str, email: str, secret: str, max_age_seconds: int = 3600) -> bool:
     """Validate password reset token.
-    
+
     Args:
         token: Reset token to validate
         email: User email address
         secret: Secret key for token validation
         max_age_seconds: Maximum token age in seconds (default 1 hour)
-    
+
     Returns:
         True if token is valid, False otherwise
 

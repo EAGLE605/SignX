@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import structlog
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from .audit import log_audit
 from .auth import TokenData, get_current_user
 from .db import get_db
 from .models_audit import Permission, Role, UserRole, role_permissions
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -21,7 +25,7 @@ async def get_user_permissions(
     account_id: str,
 ) -> set[str]:
     """Get all permissions for a user in a given account.
-    
+
     Returns:
         Set of permission strings in format "{resource}.{action}"
         e.g., {"calculation.approve", "project.delete", "file.read"}
@@ -59,12 +63,12 @@ async def check_permission(
     permission: str,
 ) -> bool:
     """Check if user has a specific permission.
-    
+
     Args:
         db: Database session
         user: Current user token data
         permission: Permission string in format "{resource}.{action}"
-    
+
     Returns:
         True if user has permission, False otherwise
 
@@ -81,7 +85,7 @@ async def check_permission(
 
 def require_permission(permission: str):
     """Decorator factory for requiring specific permissions.
-    
+
     Usage:
         @router.post("/calculations/{id}/approve")
         @require_permission("calculation.approve")
@@ -91,10 +95,10 @@ def require_permission(permission: str):
             db: AsyncSession = Depends(get_db),
         ):
             ...
-    
+
     Args:
         permission: Permission string in format "{resource}.{action}"
-    
+
     Returns:
         FastAPI dependency that checks permission and raises 403 if missing
 
@@ -135,7 +139,7 @@ def require_permission(permission: str):
 
 def require_any_permission(permissions: list[str]):
     """Decorator factory for requiring any of multiple permissions.
-    
+
     Usage:
         @router.get("/projects/{id}")
         @require_any_permission(["project.read", "project.read_all"])
@@ -180,7 +184,7 @@ def require_any_permission(permissions: list[str]):
 
 def require_all_permissions(permissions: list[str]):
     """Decorator factory for requiring all of multiple permissions.
-    
+
     Usage:
         @router.delete("/projects/{id}")
         @require_all_permissions(["project.delete", "project.confirm"])
@@ -306,7 +310,7 @@ async def seed_default_rbac(db: AsyncSession) -> None:
         elif role.name == "engineer":
             # Engineer can create/read calculations, approve
             for key, perm in permission_map.items():
-                if key.startswith("calculation.") or key.startswith("project.create"):
+                if key.startswith(("calculation.", "project.create")):
                     role.permissions.append(perm)
         elif role.name == "approver":
             # Approver can approve calculations and projects

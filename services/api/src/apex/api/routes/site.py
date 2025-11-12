@@ -26,10 +26,10 @@ class SiteResolveRequest(BaseModel):
     snow_load_override: float | None = Field(None, description="Manual snow load override (psf)")
 
 
-@router.post("/site/resolve", response_model=ResponseEnvelope)
+@router.post("/site/resolve")
 async def resolve_site(req: SiteResolveRequest) -> ResponseEnvelope:
     """Resolve site with geocoding and wind data.
-    
+
     Body: {address: str, exposure?: str, risk_category?: str}
     Returns: SiteLoads with wind/snow, lat/lon, and source metadata.
     """

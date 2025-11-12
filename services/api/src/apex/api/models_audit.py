@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Table, Text
@@ -10,10 +10,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base, int_pk, str_255, str_text
 
+if TYPE_CHECKING:
+    from datetime import datetime
+
 
 class AuditLog(Base):
     """Immutable audit log table for compliance and liability tracking.
-    
+
     Critical for engineering liability - all actions must be logged.
     Retention: 7 years minimum.
     Append-only (immutable) by design - no UPDATE or DELETE operations.

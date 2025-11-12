@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
 from gotrue.errors import AuthApiError
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
@@ -26,6 +26,9 @@ from ..deps import get_code_version, get_model_config, settings
 from ..duo_client import get_duo_service
 from ..schemas import ResponseEnvelope, add_assumption
 from ..supabase_client import get_supabase_admin, get_supabase_client
+
+if TYPE_CHECKING:
+    from fastapi.security import OAuth2PasswordRequestForm
 
 logger = structlog.get_logger(__name__)
 
@@ -80,12 +83,12 @@ class PasswordResetConfirm(BaseModel):
 
 @router.post("/register", response_model=ResponseEnvelope)
 async def register(
-    email: EmailStr = Query(..., description="User email address"),
-    password: str = Query(..., min_length=8, description="User password"),
-    account_id: str | None = Query(None, description="Account/organization ID (auto-assigned if not provided)"),
+    email: Annotated[EmailStr, Query(description="User email address")],
+    password: Annotated[str, Query(min_length=8, description="User password")],
+    account_id: Annotated[str | None, Query(description="Account/organization ID (auto-assigned if not provided)")] = None,
 ) -> ResponseEnvelope:
     """Register new user via Supabase Auth with automatic account assignment.
-    
+
     Creates a new user account with email/password authentication.
     Account and role are automatically assigned based on email domain.
     Email confirmation may be required based on Supabase configuration.
@@ -171,7 +174,7 @@ async def register(
         )
     except ValueError as e:
         # Supabase not configured
-        logger.error("auth.register.config_missing", error=str(e))
+        logger.exception("auth.register.config_missing", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Authentication service not configured",
@@ -179,12 +182,12 @@ async def register(
 
 
 @router.post("/token", response_model=ResponseEnvelope)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> ResponseEnvelope:
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> ResponseEnvelope:
     """OAuth2 password grant login via Supabase Auth.
-    
+
     Supports 2FA flow: if user has 2FA enabled, returns session_token instead of access_token.
     Client must then call /auth/verify-2fa to complete authentication.
-    
+
     Implements account lockout after failed attempts.
     """
     logger.info("auth.login", username=form_data.username)
@@ -317,7 +320,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> ResponseEnv
         )
     except ValueError as e:
         # Supabase not configured
-        logger.error("auth.login.config_missing", error=str(e))
+        logger.exception("auth.login.config_missing", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Authentication service not configured",
@@ -327,14 +330,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> ResponseEnv
 @router.get("/oauth/{provider}")
 async def oauth_login(
     provider: str,
-    redirect_to: str | None = Query(None, description="Redirect URL after OAuth"),
+    redirect_to: Annotated[str | None, Query(description="Redirect URL after OAuth")] = None,
 ) -> RedirectResponse:
     """Initiate OAuth flow for Microsoft 365, Google, or Apple.
-    
+
     Args:
         provider: OAuth provider ("azure", "google", "apple")
         redirect_to: Optional redirect URL (defaults to frontend callback)
-    
+
     Returns:
         Redirect to OAuth provider
 
@@ -372,13 +375,13 @@ async def oauth_login(
         )
 
     except ValueError as e:
-        logger.error("auth.oauth.config_missing", error=str(e))
+        logger.exception("auth.oauth.config_missing", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Authentication service not configured",
         )
     except Exception as e:
-        logger.error("auth.oauth.failed", provider=provider_normalized, error=str(e))
+        logger.exception("auth.oauth.failed", provider=provider_normalized, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"OAuth flow failed: {e!s}",
@@ -387,12 +390,12 @@ async def oauth_login(
 
 @router.get("/callback")
 async def auth_callback(
-    code: str | None = Query(None),
-    error: str | None = Query(None),
-    error_description: str | None = Query(None),
+    code: Annotated[str | None, Query()] = None,
+    error: Annotated[str | None, Query()] = None,
+    error_description: Annotated[str | None, Query()] = None,
 ) -> RedirectResponse:
     """Handle OAuth callback from provider.
-    
+
     Supabase automatically handles token exchange.
     Redirects to frontend with access token or error.
     """
@@ -419,10 +422,10 @@ async def auth_callback(
 @router.post("/verify-2fa", response_model=ResponseEnvelope)
 async def verify_2fa(req: Verify2FARequest) -> ResponseEnvelope:
     """Verify 2FA with Duo and issue final access token.
-    
+
     Args:
         req: Session token and 2FA verification details
-    
+
     Returns:
         Final access token with mfa_verified=true
 
@@ -497,7 +500,7 @@ async def verify_2fa(req: Verify2FARequest) -> ResponseEnvelope:
         duo_username = email
 
     # Perform Duo verification
-    success, txid = await duo_service.verify_user(
+    success, _txid = await duo_service.verify_user(
         username=duo_username,
         factor=req.factor,
         passcode=req.passcode,
@@ -550,10 +553,10 @@ async def verify_2fa(req: Verify2FARequest) -> ResponseEnvelope:
 
 @router.post("/enable-2fa", response_model=ResponseEnvelope)
 async def enable_2fa(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """Enable 2FA for current user (opt-in).
-    
+
     Updates user metadata to mark 2FA as enabled.
     User must enroll in Duo separately (via Duo Admin portal or enrollment flow).
     """
@@ -599,7 +602,7 @@ async def enable_2fa(
             model_config=get_model_config(),
         )
     except Exception as e:
-        logger.error("auth.2fa.enable.failed", user_id=current_user.user_id, error=str(e))
+        logger.exception("auth.2fa.enable.failed", user_id=current_user.user_id, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to enable 2FA: {e!s}",
@@ -608,7 +611,7 @@ async def enable_2fa(
 
 @router.post("/disable-2fa", response_model=ResponseEnvelope)
 async def disable_2fa(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """Disable 2FA for current user (opt-out)."""
     logger.info("auth.2fa.disable", user_id=current_user.user_id)
@@ -636,7 +639,7 @@ async def disable_2fa(
             model_config=get_model_config(),
         )
     except Exception as e:
-        logger.error("auth.2fa.disable.failed", user_id=current_user.user_id, error=str(e))
+        logger.exception("auth.2fa.disable.failed", user_id=current_user.user_id, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to disable 2FA: {e!s}",
@@ -645,7 +648,7 @@ async def disable_2fa(
 
 @router.get("/2fa-status", response_model=ResponseEnvelope)
 async def get_2fa_status(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """Get 2FA status for current user."""
     try:
@@ -676,7 +679,7 @@ async def get_2fa_status(
             model_config=get_model_config(),
         )
     except Exception as e:
-        logger.error("auth.2fa.status.failed", user_id=current_user.user_id, error=str(e))
+        logger.exception("auth.2fa.status.failed", user_id=current_user.user_id, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get 2FA status: {e!s}",
@@ -685,11 +688,11 @@ async def get_2fa_status(
 
 @router.post("/switch-account", response_model=ResponseEnvelope)
 async def switch_account(
-    account_id: str = Query(..., description="Account ID to switch to"),
-    current_user: TokenData = Depends(get_current_user),
+    account_id: Annotated[str, Query(description="Account ID to switch to")],
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """Switch active account for multi-account users.
-    
+
     Verifies user has access to the requested account, then issues new token.
     """
     logger.info("auth.account.switch", user_id=current_user.user_id, account_id=account_id)
@@ -718,7 +721,7 @@ async def switch_account(
                     role = acc.get("role", "viewer")
                     break
         except Exception as e:
-            logger.error("auth.account.switch.failed", user_id=current_user.user_id, error=str(e))
+            logger.exception("auth.account.switch.failed", user_id=current_user.user_id, error=str(e))
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to verify account access: {e!s}",
@@ -764,7 +767,7 @@ async def switch_account(
 
 @router.get("/accounts", response_model=ResponseEnvelope)
 async def list_accounts(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """List all accounts the current user belongs to."""
     return make_envelope(
@@ -783,7 +786,7 @@ async def list_accounts(
 
 @router.get("/me", response_model=ResponseEnvelope)
 async def get_current_user_info(
-    current_user: TokenData = Depends(get_current_user),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
 ) -> ResponseEnvelope:
     """Get current user information and account details."""
     return make_envelope(
@@ -808,7 +811,7 @@ async def get_current_user_info(
 @router.post("/password-reset", response_model=ResponseEnvelope)
 async def request_password_reset(req: PasswordResetRequest) -> ResponseEnvelope:
     """Request password reset token.
-    
+
     Sends reset token via email (in production, use email service).
     Token expires in 1 hour.
     """
@@ -870,7 +873,7 @@ async def request_password_reset(req: PasswordResetRequest) -> ResponseEnvelope:
             )
 
         except Exception as e:
-            logger.error("auth.password_reset.error", email=req.email, error=str(e))
+            logger.exception("auth.password_reset.error", email=req.email, error=str(e))
             # Don't reveal error details
             return make_envelope(
                 result={"message": "If that email exists, a reset link has been sent."},
@@ -883,7 +886,7 @@ async def request_password_reset(req: PasswordResetRequest) -> ResponseEnvelope:
             )
 
     except ValueError as e:
-        logger.error("auth.password_reset.config_missing", error=str(e))
+        logger.exception("auth.password_reset.config_missing", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Password reset service not available",
@@ -893,7 +896,7 @@ async def request_password_reset(req: PasswordResetRequest) -> ResponseEnvelope:
 @router.post("/password-reset/confirm", response_model=ResponseEnvelope)
 async def confirm_password_reset(req: PasswordResetConfirm) -> ResponseEnvelope:
     """Confirm password reset with token.
-    
+
     Validates token and updates password.
     """
     logger.info("auth.password_reset.confirm", email=req.email)
@@ -977,7 +980,7 @@ async def confirm_password_reset(req: PasswordResetConfirm) -> ResponseEnvelope:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("auth.password_reset.confirm.error", email=req.email, error=str(e))
+        logger.exception("auth.password_reset.confirm.error", email=req.email, error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to reset password",

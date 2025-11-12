@@ -1,4 +1,4 @@
-"""Single Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant
+"""Single Pole Sign Structural Analysis - IBC 2024 / ASCE 7-22 / AISC 360-22 Compliant.
 
 This module analyzes single-pole sign structures (monuments, pylons, cantilever posts)
 using current building code standards.
@@ -265,15 +265,21 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
 
     # Validate section properties before calculation (per AISC 360-22 design requirements)
     if config.pole_section.sx_in3 <= 0:
-        raise ValueError(
+        msg = (
             f"Invalid section modulus: sx_in3={config.pole_section.sx_in3:.3f} in³. "
             f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'. "
-            f"Check that the section designation '{config.pole_section.designation}' exists in the AISC shapes database.",
+            f"Check that the section designation '{config.pole_section.designation}' exists in the AISC shapes database."
+        )
+        raise ValueError(
+            msg,
         )
     if config.pole_section.area_in2 <= 0:
-        raise ValueError(
+        msg = (
             f"Invalid cross-sectional area: area_in2={config.pole_section.area_in2:.3f} in². "
-            f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'.",
+            f"Section properties must be positive. Verify AISC database lookup for section '{config.pole_section.designation}'."
+        )
+        raise ValueError(
+            msg,
         )
 
     # Bending stress: fb = M / Sx
@@ -316,10 +322,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
     ) / (3.0 * E_STEEL_KSI * 1000.0 * config.pole_section.ix_in4)
 
     # Deflection ratio: L/δ
-    if deflection_in > 0:
-        deflection_ratio = pole_height_in / deflection_in
-    else:
-        deflection_ratio = float("inf")
+    deflection_ratio = pole_height_in / deflection_in if deflection_in > 0 else float("inf")
 
     code_refs.append("AISC 360-22 Chapter L: Serviceability (Deflection)")
 
@@ -554,8 +557,6 @@ def _calculate_foundation_diameter(
 
 # Example usage
 if __name__ == "__main__":
-    print("Single Pole Sign Structural Analysis Example\n")
-    print("=" * 70)
 
     # Example: 15 ft monument sign with HSS8×8×1/4
     pole = PoleSection(
@@ -585,41 +586,12 @@ if __name__ == "__main__":
 
     result = analyze_single_pole_sign(config)
 
-    print("Configuration:")
-    print(f"  Pole: {pole.designation}, {pole.pole_height_ft} ft tall")
-    print(f"  Sign: {config.sign_width_ft}×{config.sign_height_ft} ft ({config.sign_area_sqft} sqft)")
-    print(f"  Wind: {config.basic_wind_speed_mph} mph, Exposure {config.exposure_category.value}")
-    print()
 
-    print("Wind Loads (ASCE 7-22):")
-    print(f"  Design pressure:       {result.design_wind_pressure_psf:.1f} psf")
-    print(f"  Total wind force:      {result.total_wind_force_lbs:.0f} lbs")
-    print(f"  Moment at base:        {result.wind_moment_at_base_kipft:.2f} kip-ft")
-    print()
 
-    print("Structural Analysis (AISC 360-22 ASD):")
-    print(f"  Bending stress ratio:  {result.bending_stress_ratio:.3f} ({result.bending_stress_fb_ksi:.1f}/{result.allowable_bending_Fb_ksi:.1f} ksi)")
-    print(f"  Shear stress ratio:    {result.shear_stress_ratio:.3f}")
-    print(f"  Deflection:            {result.max_deflection_in:.2f} in (L/{result.deflection_ratio_l_over:.0f})")
-    print()
 
-    print("Foundation (IBC 2024):")
-    print(f"  Diameter required:     {result.foundation_diameter_ft:.1f} ft")
-    print(f"  Embedment depth:       {result.foundation_depth_ft:.1f} ft")
-    print(f"  Overturning SF:        {result.safety_factor_overturning:.2f} (min 1.5)")
-    print(f"  Concrete volume:       {result.concrete_volume_cuyd:.2f} cu yd")
-    print()
 
-    print("Design Status:")
-    print(f"  ✓ Strength check:      {'PASS' if result.passes_strength_check else 'FAIL'}")
-    print(f"  ✓ Deflection check:    {'PASS' if result.passes_deflection_check else 'FAIL'}")
-    print(f"  ✓ Overturning check:   {'PASS' if result.passes_overturning_check else 'FAIL'}")
-    print(f"  ✓ Soil bearing check:  {'PASS' if result.passes_soil_bearing_check else 'FAIL'}")
-    print(f"  ✓ Overall:             {'PASS' if result.passes_all_checks else 'FAIL'}")
 
     if result.warnings:
-        print("\nWarnings:")
-        for warning in result.warnings:
-            print(f"  ⚠ {warning}")
+        for _warning in result.warnings:
+            pass
 
-    print("\n" + "=" * 70)

@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Batch Processing
+"""APEX Signage Engineering - Batch Processing.
 
 Parallel processing for multiple project configurations.
 """
@@ -6,10 +6,12 @@ Parallel processing for multiple project configurations.
 from __future__ import annotations
 
 import multiprocessing
-from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .models import Cabinet, SiteLoads
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # ========== Batch Solver ==========
 
@@ -23,7 +25,7 @@ class ProjectConfig:
         site: SiteLoads,
         cabinets: list[dict[str, Any]],
         height_ft: float,
-    ):
+    ) -> None:
         self.project_id = project_id
         self.site = site
         self.cabinets = cabinets
@@ -32,10 +34,10 @@ class ProjectConfig:
 
 def _solve_single_project(config: ProjectConfig) -> dict[str, Any]:
     """Solve a single project (used in multiprocessing).
-    
+
     Args:
         config: Project configuration
-    
+
     Returns:
         Dict with project_id, result, error (if any)
 
@@ -81,15 +83,15 @@ def solve_batch(
     n_workers: int | None = None,
 ) -> list[dict[str, Any]]:
     """Solve multiple projects in parallel.
-    
+
     Args:
         projects: List of project configurations
         progress_callback: Optional callback(total, completed, failed)
         n_workers: Number of parallel workers (default: CPU count)
-    
+
     Returns:
         List of results (one per project)
-    
+
     Target: Process 100 projects in <10s
 
     """

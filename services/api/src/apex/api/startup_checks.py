@@ -38,9 +38,8 @@ def validate_prod_requirements() -> None:
 
     if failures:
         logger.error("prod_validation_failed", failures=failures)
-        print("FATAL: Production environment validation failed:", file=sys.stderr)
-        for f in failures:
-            print(f"  - {f}", file=sys.stderr)
+        for _f in failures:
+            pass
         sys.exit(1)
 
     logger.info("prod_validation_passed")

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from datetime import UTC
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import TokenData, get_current_user
 from ..common.helpers import get_code_version, get_model_config
@@ -19,6 +19,9 @@ from ..models_audit import FileUpload
 from ..rbac import require_permission
 from ..schemas import ResponseEnvelope, add_assumption
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1/uploads", tags=["uploads"])
@@ -26,16 +29,16 @@ router = APIRouter(prefix="/api/v1/uploads", tags=["uploads"])
 
 @router.post("", response_model=ResponseEnvelope)
 async def upload_file_endpoint(
-    file: UploadFile = File(...),
+    file: Annotated[UploadFile, File()],
     project_id: str | None = None,
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """Upload file with virus scanning, thumbnail generation, and metadata storage.
-    
+
     Accepts: images (JPEG, PNG, GIF, WebP), PDFs, DXF, DWG
     Max size: 50 MB
-    
+
     Returns:
         FileUpload metadata with presigned download URL
 
@@ -102,11 +105,11 @@ async def upload_file_endpoint(
 @router.get("/{upload_id}", response_model=ResponseEnvelope)
 async def get_upload(
     upload_id: int,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Get file upload metadata and presigned download URL.
-    
+
     Access control: User must have access to the file's account or project.
     """
     # Get upload record
@@ -170,11 +173,11 @@ async def get_upload(
 @require_permission("file.delete")
 async def delete_upload(
     upload_id: int,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Delete file upload (soft delete - marks as expired).
-    
+
     Requires: file.delete permission
     """
     result = await db.execute(

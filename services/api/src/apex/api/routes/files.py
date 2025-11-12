@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.helpers import log_event, require_project
 from ..common.models import make_envelope
 from ..db import get_db
 from ..deps import get_code_version, get_model_config, settings, storage_client
 from ..schemas import ResponseEnvelope, add_assumption
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -24,10 +27,10 @@ router = APIRouter(prefix="/projects", tags=["files"])
 async def presign_upload(
     project_id: str,
     req: dict,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Generate presigned URL for MinIO upload.
-    
+
     Body: {filename: str, content_type: str}
     Returns presigned PUT URL for direct client upload to MinIO.
     """
@@ -78,10 +81,10 @@ async def presign_upload(
 async def attach_file(
     project_id: str,
     req: dict,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Attach uploaded file to project with SHA256 verification.
-    
+
     Body: {blob_key: str, sha256: str}
     """
     blob_key = req.get("blob_key", "")

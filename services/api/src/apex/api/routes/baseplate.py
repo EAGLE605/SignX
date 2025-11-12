@@ -150,7 +150,7 @@ def _check_anchor_shear(anchors: dict, loads: dict) -> dict:
 @router.post("/checks", response_model=ResponseEnvelope)
 async def baseplate_checks(req: dict) -> ResponseEnvelope:
     """Validate baseplate design with ACI-style checks.
-    
+
     Body: {
         plate: {w_in, l_in, t_in, fy_ksi, e_in},
         weld: {size_in, strength, length_in},
@@ -200,7 +200,7 @@ async def baseplate_checks(req: dict) -> ResponseEnvelope:
 @router.post("/design", response_model=ResponseEnvelope)
 async def baseplate_design(req: dict) -> ResponseEnvelope:
     """Auto-design baseplate with deterministic anchor schedule.
-    
+
     Body: {loads: {F_lbf, M_inlb}}
     Returns: Complete baseplate design with anchor schedule
     """

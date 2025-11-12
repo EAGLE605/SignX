@@ -15,11 +15,11 @@ logger = structlog.get_logger(__name__)
 
 def round_floats(obj: Any, precision: int = 3) -> Any:
     """Recursively round float values for deterministic output.
-    
+
     Args:
         obj: Value to round (float, dict, list, or any)
         precision: Decimal places (default 3 for engineering precision)
-    
+
     Returns:
         Value with floats rounded to specified precision
 
@@ -35,10 +35,10 @@ def round_floats(obj: Any, precision: int = 3) -> Any:
 
 def envelope_sha(envelope: Any) -> str:
     """Compute SHA256 of envelope for content-addressed storage.
-    
+
     Args:
         envelope: ResponseEnvelope or dict representation
-    
+
     Returns:
         SHA256 hex digest
 
@@ -65,17 +65,17 @@ def envelope_sha(envelope: Any) -> str:
 
 def calc_confidence(assumptions: list[str] | None) -> float:
     """Calculate confidence score based on assumptions (warnings/failures).
-    
+
     Penalizes for:
     - "warning" keywords: -0.1 each
     - "fail" or "failed" keywords: -0.3 each
     - "abstain" or "cannot solve": -0.5
     - "request engineering": -0.3
     - "no feasible": -0.4
-    
+
     Args:
         assumptions: List of assumption strings
-    
+
     Returns:
         Confidence score [0.0, 1.0]
 
@@ -103,12 +103,12 @@ def calc_confidence(assumptions: list[str] | None) -> float:
 
 def deterministic_sort(items: list[dict[str, Any]], sort_key: str = "id", seed: str | None = None) -> list[dict[str, Any]]:
     """Sort list deterministically with optional seed.
-    
+
     Args:
         items: List of dicts to sort
         sort_key: Key to use for sorting
         seed: Optional seed for stable ordering
-    
+
     Returns:
         Sorted list
 
@@ -131,11 +131,11 @@ def deterministic_sort(items: list[dict[str, Any]], sort_key: str = "id", seed: 
 
 def extract_solver_warnings(result: Any, warnings_key: str = "warnings") -> list[str]:
     """Extract warnings from solver results (Agent 4 tuple pattern).
-    
+
     Args:
         result: Solver result (may be tuple or dict)
         warnings_key: Key name for warnings in dict results
-    
+
     Returns:
         List of warning strings
 

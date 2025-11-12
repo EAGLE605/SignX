@@ -21,14 +21,14 @@ except ImportError:
 
 class DuoService:
     """Duo Security authentication service.
-    
+
     Provides 2FA verification, enrollment, and status checking.
     Gracefully handles missing configuration (2FA optional).
     """
 
-    def __init__(self, ikey: str | None, skey: str | None, host: str | None):
+    def __init__(self, ikey: str | None, skey: str | None, host: str | None) -> None:
         """Initialize Duo service.
-        
+
         Args:
             ikey: Duo integration key
             skey: Duo secret key
@@ -63,13 +63,13 @@ class DuoService:
         passcode: str | None = None,
     ) -> tuple[bool, str | None]:
         """Verify user with Duo 2FA.
-        
+
         Args:
             username: Duo username (typically email or user_id)
             factor: Verification factor ("push", "sms", "phone", "passcode")
             device: Device selector ("auto" or specific device ID)
             passcode: Passcode for "passcode" factor (required if factor="passcode")
-        
+
         Returns:
             Tuple of (success: bool, txid: Optional[str])
             txid is provided for async flows (push, SMS, phone)
@@ -100,15 +100,15 @@ class DuoService:
             return False, response.get("txid")
 
         except Exception as e:
-            logger.error("duo.verify.error", username=username, error=str(e))
+            logger.exception("duo.verify.error", username=username, error=str(e))
             return False, None
 
     async def check_enrollment(self, username: str) -> bool:
         """Check if user is enrolled in Duo.
-        
+
         Args:
             username: Duo username
-        
+
         Returns:
             True if user is enrolled, False otherwise
 
@@ -132,10 +132,10 @@ class DuoService:
 
     async def enroll_user(self, username: str) -> dict[str, Any]:
         """Enroll user in Duo (requires admin API - not typically used).
-        
+
         Args:
             username: Duo username
-        
+
         Returns:
             Enrollment response data
 
@@ -150,13 +150,13 @@ class DuoService:
             return {"status": "requires_admin_portal"}
 
         except Exception as e:
-            logger.error("duo.enroll.error", username=username, error=str(e))
+            logger.exception("duo.enroll.error", username=username, error=str(e))
             return {"error": str(e)}
 
 
 def get_duo_service() -> DuoService | None:
     """Get configured Duo service instance.
-    
+
     Returns:
         DuoService if configured, None otherwise
 

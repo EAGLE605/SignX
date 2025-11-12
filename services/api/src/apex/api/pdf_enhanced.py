@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import structlog
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from .compliance import get_project_compliance
 from .models_audit import PEStamp
 from .utils.report import generate_report_from_payload
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -23,14 +27,14 @@ async def generate_pe_stamped_report(
     root_path: Path | None = None,
 ) -> dict[str, str]:
     """Generate PDF report with PE stamp watermark and certification page.
-    
+
     Args:
         db: Database session
         project_id: Project ID
         payload: Project payload/configuration
         pe_stamp_id: Optional PE stamp ID (if already created)
         root_path: Optional root path for report generation
-    
+
     Returns:
         Dict with sha256, pdf_ref, cached, pe_stamp_info
 
@@ -100,14 +104,14 @@ async def add_pe_stamp_to_pdf(
     output_path: Path | None = None,
 ) -> Path:
     """Add PE stamp certification page to existing PDF.
-    
+
     Creates a new PDF with PE certification page appended.
-    
+
     Args:
         pdf_path: Path to original PDF
         pe_stamp: PEStamp model instance
         output_path: Optional output path (default: append .stamped.pdf)
-    
+
     Returns:
         Path to stamped PDF
 
@@ -179,7 +183,7 @@ async def add_pe_stamp_to_pdf(
         # Return original PDF if libraries not available
         return pdf_path
     except Exception as e:
-        logger.error("pdf.stamp_failed", error=str(e))
+        logger.exception("pdf.stamp_failed", error=str(e))
         # Return original PDF on error
         return pdf_path
 

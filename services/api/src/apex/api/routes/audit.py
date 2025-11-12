@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..audit import query_audit_logs
 from ..auth import TokenData, get_current_user
@@ -16,6 +15,11 @@ from ..db import get_db
 from ..rbac import require_permission
 from ..schemas import ResponseEnvelope
 
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
@@ -24,22 +28,22 @@ router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
 @router.get("/logs", response_model=ResponseEnvelope)
 @require_permission("audit.read")
 async def get_audit_logs(
-    user_id: str | None = Query(None, description="Filter by user ID"),
-    account_id: str | None = Query(None, description="Filter by account ID"),
-    action: str | None = Query(None, description="Filter by action"),
-    resource_type: str | None = Query(None, description="Filter by resource type"),
-    resource_id: str | None = Query(None, description="Filter by resource ID"),
-    start_date: datetime | None = Query(None, description="Start date (ISO format)"),
-    end_date: datetime | None = Query(None, description="End date (ISO format)"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum results"),
-    offset: int = Query(0, ge=0, description="Offset for pagination"),
+    user_id: Annotated[str | None, Query(description="Filter by user ID")] = None,
+    account_id: Annotated[str | None, Query(description="Filter by account ID")] = None,
+    action: Annotated[str | None, Query(description="Filter by action")] = None,
+    resource_type: Annotated[str | None, Query(description="Filter by resource type")] = None,
+    resource_id: Annotated[str | None, Query(description="Filter by resource ID")] = None,
+    start_date: Annotated[datetime | None, Query(description="Start date (ISO format)")] = None,
+    end_date: Annotated[datetime | None, Query(description="End date (ISO format)")] = None,
+    limit: Annotated[int, Query(ge=1, le=1000, description="Maximum results")] = 100,
+    offset: Annotated[int, Query(ge=0, description="Offset for pagination")] = 0,
     current_user: TokenData = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """Query audit logs for compliance reporting.
-    
+
     Requires: audit.read permission
-    
+
     Retention: 7 years (engineering liability)
     """
     # Non-admins can only view their own account's logs

@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Multi-Objective Optimization
+"""APEX Signage Engineering - Multi-Objective Optimization.
 
 Pareto optimization for pole selection and genetic algorithm for baseplate design.
 """
@@ -6,14 +6,17 @@ Pareto optimization for pole selection and genetic algorithm for baseplate desig
 from __future__ import annotations
 
 import random
-from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from deap import algorithms, base, creator, tools
 
-from .models import PoleOption
 from .solvers import filter_poles
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from .models import PoleOption
 
 # ========== Multi-Objective Pareto Optimization ==========
 
@@ -28,7 +31,7 @@ class ParetoSolution:
         weight: float,
         safety_factor: float,
         is_dominated: bool = False,
-    ):
+    ) -> None:
         self.pole = pole
         self.cost = cost
         self.weight = weight
@@ -61,14 +64,14 @@ def pareto_optimize_poles(
     seed: int = 42,
 ) -> list[ParetoSolution]:
     """Multi-objective Pareto optimization for pole selection.
-    
+
     Objectives:
     1. Minimize cost (weight * cost_per_lb * height)
     2. Minimize weight (total pole weight)
     3. Maximize safety_factor (capacity / demand)
-    
+
     Uses NSGA-II algorithm via DEAP.
-    
+
     Args:
         mu_required_kipin: Required ultimate moment
         sections: List of DB row dicts with pole properties
@@ -77,10 +80,10 @@ def pareto_optimize_poles(
         cost_per_lb: Cost per pound of steel
         max_solutions: Maximum Pareto solutions to return
         seed: Random seed for reproducibility
-    
+
     Returns:
         List of Pareto-optimal solutions (5-10 typically)
-    
+
     References:
         Deb et al. (2002) "A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II"
 
@@ -203,8 +206,7 @@ def pareto_optimize_poles(
     all_solutions.sort(key=lambda x: x.cost)
 
     # Return Pareto front + dominated solutions up to max_solutions
-    pareto_solutions = [s for s in all_solutions if not s.is_dominated][:max_solutions]
-    return pareto_solutions
+    return [s for s in all_solutions if not s.is_dominated][:max_solutions]
 
 
 # ========== Genetic Algorithm for Baseplate Optimization ==========
@@ -219,9 +221,9 @@ def baseplate_optimize_ga(
     progress_callback: Callable[[int, float], None] | None = None,
 ) -> tuple[Any, float]:
     """Genetic algorithm optimization for baseplate design.
-    
+
     Replaces grid search O(n³) with GA that converges in <5s.
-    
+
     Args:
         loads: Dict with mu_kipft, vu_kip, tu_kip
         constraints: Optional constraints
@@ -229,14 +231,14 @@ def baseplate_optimize_ga(
         seed: Random seed
         max_generations: Maximum GA generations (default 30, converges ~20)
         progress_callback: Optional callback(generation, best_fitness)
-    
+
     Returns:
         Tuple of (BasePlateInput, cost_proxy)
-    
+
     Constraints:
         - safety_factor >= 2.0
         - anchor_spacing >= 6"
-    
+
     Fitness:
         minimize cost_proxy = plate_cost + weld_cost + anchor_cost
 

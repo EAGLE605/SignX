@@ -9,9 +9,9 @@ import aiohttp
 
 async def geocode_address(address: str, api_key: str | None = None) -> dict[str, float] | None:
     """Geocode address to lat/lon.
-    
+
     Returns: {"lat": float, "lon": float} or None if failed.
-    
+
     Supports:
     - OpenStreetMap Nominatim (free, no key)
     - Google Geocoding API (requires key)

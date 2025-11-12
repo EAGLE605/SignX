@@ -73,7 +73,7 @@ def make_envelope(
     model_config: Any | None = None,
 ) -> Any:
     """Build a ResponseEnvelope with trace data.
-    
+
     Unified envelope builder that:
     - Auto-injects request_id from context if available
     - Auto-fetches code_version and model_config if not provided

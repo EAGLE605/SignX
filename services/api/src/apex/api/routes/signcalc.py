@@ -41,7 +41,7 @@ async def gateway(
     code_version=Depends(get_code_version),
 ):  # type: ignore[no-untyped-def]
     """Gateway proxy to signcalc service with rate limiting.
-    
+
     Rate limit: 100 requests per minute per IP address.
     This helps prevent DoS attacks and resource exhaustion from expensive calculations.
     """

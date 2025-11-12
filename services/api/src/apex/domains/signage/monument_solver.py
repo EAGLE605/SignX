@@ -138,17 +138,17 @@ class MonumentResults:
 class MonumentSolver:
     """Monument sign engineering solver using ASCE 7-22 standards."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logger.bind(component="monument_solver")
 
     def analyze_monument_sign(self, config: MonumentConfig,
                             section_props: SectionProperties) -> MonumentResults:
         """Complete monument sign analysis.
-        
+
         Args:
             config: Monument configuration parameters
             section_props: AISC section properties for the pole
-            
+
         Returns:
             Complete analysis results with pass/fail status
 
@@ -477,11 +477,11 @@ class MonumentSolver:
 def optimize_monument_pole(config: MonumentConfig,
                          available_sections: list[SectionProperties]) -> tuple[SectionProperties, MonumentResults]:
     """Find the optimal pole section for given monument requirements.
-    
+
     Args:
         config: Monument configuration
         available_sections: List of available AISC sections
-        
+
     Returns:
         Tuple of (optimal_section, analysis_results)
 
@@ -515,6 +515,7 @@ def optimize_monument_pole(config: MonumentConfig,
             continue
 
     if best_section is None:
-        raise ValueError("No suitable sections found for monument requirements")
+        msg = "No suitable sections found for monument requirements"
+        raise ValueError(msg)
 
     return best_section, best_results

@@ -1,5 +1,5 @@
 """APEX Signage Engineering - Domain Models (Pydantic v2)
-Shared primitives for sign structure design
+Shared primitives for sign structure design.
 """
 
 from __future__ import annotations

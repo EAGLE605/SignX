@@ -9,14 +9,14 @@ import aiohttp
 
 def _get_asce7_default_v(lat: float, lon: float) -> float:
     """Get default V from ASCE 7-16 wind speed map (simplified lookup).
-    
+
     Uses approximate zones:
     - Gulf/Atlantic Coast: 140-170 mph
     - Hurricane-prone regions: 140-150 mph
     - Mountain/West Coast: 110-130 mph
     - Interior: 90-115 mph
     - Special wind regions: 115-130 mph
-    
+
     Returns conservative default if no precise match.
     """
     # Simplified lookup based on lat/lon zones
@@ -40,7 +40,7 @@ def _get_asce7_default_v(lat: float, lon: float) -> float:
 
 async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: str | None = None) -> dict | None:
     """Fetch wind speed from OpenWeatherMap API.
-    
+
     Returns: {"wind_speed_mph": float, "source": "openweathermap"} or None
     """
     api_key = api_key or os.getenv("OPENWEATHER_API_KEY")
@@ -71,9 +71,9 @@ async def fetch_wind_speed_openweather(lat: float, lon: float, api_key: str | No
 
 async def fetch_wind_speed_noaa(lat: float, lon: float) -> dict | None:
     """Fetch wind speed from NOAA ASOS nearest station.
-    
+
     Returns: {"wind_speed_mph": float, "source": "noaa"} or None
-    
+
     Note: Requires NOAA API access and station lookup.
     """
     # TODO: Implement NOAA ASOS nearest-neighbor lookup
@@ -86,12 +86,12 @@ async def fetch_wind_speed_noaa(lat: float, lon: float) -> dict | None:
 
 async def resolve_wind_speed(lat: float, lon: float, api_keys: dict | None = None) -> dict:
     """Resolve wind speed from multiple sources with fallback.
-    
+
     Priority:
     1. ASCE 7-16 map lookup (deterministic)
     2. OpenWeatherMap API (if key provided)
     3. Default conservative value
-    
+
     Returns: {"wind_speed_mph": float, "source": str, "confidence": float}
     """
     api_keys = api_keys or {}
@@ -116,9 +116,9 @@ async def resolve_wind_speed(lat: float, lon: float, api_keys: dict | None = Non
 
 def fetch_snow_load(lat: float, lon: float) -> float | None:
     """Fetch ground snow load from ASCE 7-16 Figure 7.2-1.
-    
+
     Returns: snow_load_psf or None
-    
+
     Note: Simplified lookup; production would use digitized map.
     """
     # Simplified zones (production would use digitized ASCE 7 Figure 7.2-1)

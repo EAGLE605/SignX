@@ -1,4 +1,4 @@
-"""INSA API Endpoints - Integrated Neuro-Symbolic Architecture
+"""INSA API Endpoints - Integrated Neuro-Symbolic Architecture.
 
 Provides:
 - Production scheduling with hybrid AI reasoning
@@ -13,7 +13,7 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
@@ -74,7 +74,7 @@ class ExplainScheduleRequest(BaseModel):
 @router.post("/schedule", response_model=ResponseEnvelope)
 async def schedule_project(
     request: ScheduleProjectRequest,
-    user_id: str = Depends(get_current_user_id),
+    user_id: Annotated[str, Depends(get_current_user_id)],
 ) -> ResponseEnvelope:
     """Generate optimized production schedule using INSA hybrid reasoning.
 
@@ -149,14 +149,14 @@ async def schedule_project(
         )
 
     except Exception as e:
-        logger.error("insa.schedule.error", error=str(e), project_id=request.project_id)
+        logger.exception("insa.schedule.error", error=str(e), project_id=request.project_id)
         raise HTTPException(status_code=500, detail=f"Scheduling error: {e!s}") from e
 
 
 @router.post("/reschedule", response_model=ResponseEnvelope)
 async def reschedule_with_vitra(
     request: RescheduleRequest,
-    user_id: str = Depends(get_current_user_id),
+    user_id: Annotated[str, Depends(get_current_user_id)],
 ) -> ResponseEnvelope:
     """Adaptive rescheduling based on VITRA vision feedback.
 
@@ -227,14 +227,14 @@ async def reschedule_with_vitra(
         )
 
     except Exception as e:
-        logger.error("insa.reschedule.error", error=str(e), project_id=request.project_id)
+        logger.exception("insa.reschedule.error", error=str(e), project_id=request.project_id)
         raise HTTPException(status_code=500, detail=f"Rescheduling error: {e!s}") from e
 
 
 @router.post("/explain", response_model=ResponseEnvelope)
 async def explain_schedule_decision(
     request: ExplainScheduleRequest,
-    user_id: str = Depends(get_current_user_id),
+    user_id: Annotated[str, Depends(get_current_user_id)],
 ) -> ResponseEnvelope:
     """Generate human-readable explanation for scheduling decision.
 
@@ -294,13 +294,13 @@ async def explain_schedule_decision(
         )
 
     except Exception as e:
-        logger.error("insa.explain.error", error=str(e), job_id=request.job_id)
+        logger.exception("insa.explain.error", error=str(e), job_id=request.job_id)
         raise HTTPException(status_code=500, detail=f"Explanation error: {e!s}") from e
 
 
 @router.get("/knowledge-base/stats", response_model=ResponseEnvelope)
 async def get_knowledge_base_stats(
-    user_id: str = Depends(get_current_user_id),
+    user_id: Annotated[str, Depends(get_current_user_id)],
 ) -> ResponseEnvelope:
     """Get INSA knowledge base statistics.
 
@@ -361,7 +361,7 @@ async def get_knowledge_base_stats(
         )
 
     except Exception as e:
-        logger.error("insa.kb_stats.error", error=str(e))
+        logger.exception("insa.kb_stats.error", error=str(e))
         raise HTTPException(status_code=500, detail=f"KB stats error: {e!s}") from e
 
 
@@ -392,7 +392,7 @@ async def health_check() -> ResponseEnvelope:
         )
 
     except Exception as e:
-        logger.error("insa.health.error", error=str(e))
+        logger.exception("insa.health.error", error=str(e))
         return make_envelope(
             result={
                 "status": "unhealthy",

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import structlog
 from httpx import NetworkError
@@ -17,6 +16,9 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = structlog.get_logger(__name__)
 
@@ -34,9 +36,9 @@ RETRY_CONFIG = {
 
 def retry_auth_operation(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator for retrying authentication operations.
-    
+
     Automatically retries on transient failures with exponential backoff.
-    
+
     Example:
         @retry_auth_operation
         async def oauth_sign_in(provider: str, ...):
@@ -52,17 +54,17 @@ async def retry_with_fallback(
     error_types: tuple[type[Exception], ...] = (Exception,),
 ) -> T:
     """Execute function with automatic fallback on failure.
-    
+
     Tries primary function first, then falls back to alternatives.
-    
+
     Args:
         primary: Primary function to try
         fallbacks: List of fallback functions
         error_types: Exception types that trigger fallback
-    
+
     Returns:
         Result from successful function
-    
+
     Raises:
         Last exception if all attempts fail
 
@@ -92,7 +94,8 @@ async def retry_with_fallback(
     # All attempts failed
     if last_error:
         raise last_error
-    raise Exception("All authentication attempts failed")
+    msg = "All authentication attempts failed"
+    raise Exception(msg)
 
 
 def log_retry_attempt(retry_state) -> None:

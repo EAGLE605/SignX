@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Advanced Structural Analysis
+"""APEX Signage Engineering - Advanced Structural Analysis.
 
 Dynamic load analysis, fatigue analysis, and connection design.
 """
@@ -18,16 +18,16 @@ def dynamic_load_analysis(
     site_class: str = "C",
 ) -> dict[str, float]:
     """Calculate dynamic amplification factor per ASCE 7-22.
-    
+
     Args:
         static_load_lbf: Static wind load
         natural_period_sec: Natural period of structure
         damping_ratio: Damping ratio (5% typical for steel)
         site_class: Site class (A-F per ASCE 7-22)
-    
+
     Returns:
         Dict with peak_load, static_load, amplification_factor
-    
+
     References:
         ASCE 7-22 Chapter 12: Seismic Design Requirements
         Simplified response spectrum for wind loads
@@ -81,15 +81,15 @@ def fatigue_analysis(
     design_life_years: float = 25.0,
 ) -> dict[str, Any]:
     """Fatigue analysis per AISC 360-16 Appendix 3.
-    
+
     Args:
         stress_range_ksi: Stress range (max - min stress)
         detail_category: Detail category (A through E' per AISC Table A-3.1)
         design_life_years: Required design life
-    
+
     Returns:
         Dict with design_life_years, passes_25yr_requirement, cycles_to_failure
-    
+
     References:
         AISC 360-16 Appendix 3: Design for Fatigue
         AISC Table A-3.1: Detail Categories
@@ -150,17 +150,17 @@ def connection_design(
     num_bolts: int = 4,
 ) -> dict[str, Any]:
     """Bolt group analysis per AISC 360-16 Table J3.2.
-    
+
     Args:
         tension_kip: Tension load
         shear_kip: Shear load
         bolt_grade: Bolt grade (A325, A490)
         bolt_diameter_in: Bolt diameter
         num_bolts: Number of bolts in group
-    
+
     Returns:
         Dict with bolts_required, weld_size_in, connection_capacity
-    
+
     References:
         AISC 360-16 Chapter J: Design of Connections
         AISC Table J3.2: Available Strength of Bolts

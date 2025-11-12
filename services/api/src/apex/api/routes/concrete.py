@@ -19,7 +19,7 @@ router = APIRouter(prefix="/signage/common", tags=["utilities"])
 @router.post("/concrete/yards", response_model=ResponseEnvelope)
 async def calculate_concrete_yards(req: dict) -> ResponseEnvelope:
     """Calculate concrete yardage for cylindrical footing.
-    
+
     Body: {diameter_ft: float, depth_ft: float}
     Returns: {concrete_yards: float, volume_cf: float}
     """

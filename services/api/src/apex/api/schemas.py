@@ -37,7 +37,7 @@ class TraceModel(BaseModel):
 
 class ResponseEnvelope(BaseModel):
     """APEX envelope format for all API responses.
-    
+
     Includes deterministic content SHA256, round-trip traceability,
     confidence scoring, and assumptions tracking.
     """
@@ -78,7 +78,7 @@ def compute_confidence(base: float, adjustments: dict[str, float] | None = None)
     Example: compute_confidence(0.6, {"coverage": 0.2, "margin": 0.1}) → 0.9
     """
     value = float(base)
-    for _, delta in (adjustments or {}).items():
+    for delta in (adjustments or {}).values():
         value += float(delta)
     if value < 0.0:
         return 0.0
@@ -88,7 +88,7 @@ def compute_confidence(base: float, adjustments: dict[str, float] | None = None)
 
 def compute_confidence_from_margins(margins: list[float], ideal_target: float = 2.0) -> float:
     """Compute confidence from safety factor margins.
-    
+
     Maps minimum margin to confidence [0,1]:
     - margin >= ideal_target → confidence = 1.0
     - margin >= 1.0 → confidence = (margin - 1.0) / (ideal_target - 1.0)

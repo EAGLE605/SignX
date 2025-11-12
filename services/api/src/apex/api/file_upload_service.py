@@ -9,7 +9,6 @@ from datetime import UTC, datetime
 import structlog
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
     from PIL import Image  # noqa: F401
@@ -17,9 +16,15 @@ try:
 except ImportError:
     PIL_AVAILABLE = False
 
+from typing import TYPE_CHECKING
+
 from .audit import log_audit
 from .models_audit import FileUpload
-from .storage import StorageClient
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from .storage import StorageClient
 
 logger = structlog.get_logger(__name__)
 
@@ -35,7 +40,7 @@ MAX_FILE_SIZE = 50 * 1024 * 1024
 # Virus scanning (async wrapper for ClamAV or similar)
 async def scan_file_for_viruses(file_content: bytes, filename: str) -> tuple[str, str | None]:
     """Scan file for viruses using ClamAV or similar.
-    
+
     Returns:
         Tuple of (status, error_message)
         Status: "clean", "infected", "error", "pending"
@@ -65,7 +70,7 @@ async def scan_file_for_viruses(file_content: bytes, filename: str) -> tuple[str
         logger.warning("virus_scan.not_available", reason="clamd package not installed")
         return "pending", None
     except Exception as e:
-        logger.error("virus_scan.failed", error=str(e))
+        logger.exception("virus_scan.failed", error=str(e))
         return "error", str(e)
 
 
@@ -75,7 +80,7 @@ async def generate_thumbnail(
     max_size: tuple[int, int] = (300, 300),
 ) -> bytes | None:
     """Generate thumbnail for image files.
-    
+
     Returns:
         Thumbnail bytes (JPEG) or None if not an image
 
@@ -108,7 +113,7 @@ async def generate_thumbnail(
         return output.getvalue()
 
     except Exception as e:
-        logger.error("thumbnail.generation_failed", error=str(e))
+        logger.exception("thumbnail.generation_failed", error=str(e))
         return None
 
 
@@ -123,7 +128,7 @@ async def upload_file(
     user_agent: str | None = None,
 ) -> FileUpload:
     """Upload file with virus scanning, thumbnail generation, and metadata storage.
-    
+
     Args:
         db: Database session
         storage: Storage client (MinIO/S3/R2)
@@ -133,10 +138,10 @@ async def upload_file(
         account_id: Account context
         ip_address: Client IP (for audit)
         user_agent: Client user agent (for audit)
-    
+
     Returns:
         FileUpload model instance
-    
+
     Raises:
         HTTPException: If file type/size invalid or virus detected
 
@@ -237,7 +242,7 @@ async def upload_file(
             )
             logger.info("file.uploaded", file_key=file_key, size=file_size)
         except Exception as e:
-            logger.error("file.storage_upload_failed", error=str(e))
+            logger.exception("file.storage_upload_failed", error=str(e))
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to upload file to storage",
@@ -262,7 +267,7 @@ async def upload_file(
                     )
                     logger.info("file.thumbnail_generated", thumbnail_key=thumbnail_key)
                 except Exception as e:
-                    logger.error("file.thumbnail_upload_failed", error=str(e))
+                    logger.exception("file.thumbnail_upload_failed", error=str(e))
                     # Don't fail the upload if thumbnail fails
 
     # Create database record
@@ -319,7 +324,7 @@ async def get_presigned_download_url(
     expires_seconds: int = 3600,
 ) -> str | None:
     """Generate presigned download URL for file access.
-    
+
     Returns:
         Presigned URL or None if storage not configured
 
@@ -330,14 +335,13 @@ async def get_presigned_download_url(
     try:
         from datetime import timedelta
 
-        url = storage._client.presigned_get_object(
+        return storage._client.presigned_get_object(
             storage.bucket,
             file_key,
             expires=timedelta(seconds=expires_seconds),
         )
-        return url
     except Exception as e:
-        logger.error("file.presign_failed", file_key=file_key, error=str(e))
+        logger.exception("file.presign_failed", file_key=file_key, error=str(e))
         return None
 
 

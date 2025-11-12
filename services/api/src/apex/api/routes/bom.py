@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..common.helpers import require_project
 from ..common.models import make_envelope
 from ..db import ProjectPayload, get_db
 from ..deps import get_code_version, get_model_config
 from ..schemas import ResponseEnvelope, add_assumption
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -22,7 +24,7 @@ router = APIRouter(prefix="/projects", tags=["bom"])
 
 def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
     """Generate BOM items from project configuration.
-    
+
     Placeholder implementation that extracts materials and components
     from the design config.
     """
@@ -79,10 +81,10 @@ def _generate_bom_items(config: dict[str, Any]) -> list[dict[str, Any]]:
 @router.get("/{project_id}/bom", response_model=ResponseEnvelope)
 async def get_bom(
     project_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Get current BOM for a project.
-    
+
     Retrieves the latest payload and generates BOM items.
     """
     logger.info("bom.get", project_id=project_id)
@@ -130,10 +132,10 @@ async def get_bom(
 @router.post("/{project_id}/bom", response_model=ResponseEnvelope)
 async def regenerate_bom(
     project_id: str,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Regenerate BOM for a project.
-    
+
     Same as GET but forces regeneration from latest payload.
     """
     return await get_bom(project_id, db)

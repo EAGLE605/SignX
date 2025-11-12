@@ -18,7 +18,7 @@ _client: aioredis.Redis | None = None
 
 async def get_redis_client() -> aioredis.Redis | None:
     """Get singleton Redis client.
-    
+
     Returns None if Redis unavailable or not configured.
     """
     global _client

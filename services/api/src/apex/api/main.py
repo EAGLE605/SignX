@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import socket
 import uuid
@@ -336,12 +337,12 @@ app.include_router(insa_router, tags=["insa-scheduling"])
 setup_tracing()
 # Startup hooks
 @app.on_event("startup")
-async def _startup_checks():  # type: ignore[no-untyped-def]
+async def _startup_checks() -> None:  # type: ignore[no-untyped-def]
     validate_prod_requirements()
 
 
 @app.on_event("startup")
-async def _startup_contract_lock():  # type: ignore[no-untyped-def]
+async def _startup_contract_lock() -> None:  # type: ignore[no-untyped-def]
     try:
         sha = ensure_materials_contract()
         app.state.materials_contract_sha = sha
@@ -350,7 +351,7 @@ async def _startup_contract_lock():  # type: ignore[no-untyped-def]
 
 
 @app.on_event("startup")
-async def _startup_metrics_background():  # type: ignore[no-untyped-def]
+async def _startup_metrics_background() -> None:  # type: ignore[no-untyped-def]
     """Start background metrics collection task."""
     import asyncio
 
@@ -359,7 +360,7 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
 
     from .metrics import CACHE_HIT_RATIO, CELERY_QUEUE_DEPTH, PG_POOL_USED
 
-    async def update_runtime_metrics():
+    async def update_runtime_metrics() -> None:
         # Queue depth
         try:
             r = Redis.from_url(settings.REDIS_URL)
@@ -380,12 +381,10 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
                 pass
 
         # Cache hit ratio
-        try:
+        with contextlib.suppress(Exception):
             CACHE_HIT_RATIO.set(-1)
-        except Exception:
-            pass
 
-    async def metrics_background_loop():
+    async def metrics_background_loop() -> None:
         while True:
             await update_runtime_metrics()
             await asyncio.sleep(10)
@@ -394,7 +393,7 @@ async def _startup_metrics_background():  # type: ignore[no-untyped-def]
 
 
 @app.on_event("shutdown")
-async def _shutdown_cleanup():  # type: ignore[no-untyped-def]
+async def _shutdown_cleanup() -> None:  # type: ignore[no-untyped-def]
     """Cleanup resources on shutdown."""
     await close_redis_client()
     logger.info("shutdown.complete")

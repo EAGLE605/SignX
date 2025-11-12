@@ -7,15 +7,15 @@ from fastapi import HTTPException
 
 def require_field(data: dict, field: str, field_type: type | None = None) -> any:
     """Require a field exists in data dict, raise 422 if missing.
-    
+
     Args:
         data: Dict to check
         field: Field name to require
         field_type: Optional type to validate
-    
+
     Returns:
         Field value
-    
+
     Raises:
         HTTPException: 422 if field missing or invalid type
 

@@ -1,6 +1,7 @@
 """Project payload management endpoints."""
 
 from datetime import UTC, datetime
+from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends
@@ -25,15 +26,15 @@ router = APIRouter(prefix="/projects", tags=["payloads"])
 
 
 @with_transaction
-@router.post("/{project_id}/payload", response_model=ResponseEnvelope)
+@router.post("/{project_id}/payload")
 async def save_payload(
     project_id: str,
     payload: dict,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
     actor: str = "system",
 ) -> ResponseEnvelope:
     """Save project design payload with deterministic SHA256.
-    
+
     Body: {module: str, config: dict, files: list[str], cost_snapshot: dict}
     Returns: {payload_id: int, sha256: str}
     """

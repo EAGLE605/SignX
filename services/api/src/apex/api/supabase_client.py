@@ -25,25 +25,27 @@ from .deps import settings
 @lru_cache
 def get_supabase_client() -> Client:
     """Get singleton Supabase client (anon/public key).
-    
+
     Uses the public/anonymous key for client-side operations.
     Suitable for operations that respect Row Level Security (RLS).
-    
+
     Returns:
         Supabase Client instance
-        
+
     Raises:
         ValueError: If Supabase is not configured
 
     """
     if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
+        msg = "Supabase not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_KEY environment variables."
         raise ValueError(
-            "Supabase not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_KEY environment variables.",
+            msg,
         )
 
     if create_client is None:
+        msg = "supabase package not installed. Install with: pip install supabase"
         raise ImportError(
-            "supabase package not installed. Install with: pip install supabase",
+            msg,
         )
 
     return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
@@ -52,25 +54,27 @@ def get_supabase_client() -> Client:
 @lru_cache
 def get_supabase_admin() -> Client:
     """Get admin Supabase client with service role key.
-    
+
     Uses the service role key which bypasses Row Level Security (RLS).
     Use with caution - only for server-side admin operations.
-    
+
     Returns:
         Supabase Client instance with admin privileges
-        
+
     Raises:
         ValueError: If Supabase is not configured
 
     """
     if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_KEY:
+        msg = "Supabase admin not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_SERVICE_KEY environment variables."
         raise ValueError(
-            "Supabase admin not configured. Set APEX_SUPABASE_URL and APEX_SUPABASE_SERVICE_KEY environment variables.",
+            msg,
         )
 
     if create_client is None:
+        msg = "supabase package not installed. Install with: pip install supabase"
         raise ImportError(
-            "supabase package not installed. Install with: pip install supabase",
+            msg,
         )
 
     return create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)

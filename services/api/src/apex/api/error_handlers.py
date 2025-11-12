@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 import structlog
 from fastapi import Request, status
-from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse
 
 from .common.envelope import calc_confidence
 from .common.models import make_envelope
 from .deps import get_code_version, get_model_config, settings
+
+if TYPE_CHECKING:
+    from fastapi.exceptions import RequestValidationError
 
 logger = structlog.get_logger(__name__)
 
@@ -27,7 +30,7 @@ except ImportError:
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> ORJSONResponse:
     """Handle Pydantic validation errors with field paths.
-    
+
     Returns envelope with detailed error information.
     """
     trace_id = getattr(request.state, "trace_id", "unknown")

@@ -1,16 +1,18 @@
-"""APEX Signage Engineering - Real-World Validation & Calibration
+"""APEX Signage Engineering - Real-World Validation & Calibration.
 
 Compare solver predictions against field data and auto-tune parameters.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 from scipy import optimize
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # ========== Field Data Validation ==========
 
@@ -18,9 +20,9 @@ from scipy import optimize
 class FieldDataValidator:
     """Validates solver predictions against actual field installations."""
 
-    def __init__(self, field_data_path: Path | None = None):
+    def __init__(self, field_data_path: Path | None = None) -> None:
         """Initialize validator with field data.
-        
+
         Args:
             field_data_path: Path to CSV with historical project data
 
@@ -39,11 +41,11 @@ class FieldDataValidator:
         actuals: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """Compare predictions vs actual installations.
-        
+
         Args:
             predictions: List of prediction dicts with {pole_height, footing_depth, cost}
             actuals: List of actual dicts (or use self.field_data)
-        
+
         Returns:
             Dict with RMSE, R², MAE, biases, recommendations
 
@@ -146,7 +148,7 @@ class FieldDataValidator:
 class SolverParameterTuner:
     """Auto-tune solver parameters based on field performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize tuner with default parameters."""
         self.current_params = {
             "soil_bearing_multiplier": 1.0,
@@ -161,11 +163,11 @@ class SolverParameterTuner:
         objective: str = "minimize_error",
     ) -> dict[str, float]:
         """Auto-tune parameters to minimize prediction error.
-        
+
         Args:
             field_data: List of {predicted, actual, inputs} dicts
             objective: "minimize_error" or "minimize_error_with_safety"
-        
+
         Returns:
             Dict of tuned parameter values
 
@@ -212,7 +214,7 @@ class SolverParameterTuner:
 
     def validate_safety(self, tuned_params: dict[str, float]) -> bool:
         """Validate that tuned parameters maintain safety.
-        
+
         Returns False if parameters reduce safety factors below minimums.
         """
         # Ensure safety factors don't decrease too much
@@ -220,10 +222,7 @@ class SolverParameterTuner:
             return False
 
         # Ensure calibration doesn't reduce capacity
-        if tuned_params.get("soil_bearing_multiplier", 1.0) < 0.8:
-            return False
-
-        return True
+        return not tuned_params.get("soil_bearing_multiplier", 1.0) < 0.8
 
 
 # ========== Validation Report Generation ==========
@@ -235,12 +234,12 @@ def generate_validation_report(
     field_data: list[dict[str, Any]] | None = None,
 ) -> Path:
     """Generate PDF validation report with scatter plots and statistics.
-    
+
     Args:
         validation_results: Results from validate_against_field_data()
         output_path: Output PDF path
         field_data: Optional field data for plots
-    
+
     Returns:
         Path to generated PDF
 
@@ -263,7 +262,7 @@ def generate_validation_report(
     </head>
     <body>
         <h1>APEX Solver Validation Report</h1>
-        
+
         <h2>Statistical Summary</h2>
         <table>
             <tr>
@@ -295,7 +294,7 @@ def generate_validation_report(
 
     html_content += """
         </table>
-        
+
         <h2>Recommendations</h2>
         <ul>
     """
@@ -305,7 +304,7 @@ def generate_validation_report(
 
     html_content += """
         </ul>
-        
+
         <h2>Assessment</h2>
         <p>
     """
@@ -336,11 +335,11 @@ def validate_against_field_data(
     field_data_path: Path | None = None,
 ) -> dict[str, Any]:
     """Convenience function to validate predictions.
-    
+
     Args:
         predictions: List of prediction dicts
         field_data_path: Optional path to field data CSV
-    
+
     Returns:
         Validation results dict
 
@@ -354,11 +353,11 @@ def auto_tune_parameters(
     objective: str = "minimize_error",
 ) -> dict[str, float]:
     """Auto-tune solver parameters from field data.
-    
+
     Args:
         field_data_path: Path to CSV with field data
         objective: Tuning objective
-    
+
     Returns:
         Tuned parameter dict
 

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Annotated
+
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import TokenData, get_current_user_optional
 from ..common.models import make_envelope
@@ -13,6 +14,9 @@ from ..crm_integration import CRMWebhookPayload, crm_client
 from ..db import get_db
 from ..deps import get_code_version, get_model_config
 from ..schemas import ResponseEnvelope
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -31,15 +35,15 @@ class WebhookPayload(BaseModel):
 async def receive_keyedin_webhook(
     payload: WebhookPayload,
     request: Request,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Receive webhook from KeyedIn CRM.
-    
+
     Events handled:
     - project.created: Create project in Calcusign
     - project.updated: Update project in Calcusign
     - project.deleted: Soft delete project
-    
+
     No authentication required (validated via webhook signature/secret)
     """
     # Extract IP and user agent
@@ -79,11 +83,11 @@ async def receive_keyedin_webhook(
 async def send_webhook_to_keyedin(
     event_type: str,
     data: dict,
-    current_user: TokenData | None = Depends(get_current_user_optional),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData | None, Depends(get_current_user_optional)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Send webhook to KeyedIn CRM.
-    
+
     Events sent:
     - calculation.completed: Calculation finished
     - cost.updated: Project cost updated

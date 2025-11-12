@@ -9,7 +9,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from .deps import settings
 
 
-def setup_tracing():  # type: ignore[no-untyped-def]
+def setup_tracing() -> None:  # type: ignore[no-untyped-def]
     resource = Resource.create({"service.name": settings.SERVICE_NAME, "service.version": settings.APP_VERSION})
     provider = TracerProvider(resource=resource)
     if settings.OTEL_EXPORTER == "otlp" and settings.OTEL_ENDPOINT:

@@ -22,7 +22,7 @@ except ImportError:
 logger = structlog.get_logger(__name__)
 
 
-from ..common.hashing import compute_payload_sha256
+from api.common.hashing import compute_payload_sha256
 
 
 async def generate_report_from_payload(
@@ -31,7 +31,7 @@ async def generate_report_from_payload(
     root_path: Path | None = None,
 ) -> dict[str, str]:
     """Generate PDF report from project payload with deterministic caching.
-    
+
     Returns: {"sha256": str, "pdf_ref": str, "cached": bool}
     """
     if root_path is None:

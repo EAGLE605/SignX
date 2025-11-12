@@ -60,7 +60,7 @@ def _check_section_deflection(section: Section, L_in: float, Delta_allow_in: flo
 @router.post("/poles/options", response_model=ResponseEnvelope)
 async def pole_options(req: dict) -> ResponseEnvelope:
     """Get filtered list of feasible pole options.
-    
+
     Body: {loads: {M_kipin, V_kip}, prefs: {family, steel_grade, sort_by}, num_poles: int, material: str, height_ft: float}
     Returns: Filtered list starting with minimum feasible ("value engineered")
     """

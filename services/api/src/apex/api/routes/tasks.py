@@ -22,7 +22,7 @@ async def get_task_status(
     task_id: str,
 ) -> ResponseEnvelope:
     """Get status of a background task.
-    
+
     Returns task state: PENDING, STARTED, SUCCESS, FAILURE, RETRY, REVOKED
     On success, includes result. On failure, includes error.
     """
@@ -74,7 +74,7 @@ async def get_task_status(
         )
 
     except Exception as e:
-        logger.error("task.status.error", task_id=task_id, error=str(e))
+        logger.exception("task.status.error", task_id=task_id, error=str(e))
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get task status: {e!s}",
@@ -86,7 +86,7 @@ async def cancel_task(
     task_id: str,
 ) -> ResponseEnvelope:
     """Cancel a pending or in-progress task.
-    
+
     Only works for PENDING or STARTED tasks.
     """
     logger.info("task.cancel", task_id=task_id)
@@ -129,7 +129,7 @@ async def cancel_task(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("task.cancel.error", task_id=task_id, error=str(e))
+        logger.exception("task.cancel.error", task_id=task_id, error=str(e))
         raise HTTPException(
             status_code=500,
             detail=f"Failed to cancel task: {e!s}",

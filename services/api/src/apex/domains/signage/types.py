@@ -1,4 +1,4 @@
-"""Type Definitions for Signage Engineering Domain
+"""Type Definitions for Signage Engineering Domain.
 
 Enhanced type safety using NewType for domain-specific units.
 Prevents unit confusion errors (e.g., mixing feet and inches, kips and pounds).

@@ -1,13 +1,14 @@
-"""Pydantic schemas for VITRA vision analysis API endpoints.
-"""
+"""Pydantic schemas for VITRA vision analysis API endpoints."""
 
 from __future__ import annotations
 
-from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 # ===== Enums =====
 

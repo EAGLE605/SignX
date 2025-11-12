@@ -13,11 +13,11 @@ logger = structlog.get_logger(__name__)
 
 def compute_etag(content: dict[str, Any], updated_at: datetime | str | None = None) -> str:
     """Compute ETag from content + timestamp.
-    
+
     Args:
         content: Dictionary with state to hash
         updated_at: Optional timestamp for version tracking
-    
+
     Returns:
         SHA256 hex digest (truncated to 32 chars for readability)
 
@@ -35,8 +35,7 @@ def compute_etag(content: dict[str, Any], updated_at: datetime | str | None = No
         content_str = f"{content_str}:{timestamp_str}"
 
     # Compute hash
-    etag = hashlib.sha256(content_str.encode()).hexdigest()[:32]
-    return etag
+    return hashlib.sha256(content_str.encode()).hexdigest()[:32]
 
 
 def compute_project_etag(
@@ -46,13 +45,13 @@ def compute_project_etag(
     additional_fields: dict[str, Any] | None = None,
 ) -> str:
     """Compute ETag for project entity.
-    
+
     Args:
         project_id: Project identifier
         status: Current project status
         updated_at: Last updated timestamp
         additional_fields: Optional additional fields to include in hash
-    
+
     Returns:
         ETag hex digest
 
@@ -71,11 +70,11 @@ def compute_project_etag(
 
 def validate_if_match(current_etag: str, if_match_header: str | None) -> tuple[bool, str | None]:
     """Validate If-Match header against current ETag.
-    
+
     Args:
         current_etag: Current entity ETag from database
         if_match_header: If-Match header value from request
-    
+
     Returns:
         Tuple of (is_valid, error_message)
 

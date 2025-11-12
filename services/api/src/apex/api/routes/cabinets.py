@@ -17,7 +17,7 @@ router = APIRouter(prefix="/signage/common", tags=["cabinets"])
 @router.post("/cabinets/derive", response_model=ResponseEnvelope)
 async def derive_cabinets(req: dict) -> ResponseEnvelope:  # type: ignore
     """Compute cabinet geometry: area, centroid, weight.
-    
+
     Body: {overall_height_ft: float, cabinets: [{width_ft, height_ft, depth_in, weight_psf}]}
     Returns: {A_ft2, z_cg_ft, weight_estimate_lb, view_token}
     """
@@ -83,7 +83,7 @@ async def add_cabinet(
     project_id: str | None = None,
 ) -> ResponseEnvelope:
     """Add cabinet to stack and update project payload.
-    
+
     Body: {cabinet: {width_ft, height_ft, depth_in, weight_psf, z_offset_ft}, project_id?: str}
     Returns: Updated cabinet geometry and optionally saves to project payload
     """

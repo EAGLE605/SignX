@@ -1,4 +1,4 @@
-"""AISC Steel Shape Database Service
+"""AISC Steel Shape Database Service.
 
 Provides type-safe, cached access to AISC steel section properties
 from the database with comprehensive error handling and validation.
@@ -9,11 +9,14 @@ Standards: AISC 360-22, AISC Shapes Database v16.0
 from __future__ import annotations
 
 import functools
+from typing import TYPE_CHECKING
 
 import structlog
 from pydantic import BaseModel, Field
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -112,9 +115,12 @@ async def get_section_properties_async(
     """
     # Validate designation format
     if not designation or len(designation) < 3:
-        raise AISCDatabaseError(
+        msg = (
             f"Invalid AISC designation format: '{designation}'. "
-            f"Expected format: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', etc.",
+            f"Expected format: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', etc."
+        )
+        raise AISCDatabaseError(
+            msg,
         )
 
     # Steel grade to yield strength mapping (AISC 360-22 Table 2-5)
@@ -156,10 +162,13 @@ async def get_section_properties_async(
                 available_types=["HSS", "PIPE", "W", "C", "MC", "L", "WT"],
             )
 
-            raise AISCDatabaseError(
+            msg = (
                 f"AISC section '{designation}' not found in database. "
                 f"Verify designation format and ensure it exists in AISC Shapes Database v16.0. "
-                f"Common formats: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', 'C12X20.7'",
+                f"Common formats: 'HSS8X8X1/4', 'W12X26', 'PIPE6STD', 'C12X20.7'"
+            )
+            raise AISCDatabaseError(
+                msg,
             )
 
         # Build validated model
@@ -194,7 +203,7 @@ async def get_section_properties_async(
 
     except Exception as e:
         # Catch all other database errors
-        logger.error(
+        logger.exception(
             "aisc.database_error",
             designation=designation,
             steel_grade=steel_grade,
@@ -202,8 +211,9 @@ async def get_section_properties_async(
             error_type=type(e).__name__,
         )
 
+        msg = f"Database error fetching AISC section '{designation}': {e}"
         raise AISCDatabaseError(
-            f"Database error fetching AISC section '{designation}': {e}",
+            msg,
         ) from e
 
 
@@ -268,17 +278,23 @@ def validate_section_properties(
 
     """
     if sx_in3 <= 0:
-        raise ValueError(
+        msg = (
             f"Invalid section modulus for {designation}: Sx={sx_in3} in³. "
             f"Section properties must be positive. "
-            f"Verify AISC database lookup or provide valid section designation.",
+            f"Verify AISC database lookup or provide valid section designation."
+        )
+        raise ValueError(
+            msg,
         )
 
     if area_in2 <= 0:
-        raise ValueError(
+        msg = (
             f"Invalid cross-sectional area for {designation}: A={area_in2} in². "
             f"Section properties must be positive. "
-            f"Verify AISC database lookup or provide valid section designation.",
+            f"Verify AISC database lookup or provide valid section designation."
+        )
+        raise ValueError(
+            msg,
         )
 
     # Sanity checks for typical ranges

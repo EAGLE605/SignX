@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Annotated
+
 import structlog
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import TokenData, get_current_user
 from ..common.models import make_envelope
@@ -20,6 +21,9 @@ from ..db import get_db
 from ..deps import get_code_version, get_model_config
 from ..rbac import require_permission
 from ..schemas import ResponseEnvelope
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -68,8 +72,8 @@ class PEStampRequest(BaseModel):
 async def check_project_compliance(
     project_id: str,
     req: ComplianceCheckRequest,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Check compliance with FAA/airport requirements."""
     record = await check_compliance(
@@ -104,8 +108,8 @@ async def check_project_compliance(
 async def check_breakaway(
     project_id: str,
     req: BreakawayCheckRequest,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Verify breakaway compliance per FAA-AC-70/7460-1L."""
     record = await verify_breakaway_compliance(
@@ -140,8 +144,8 @@ async def check_breakaway(
 async def check_wind_load(
     project_id: str,
     req: WindLoadCheckRequest,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Verify wind load compliance per ASCE 7."""
     record = await verify_wind_load_compliance(
@@ -175,8 +179,8 @@ async def check_wind_load(
 @router.get("/projects/{project_id}", response_model=ResponseEnvelope)
 async def get_project_compliance_records(
     project_id: str,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Get all compliance records for a project."""
     records = await get_project_compliance(db=db, project_id=project_id)
@@ -207,11 +211,11 @@ async def get_project_compliance_records(
 async def create_pe_stamp_endpoint(
     project_id: str,
     req: PEStampRequest,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ResponseEnvelope:
     """Create Professional Engineer stamp for calculation.
-    
+
     Requires: calculation.stamp permission (PE role)
     """
     stamp = await create_pe_stamp(

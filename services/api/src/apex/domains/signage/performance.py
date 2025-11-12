@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Performance Optimizations
+"""APEX Signage Engineering - Performance Optimizations.
 
 Advanced performance improvements for scale: caching, parallelization, adaptive algorithms.
 """
@@ -15,9 +15,9 @@ from typing import Any
 class AdaptiveStopping:
     """Adaptive stopping criterion for optimization algorithms."""
 
-    def __init__(self, improvement_threshold: float = 0.01, patience: int = 5):
+    def __init__(self, improvement_threshold: float = 0.01, patience: int = 5) -> None:
         """Initialize adaptive stopping.
-        
+
         Args:
             improvement_threshold: Stop when improvement <1% (default)
             patience: Number of generations without improvement before stopping
@@ -30,10 +30,10 @@ class AdaptiveStopping:
 
     def should_stop(self, current_best: float) -> bool:
         """Check if optimization should stop.
-        
+
         Args:
             current_best: Current best fitness value
-        
+
         Returns:
             True if should stop
 
@@ -69,9 +69,9 @@ def pareto_optimize_poles_enhanced(
     use_multiprocessing: bool = True,
 ) -> list[Any]:
     """Enhanced Pareto optimization with adaptive stopping and parallelization.
-    
+
     Performance: 3x faster than basic NSGA-II via adaptive stopping.
-    
+
     Args:
         mu_required_kipin: Required moment
         sections: Section database
@@ -81,7 +81,7 @@ def pareto_optimize_poles_enhanced(
         max_solutions: Max solutions
         seed: Random seed
         use_multiprocessing: Use DEAP multiprocessing (if available)
-    
+
     Returns:
         List of Pareto solutions
 
@@ -116,7 +116,7 @@ def _cached_predict(
     soil_bearing_hash: int,
 ) -> dict[str, Any]:
     """Cached prediction (simplified - actual implementation would hash feature vector).
-    
+
     Note: This is a placeholder. Real implementation would hash feature vectors properly.
     """
     # This would call actual ML model
@@ -130,13 +130,13 @@ def predict_with_cache(
     soil_bearing_psf: float,
 ) -> dict[str, Any]:
     """Predict with LRU cache (1000 entries).
-    
+
     Args:
         cabinet_area_ft2: Cabinet area
         height_ft: Height
         wind_speed_mph: Wind speed
         soil_bearing_psf: Soil bearing
-    
+
     Returns:
         Prediction dict
 
@@ -158,11 +158,11 @@ def batch_predict(
     batch_size: int = 32,
 ) -> list[dict[str, Any]]:
     """Batch ML inference for multiple projects.
-    
+
     Args:
         inputs: List of {cabinet_area_ft2, height_ft, wind_speed_mph, soil_bearing_psf}
         batch_size: Batch size for inference
-    
+
     Returns:
         List of predictions
 
@@ -184,14 +184,14 @@ def batch_predict(
 
 def quantize_model(model: Any, reduction_factor: float = 0.5) -> Any:
     """Reduce model memory footprint by quantization.
-    
+
     Args:
         model: ML model
         reduction_factor: Target memory reduction (0.5 = 50% reduction)
-    
+
     Returns:
         Quantized model
-    
+
     Note: Actual implementation would use quantization libraries
 
     """
@@ -207,11 +207,11 @@ def benchmark_scale_test(
     n_workers: int = 4,
 ) -> dict[str, Any]:
     """Benchmark batch processing at scale.
-    
+
     Args:
         n_projects: Number of projects to process
         n_workers: Number of parallel workers
-    
+
     Returns:
         Benchmark results
 

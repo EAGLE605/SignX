@@ -9,17 +9,17 @@ logger = structlog.get_logger(__name__)
 
 def get_account_from_email(email: str, provider: str) -> tuple[str, str]:
     """Determine account_id and role from email address and auth provider.
-    
+
     Rules:
     - @eaglesign.net (via Azure/Microsoft 365) → "eagle-sign" account, "admin" role
     - Other Microsoft 365 (azure provider) → "custom" account, "client" role (B2B customers)
     - Google/Apple (consumer) → "custom" account, "viewer" role
     - Email/password → "custom" account, "viewer" role
-    
+
     Args:
         email: User email address
         provider: Auth provider ("azure", "google", "apple", "password")
-    
+
     Returns:
         Tuple of (account_id, role)
 
@@ -43,10 +43,10 @@ def get_account_from_email(email: str, provider: str) -> tuple[str, str]:
 
 def normalize_provider(provider: str) -> str:
     """Normalize provider name to canonical format.
-    
+
     Args:
         provider: Provider string (case-insensitive)
-    
+
     Returns:
         Normalized provider: "azure", "google", "apple", "password"
 

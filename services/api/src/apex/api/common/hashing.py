@@ -9,15 +9,15 @@ from typing import Any
 
 def compute_payload_sha256(payload: dict[str, Any]) -> str:
     """Compute deterministic SHA256 hash of payload.
-    
+
     Normalizes payload by:
     - Sorting keys
     - Excluding timestamps
     - Deterministic JSON encoding
-    
+
     Args:
         payload: Dict with keys: module, config, files, cost_snapshot
-    
+
     Returns:
         SHA256 hex digest
 

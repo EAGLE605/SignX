@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
-from decimal import Decimal
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import sqlalchemy as sa
 from sqlalchemy import (
@@ -19,6 +17,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from .deps import settings
+
+if TYPE_CHECKING:
+    from datetime import date, datetime
+    from decimal import Decimal
 
 
 class Base(DeclarativeBase):

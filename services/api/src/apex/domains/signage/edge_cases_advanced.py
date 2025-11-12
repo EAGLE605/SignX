@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Advanced Edge Case Handling
+"""APEX Signage Engineering - Advanced Edge Case Handling.
 
 Multi-cabinet stacking, extreme conditions, soil edge cases, and abstain paths.
 """
@@ -6,9 +6,10 @@ Multi-cabinet stacking, extreme conditions, soil edge cases, and abstain paths.
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .models import Cabinet, SiteLoads
+if TYPE_CHECKING:
+    from .models import Cabinet, SiteLoads
 
 # ========== Multi-Cabinet Stacking Edge Cases ==========
 
@@ -22,11 +23,11 @@ class EdgeCaseDetector:
         pole_center_x: float = 0.0,
     ) -> dict[str, Any]:
         """Detect eccentric loading (cabinets not aligned on pole centerline).
-        
+
         Args:
             cabinets: Cabinet list
             pole_center_x: Pole centerline X coordinate (ft)
-        
+
         Returns:
             Dict with is_eccentric, eccentricity_ft, torsional_moment_kipft, recommendation
 
@@ -73,10 +74,10 @@ class EdgeCaseDetector:
         cabinets: list[Cabinet],
     ) -> dict[str, Any]:
         """Detect non-symmetric cabinet arrangements (torsional concerns).
-        
+
         Args:
             cabinets: Cabinet list
-    
+
         Returns:
             Dict with is_non_symmetric, asymmetry_ratio, recommendation
 
@@ -119,11 +120,11 @@ class EdgeCaseDetector:
         site: SiteLoads,
     ) -> dict[str, Any]:
         """Analyze progressive failure scenario (what if one cabinet fails?).
-        
+
         Args:
             cabinets: Cabinet list
             site: Site loads
-    
+
         Returns:
             Dict with worst_case_cabinet, failure_load_factor, recommendation
 
@@ -177,12 +178,12 @@ def check_combined_wind_seismic(
     site_class: str = "C",
 ) -> dict[str, Any]:
     """Check combined wind + seismic per ASCE 7-22 Section 12.4.3.
-    
+
     Args:
         wind_load_kipft: Wind load
         seismic_load_kipft: Seismic load
         site_class: Site class
-    
+
     Returns:
         Dict with combined_load, load_combination, recommendation
 
@@ -214,12 +215,12 @@ def check_ice_loading(
     site_temperature_f: float = 32.0,
 ) -> dict[str, Any]:
     """Check ice loading on cabinets per ASCE 7-22 Chapter 10.
-    
+
     Args:
         cabinet_area_ft2: Cabinet area
         ice_thickness_in: Ice thickness (inches)
         site_temperature_f: Site temperature (°F)
-    
+
     Returns:
         Dict with ice_load_lbf, added_weight_lb, recommendation
 
@@ -255,12 +256,12 @@ def check_temperature_effects(
     material: str = "steel",
 ) -> dict[str, Any]:
     """Check thermal expansion and cold weather effects.
-    
+
     Args:
         temperature_f: Site temperature (°F)
         pole_length_ft: Pole length
         material: Material type
-    
+
     Returns:
         Dict with thermal_expansion_in, brittleness_risk, recommendation
 
@@ -299,11 +300,11 @@ def check_layered_soil(
     footing_depth_ft: float,
 ) -> dict[str, Any]:
     """Check layered soil profiles (different bearing at different depths).
-    
+
     Args:
         soil_layers: List of {depth_top_ft, depth_bottom_ft, bearing_psf}
         footing_depth_ft: Proposed footing depth
-    
+
     Returns:
         Dict with effective_bearing_psf, governing_layer, recommendation
 
@@ -346,12 +347,12 @@ def check_groundwater_effects(
     soil_bearing_psf: float = 3000.0,
 ) -> dict[str, Any]:
     """Check groundwater effects: saturated soil, buoyancy.
-    
+
     Args:
         groundwater_depth_ft: Groundwater table depth
         footing_depth_ft: Footing depth
         soil_bearing_psf: Dry soil bearing
-    
+
     Returns:
         Dict with effective_bearing_psf, buoyancy_lbf, recommendation
 
@@ -393,12 +394,12 @@ def check_frost_heave(
     location: str = "northern",
 ) -> dict[str, Any]:
     """Check frost heave concerns (seasonal movement).
-    
+
     Args:
         frost_depth_ft: Typical frost depth
         footing_depth_ft: Proposed footing depth
         location: Geographic location
-    
+
     Returns:
         Dict with frost_risk, recommended_depth_ft, recommendation
 
@@ -441,13 +442,13 @@ def abstain_with_recommendation(
     confidence: float = 0.0,
 ) -> dict[str, Any]:
     """Return abstain response with specific recommendation.
-    
+
     Args:
         edge_case_type: Type of edge case ("eccentric", "extreme_wind", "soil", etc.)
         reason: Explanation of why abstaining
         recommendation: Specific recommendation (e.g., "Requires geotechnical report")
         confidence: Confidence level (0.0 for abstain)
-    
+
     Returns:
         Dict with result=None, confidence=0.0, assumptions, recommendation
 

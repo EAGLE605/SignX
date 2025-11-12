@@ -1,4 +1,4 @@
-"""Custom Exception Hierarchy for Signage Engineering Domain
+"""Custom Exception Hierarchy for Signage Engineering Domain.
 
 Provides structured error handling with engineering context and code references.
 All exceptions include metadata for audit trails and debugging.
@@ -21,7 +21,7 @@ class SignageEngineeringError(Exception):
         message: str,
         code_ref: str | None = None,
         **context: Any,
-    ):
+    ) -> None:
         """Initialize engineering error with context.
 
         Args:

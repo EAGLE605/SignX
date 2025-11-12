@@ -1,4 +1,4 @@
-"""APEX Signage Engineering - Calibration & Uncertainty Analysis
+"""APEX Signage Engineering - Calibration & Uncertainty Analysis.
 
 Monte Carlo reliability analysis and sensitivity analysis.
 """
@@ -24,9 +24,9 @@ def monte_carlo_reliability(
     use_antithetic: bool = True,
 ) -> dict[str, Any]:
     """Monte Carlo reliability analysis per ASCE 7.
-    
+
     Enhanced with importance sampling, antithetic variates, and Latin hypercube.
-    
+
     Args:
         load_mean: Mean load value
         load_std: Standard deviation of load
@@ -36,10 +36,10 @@ def monte_carlo_reliability(
         target_beta: Target reliability index (3.5 per ASCE 7)
         use_importance_sampling: Focus on tail distributions
         use_antithetic: Use antithetic variates to reduce variance
-    
+
     Returns:
         Dict with beta, failure_probability, passes_target
-    
+
     References:
         ASCE 7-22: Target β = 3.5 for normal importance structures
         Hasofer-Lind reliability index
@@ -119,18 +119,18 @@ def sensitivity_analysis(
     n_samples: int = 1000,
 ) -> dict[str, Any]:
     """Sensitivity analysis using Sobol indices.
-    
+
     Determines which inputs have the most influence on output.
-    
+
     Args:
         input_means: Dict of input parameter means
         input_stds: Dict of input parameter standard deviations
         output_function: Function that computes output given input dict
         n_samples: Number of samples for Sobol analysis
-    
+
     Returns:
         Dict with ranked_inputs, sensitivities (Sobol indices)
-    
+
     References:
         Sobol (1993) "Sensitivity Analysis for Nonlinear Mathematical Models"
 
@@ -200,12 +200,12 @@ def compute_uncertainty_bands(
     confidence_level: float = 0.9,
 ) -> dict[str, float]:
     """Compute uncertainty bands with confidence intervals.
-    
+
     Args:
         nominal_value: Nominal/mean value
         coefficient_of_variation: CV = σ/μ (default 10%)
         confidence_level: Confidence level (default 90%)
-    
+
     Returns:
         Dict with nominal, lower_bound, upper_bound, std_dev
 

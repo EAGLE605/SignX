@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import structlog
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from .audit import log_audit
 from .models_audit import ComplianceRecord, PEStamp
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -52,7 +55,7 @@ async def check_compliance(
     notes: str | None = None,
 ) -> ComplianceRecord:
     """Check and record compliance with FAA/airport requirements.
-    
+
     Args:
         db: Database session
         project_id: Project ID
@@ -60,14 +63,15 @@ async def check_compliance(
         compliance_data: Detailed compliance data
         verified_by: User ID of verifier (PE for stamped calculations)
         notes: Optional compliance notes
-    
+
     Returns:
         ComplianceRecord instance
 
     """
     requirement = FAA_REQUIREMENTS.get(requirement_type)
     if not requirement:
-        raise ValueError(f"Unknown requirement type: {requirement_type}")
+        msg = f"Unknown requirement type: {requirement_type}"
+        raise ValueError(msg)
 
     # Determine compliance status
     status = compliance_data.get("status", "pending")
@@ -153,10 +157,10 @@ async def verify_breakaway_compliance(
     verified_by: str | None = None,
 ) -> ComplianceRecord:
     """Verify breakaway compliance per FAA-AC-70/7460-1L.
-    
+
     Breakaway requirement: Sign support must break away upon impact
     without causing injury to vehicle occupants.
-    
+
     Simplified check: Pole height > 40ft requires breakaway design.
     """
     is_compliant = pole_height_ft <= 40.0 or material in ["breakaway", "frangible"]
@@ -190,7 +194,7 @@ async def verify_wind_load_compliance(
     verified_by: str | None = None,
 ) -> ComplianceRecord:
     """Verify wind load compliance per ASCE 7.
-    
+
     Checks that calculated wind loads meet minimum design requirements.
     """
     # Simplified: Check if wind load calculation is reasonable
@@ -229,7 +233,7 @@ async def create_pe_stamp(
     pdf_url: str | None = None,
 ) -> PEStamp:
     """Create Professional Engineer stamp for calculation.
-    
+
     Args:
         db: Database session
         project_id: Project ID
@@ -241,7 +245,7 @@ async def create_pe_stamp(
         code_references: List of code references (ASCE, AISC, etc.)
         calculation_id: Optional specific calculation ID
         pdf_url: Optional link to stamped PDF
-    
+
     Returns:
         PEStamp instance
 

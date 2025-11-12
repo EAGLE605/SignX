@@ -3,20 +3,22 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, Request
 from slowapi.util import get_remote_address
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db import Project, ProjectEvent
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 async def require_project(project_id: str, db: AsyncSession) -> Project:
     """Verify project exists and return it, or raise 404.
-    
+
     Reduces duplication across routes that need to validate project existence.
     """
     result_query = await db.execute(select(Project).where(Project.project_id == project_id))
@@ -51,7 +53,7 @@ async def fetch_project_with_history(project_id: str, db: AsyncSession) -> Proje
 
 def _extract_request_metadata(request: Request | None) -> dict[str, Any]:
     """Extract IP address, user agent, and other request metadata.
-    
+
     Returns dict with ip_address, user_agent, and optional proxy headers.
     """
     metadata: dict[str, Any] = {}
@@ -90,14 +92,14 @@ async def log_event(
     after_state: dict | None = None,
 ) -> None:
     """Helper to append event to audit log with full compliance metadata.
-    
+
     Captures:
     - Who: actor (user_id)
     - What: event_type, before/after states
     - When: timestamp (auto)
     - Where: IP address, user agent
     - Why: context in data field
-    
+
     Args:
         session: Database session
         project_id: Project identifier
@@ -142,7 +144,7 @@ async def log_event(
 
 def _compute_diff(before: dict, after: dict) -> dict:
     """Compute diff between before and after states.
-    
+
     Returns dict with:
     - added: keys only in after
     - removed: keys only in before

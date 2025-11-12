@@ -1,4 +1,4 @@
-"""INSA Symbolic Rules for Sign Manufacturing
+"""INSA Symbolic Rules for Sign Manufacturing.
 
 Encodes engineering standards, manufacturing constraints, and domain knowledge
 as symbolic rules for the INSA reasoning engine.
@@ -447,18 +447,13 @@ if __name__ == "__main__":
     kb = create_signx_knowledge_base()
     load_all_rules(kb)
 
-    print(f"✓ Loaded {len(kb.rules)} symbolic rules")
-    print("\nRule Summary by Source:")
 
     sources = {}
     for rule in kb.rules.values():
         sources[rule.source] = sources.get(rule.source, 0) + 1
 
-    for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
-        print(f"  {source}: {count} rules")
+    for _source, _count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
+        pass
 
-    print("\nHard Constraints vs. Soft Preferences:")
     hard = sum(1 for r in kb.rules.values() if r.hard_constraint)
     soft = len(kb.rules) - hard
-    print(f"  Hard constraints: {hard}")
-    print(f"  Soft preferences: {soft}")

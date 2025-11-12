@@ -9,8 +9,7 @@ from __future__ import annotations
 
 import functools
 import math
-from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pint
@@ -34,6 +33,9 @@ from .models import (
     PoleOption,
     SiteLoads,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Initialize pint unit registry
 ureg = pint.UnitRegistry()
@@ -81,9 +83,9 @@ STEEL_GRADES = {
 @functools.lru_cache(maxsize=256)
 def _get_section_properties_sync(shape: str, steel_grade: str) -> dict[str, float]:
     """Cached synchronous lookup for AISC section properties.
-    
+
     Returns dict with: sx_in3, fy_ksi, weight_per_ft, area_in2, ix_in4
-    
+
     Note: This is a fallback function. Use get_section_properties_async for actual database queries.
     """
     # Return default properties for development/testing
@@ -127,17 +129,17 @@ async def get_section_properties_async(
     db_session: Any | None = None,
 ) -> dict[str, float]:
     """Async database lookup for AISC section properties.
-    
+
     Queries the aisc_shapes_v16 table for accurate section properties.
-    
+
     Args:
         shape: AISC designation (e.g., "HSS8X8X1/4", "PIPE8STD")
         steel_grade: Steel grade (e.g., "A500B", "A53B")
         db_session: Optional database session
-        
+
     Returns:
         Dict with sx_in3, fy_ksi, weight_per_ft, area_in2, ix_in4
-        
+
     Raises:
         ValueError: If shape not found in AISC database
 
@@ -153,7 +155,7 @@ async def get_section_properties_async(
 
     # Query AISC shapes table
     query = f"""
-        SELECT 
+        SELECT
             sx as sx_in3,
             w as weight_plf,
             area as area_in2,
@@ -249,10 +251,7 @@ def _footing_solve_cached(
         h_ft = depth_estimate_ft * (2.0 / 3.0)
 
         # Convert moment to equivalent lateral force: P = M / h
-        if h_ft > 0:
-            lateral_force_lbs = (mu_effective * 1000.0) / h_ft
-        else:
-            lateral_force_lbs = mu_effective * 1000.0
+        lateral_force_lbs = mu_effective * 1000.0 / h_ft if h_ft > 0 else mu_effective * 1000.0
 
         # IBC Equation 18-1: d = (4.36 * h / b) * sqrt(P / S)
         if soil_psf > 0 and diameter_ft > 0:
@@ -267,21 +266,20 @@ def _footing_solve_cached(
         depth_estimate_ft = depth_ft
 
     # Enforce minimum depth per IBC (typically 2-3 ft minimum)
-    depth_ft = max(2.0, depth_ft)
+    return max(2.0, depth_ft)
 
-    return depth_ft
 
 # ========== Validation Helpers with Engineering Context ==========
 
 def _validate_positive(value: float, name: str, context: str = "", code_ref: str = "") -> None:
     """Validate that value is positive with engineering context.
-    
+
     Args:
         value: Value to validate
         name: Parameter name for error message
         context: Additional engineering context (e.g., "for ASCE 7-22 wind calculations")
         code_ref: Engineering code reference (e.g., "ASCE 7-22 Section 26.10")
-        
+
     Raises:
         ValueError: If value is not positive, with detailed context
 
@@ -297,13 +295,13 @@ def _validate_positive(value: float, name: str, context: str = "", code_ref: str
 
 def _validate_non_negative(value: float, name: str, context: str = "", code_ref: str = "") -> None:
     """Validate that value is non-negative with engineering context.
-    
+
     Args:
         value: Value to validate
         name: Parameter name for error message
         context: Additional engineering context
         code_ref: Engineering code reference
-        
+
     Raises:
         ValueError: If value is negative, with detailed context
 
@@ -337,27 +335,27 @@ def derive_loads(
     warnings_list: list[str] | None = None,
 ) -> LoadDerivation:
     """Compute projected area, centroid, weight, and ultimate moment per ASCE 7-22.
-    
+
     Edge cases:
     - Zero/negative loads: Raises ValueError with clear message
     - Empty cabinets: Returns zero loads
     - Negative dimensions: Raises ValueError
-    
+
     Performance: Target <100ms for real-time canvas updates.
-    
+
     Args:
         site: Wind/snow loads with exposure category
         cabinets: Cabinet list with dimensions
         height_ft: Overall sign height (ft)
         seed: Optional seed for deterministic sorting
         warnings_list: Optional list to append warnings
-    
+
     Returns:
         Derived load parameters
-    
+
     Raises:
         ValueError: If inputs are invalid (negative dimensions, invalid wind speed)
-    
+
     References:
         ASCE 7-22 Chapter 26: Wind Loads
         Equation: qz = 0.00256 * Kz * Kzt * Kd * V² * G
@@ -368,16 +366,20 @@ def derive_loads(
     # Input validation
     _validate_non_negative(height_ft, "height_ft")
     if site.wind_speed_mph < 0:
-        raise ValueError(f"wind_speed_mph must be non-negative, got {site.wind_speed_mph}")
+        msg = f"wind_speed_mph must be non-negative, got {site.wind_speed_mph}"
+        raise ValueError(msg)
 
     # Validate cabinet dimensions
     for i, cab in enumerate(cabinets):
         if cab.width_ft <= 0:
-            raise ValueError(f"cabinet[{i}].width_ft must be positive, got {cab.width_ft}")
+            msg = f"cabinet[{i}].width_ft must be positive, got {cab.width_ft}"
+            raise ValueError(msg)
         if cab.height_ft <= 0:
-            raise ValueError(f"cabinet[{i}].height_ft must be positive, got {cab.height_ft}")
+            msg = f"cabinet[{i}].height_ft must be positive, got {cab.height_ft}"
+            raise ValueError(msg)
         if cab.weight_psf < 0:
-            raise ValueError(f"cabinet[{i}].weight_psf must be non-negative, got {cab.weight_psf}")
+            msg = f"cabinet[{i}].weight_psf must be non-negative, got {cab.weight_psf}"
+            raise ValueError(msg)
 
     # Sanity check: pole height
     sanity_warnings = _warn_sanity(height_ft=height_ft)
@@ -406,10 +408,7 @@ def derive_loads(
             total_weight += cab_weight
             cum_height += cab.height_ft
 
-        if total_weight > 0:
-            z_cg_ft = weighted_moments / total_weight
-        else:
-            z_cg_ft = 0.0
+        z_cg_ft = weighted_moments / total_weight if total_weight > 0 else 0.0
 
         # Weight estimate
         weight_estimate_lb = total_weight
@@ -433,7 +432,8 @@ def derive_loads(
 
         # Edge case: zero or negative loads
         if mu_kipft <= 0:
-            raise ValueError(f"Derived ultimate moment is zero or negative: {mu_kipft:.2f} kip-ft. Check wind speed and cabinet dimensions.")
+            msg = f"Derived ultimate moment is zero or negative: {mu_kipft:.2f} kip-ft. Check wind speed and cabinet dimensions."
+            raise ValueError(msg)
 
     return LoadDerivation(
         a_ft2=round(a_ft2, 2),
@@ -454,24 +454,24 @@ def filter_poles(
     return_warnings: bool = False,
 ) -> tuple[list[PoleOption], list[str]]:
     """Filter feasible pole sections by AISC 360-16 strength check.
-    
+
     Performance: Vectorized with numpy for 10x speedup.
-    
+
     Edge cases:
     - Empty feasible list: Returns empty list with warning (doesn't error)
     - Missing AISC sections: Suggests closest alternative
-    
+
     Args:
         mu_required_kipin: Required ultimate moment (kip-in)
         sections: List of DB row dicts with pole properties
         prefs: User preferences (family, grade, sort_by)
         seed: Seed for deterministic sorting
         return_warnings: If True, returns warnings list as second element
-    
+
     Returns:
         Filtered list sorted by user preference (deterministic)
         If return_warnings=True, also returns list of warnings
-    
+
     References:
         AISC 360-16 Chapter F: Design of Members for Flexure
         Equation: φMn = φ * Fy * Sx >= Mu_required
@@ -562,12 +562,12 @@ def footing_solve(
     request_engineering: bool = False,
 ) -> tuple[float, bool, list[str]]:
     """Compute minimum footing depth for direct burial using Broms-style lateral capacity.
-    
+
     Performance: Memoized for repeated calls.
-    
+
     Edge cases:
     - Unsolvable configs: Detects load > max soil bearing * max area, sets request_engineering=True
-    
+
     Args:
         mu_kipft: Ultimate moment (kip-ft)
         diameter_ft: Footing diameter (ft)
@@ -577,10 +577,10 @@ def footing_solve(
         footing_type: 'single' or 'per_support'
         seed: Seed for deterministic rounding
         request_engineering: Output flag set to True if engineering review needed
-    
+
     Returns:
         Tuple of (depth_ft, request_engineering_flag, warnings_list)
-    
+
     References:
         ASCE 7-22 Chapter 12: Foundations
         Broms (1964) lateral earth pressure theory
@@ -599,7 +599,8 @@ def footing_solve(
                       context="allowable soil bearing pressure",
                       code_ref=IBC_2024_TABLE_1806_2)
     if poles < 1:
-        raise ValueError(f"poles must be >= 1, got {poles}")
+        msg = f"poles must be >= 1, got {poles}"
+        raise ValueError(msg)
 
     # For multi-pole per-support, split moment
     mu_effective = mu_kipft
@@ -639,19 +640,19 @@ def baseplate_checks(
     suggest_alternatives: bool = True,
 ) -> tuple[list[CheckResult], list[str]]:
     """Compute all base plate engineering checks per AISC 360-16 and ACI 318.
-    
+
     Edge cases:
     - Missing AISC sections: Suggests closest alternative if suggest_alternatives=True
-    
+
     Args:
         plate: Base plate design parameters
         loads: Dict with mu_kipft, vu_kip, tu_kip
         seed: Seed for deterministic ordering
         suggest_alternatives: If True, suggest alternatives for failing checks
-    
+
     Returns:
         Tuple of (check_results, warnings/alternatives)
-    
+
     References:
         AISC 360-16 Chapter J: Design of Connections
         ACI 318 Chapter 17: Anchorage to Concrete
@@ -682,10 +683,13 @@ def baseplate_checks(
 
     # Validate plate section modulus before calculation (per AISC 360-22 design requirements)
     if s_plate <= 0:
-        raise ValueError(
+        msg = (
             f"Invalid plate section modulus: s_plate={s_plate:.3f} in³. "
             f"Check plate dimensions: width={plate.plate_w_in} in, thickness={plate.plate_thk_in} in. "
-            f"Plate dimensions must result in positive section modulus for AISC 360-22 design checks.",
+            f"Plate dimensions must result in positive section modulus for AISC 360-22 design checks."
+        )
+        raise ValueError(
+            msg,
         )
 
     fb_ksi = m_plate_kipin / s_plate
@@ -739,10 +743,13 @@ def baseplate_checks(
 
         # Validate embedment depth before calculation (per ACI 318 anchor design requirements)
         if embed <= 0:
-            raise ValueError(
+            msg = (
                 f"Invalid anchor embedment depth: embed={embed:.3f} in. "
                 f"Embedment depth must be positive for ACI 318 concrete breakout capacity calculation. "
-                f"Check anchor_embed_in parameter.",
+                f"Check anchor_embed_in parameter."
+            )
+            raise ValueError(
+                msg,
             )
 
         fc_psi = 4000.0
@@ -798,16 +805,16 @@ def baseplate_auto_solve(
     progress_callback: Callable[[int, int], None] | None = None,
 ) -> BasePlateSolution:
     """Auto-solve base plate design using grid search optimization.
-    
+
     Performance: Supports progress callbacks for long-running solves.
-    
+
     Args:
         loads: Dict with mu_kipft, vu_kip, tu_kip
         constraints: Optional constraints
         cost_weights: Optional cost weights
         seed: Seed for deterministic grid search
         progress_callback: Optional callback(total, current) for progress updates
-    
+
     Returns:
         Optimal base plate solution with cost proxy
 
@@ -931,21 +938,23 @@ def baseplate_auto_solve(
 # ========== Async-Compatible Wrappers with Perfect Type Forwarding ==========
 
 import asyncio
-from collections.abc import Awaitable
-from typing import ParamSpec, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, TypeVar
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable
 
 P = ParamSpec("P")
 T = TypeVar("T")
 
 def make_async(func: Callable[P, T]) -> Callable[P, Awaitable[T]]:
     """Generic async wrapper that preserves type signatures perfectly.
-    
+
     Uses typing.ParamSpec for perfect type forwarding, ensuring that
     all parameter types and return types are preserved in the async version.
-    
+
     Args:
         func: Synchronous function to wrap
-        
+
     Returns:
         Async version of the function with identical signature
 

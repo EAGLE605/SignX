@@ -41,7 +41,7 @@ def _load_pricing(version: str) -> dict[str, Any]:
 @router.post("/{project_id}/estimate", response_model=ResponseEnvelope)
 async def estimate(project_id: str, req: dict) -> ResponseEnvelope:
     """Generate instant price estimate with add-ons (no submit).
-    
+
     Body: {addons: [str], height_ft: float}
     Returns: Line items + total
     """

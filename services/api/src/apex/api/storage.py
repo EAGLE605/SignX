@@ -18,7 +18,7 @@ class StorageClient:
         access_key: str | None = None,
         secret_key: str | None = None,
         bucket: str | None = None,
-    ):
+    ) -> None:
         """Initialize storage client."""
         self.endpoint = endpoint
         self.bucket = bucket or "apex-uploads"
@@ -60,7 +60,7 @@ class StorageClient:
         content_type: str = "application/octet-stream",
     ) -> str | None:
         """Generate presigned PUT URL for upload.
-        
+
         Returns None if client not available.
         """
         if not self._client:
@@ -69,19 +69,18 @@ class StorageClient:
         try:
             from datetime import timedelta
 
-            url = self._client.presigned_put_object(
+            return self._client.presigned_put_object(
                 self.bucket,
                 object_name,
                 expires=timedelta(seconds=expires_seconds),
             )
-            return url
         except Exception as e:
-            logger.error("storage.presign_failed", object_name=object_name, error=str(e))
+            logger.exception("storage.presign_failed", object_name=object_name, error=str(e))
             return None
 
     def get_object_sha256(self, object_name: str) -> str | None:
         """Get SHA256 hash of stored object.
-        
+
         Returns None if client not available or object not found.
         """
         if not self._client:
@@ -102,7 +101,7 @@ class StorageClient:
 
             return hasher.hexdigest()
         except Exception as e:
-            logger.error("storage.sha256_failed", object_name=object_name, error=str(e))
+            logger.exception("storage.sha256_failed", object_name=object_name, error=str(e))
             return None
 
     def object_exists(self, object_name: str) -> bool:
@@ -118,6 +117,6 @@ class StorageClient:
         except S3Error:
             return False
         except Exception as e:
-            logger.error("storage.exists_failed", object_name=object_name, error=str(e))
+            logger.exception("storage.exists_failed", object_name=object_name, error=str(e))
             return False
 

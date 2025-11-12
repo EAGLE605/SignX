@@ -22,19 +22,20 @@ async def submit_to_pm(self, project_id: str, payload: dict[str, Any]) -> dict[s
         # Drop to DLQ rather than retrying until cool-off passes
         dlq_push("pm", {"project_id": project_id, "payload": payload, "reason": "breaker_open"})
         self.update_state(state=states.FAILURE, meta={"reason": "breaker_open"})
-        raise Ignore()
+        raise Ignore
 
     url = os.getenv("APEX_PM_URL", "http://pm.local/submit")
     try:
         async with httpx.AsyncClient(timeout=20.0) as client:
             r = await client.post(url, json={"project_id": project_id, **payload})
         if r.status_code >= 500:
-            raise RuntimeError(f"pm 5xx: {r.status_code}")
+            msg = f"pm 5xx: {r.status_code}"
+            raise RuntimeError(msg)
         if r.status_code >= 400:
             # Permanent failure → DLQ
             dlq_push("pm", {"project_id": project_id, "payload": payload, "status": r.status_code, "body": r.text})
             self.update_state(state=states.FAILURE, meta={"status": r.status_code})
-            raise Ignore()
+            raise Ignore
         breaker_record_success(breaker_name)
         result = r.json() if r.headers.get("content-type", "").startswith("application/json") else {"status": r.status_code}
         logger.info("pm.submitted", project_id=project_id, status=r.status_code)

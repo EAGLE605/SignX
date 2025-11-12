@@ -1,4 +1,4 @@
-"""Concrete and Rebar Design Service - ACI 318-19 Implementation
+"""Concrete and Rebar Design Service - ACI 318-19 Implementation.
 
 Provides rebar detailing, development lengths, and concrete volume calculations
 for sign structure foundations with complete material takeoff for cost estimation.
@@ -17,7 +17,7 @@ from enum import Enum
 import structlog
 from pydantic import BaseModel, Field
 
-from ..exceptions import CalculationError, ValidationError
+from signage.exceptions import CalculationError, ValidationError
 
 logger = structlog.get_logger(__name__)
 
@@ -227,7 +227,7 @@ class ConcreteRebarService:
 
     """
 
-    def __init__(self, code_version: str = "ACI318-19"):
+    def __init__(self, code_version: str = "ACI318-19") -> None:
         """Initialize concrete/rebar service.
 
         Args:

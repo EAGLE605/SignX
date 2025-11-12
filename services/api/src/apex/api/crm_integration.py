@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import httpx
 import structlog
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from .audit import log_audit
 from .deps import settings
 from .models_audit import CRMWebhook
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -30,7 +33,7 @@ class CRMWebhookPayload(BaseModel):
 class CRMClient:
     """Client for sending webhooks to KeyedIn CRM."""
 
-    def __init__(self, webhook_url: str | None = None, api_key: str | None = None):
+    def __init__(self, webhook_url: str | None = None, api_key: str | None = None) -> None:
         self.webhook_url = webhook_url or settings.KEYEDIN_WEBHOOK_URL if hasattr(settings, "KEYEDIN_WEBHOOK_URL") else None
         self.api_key = api_key or settings.KEYEDIN_API_KEY if hasattr(settings, "KEYEDIN_API_KEY") else None
         self.timeout = 30.0
@@ -43,13 +46,13 @@ class CRMClient:
         db: AsyncSession | None = None,
     ) -> bool:
         """Send webhook to KeyedIn CRM.
-        
+
         Args:
             event_type: Event type (e.g., "calculation.completed")
             data: Payload data
             direction: "outbound" (calcusign → keyedin) or "inbound" (keyedin → calcusign)
             db: Optional database session for logging
-        
+
         Returns:
             True if webhook sent successfully, False otherwise
 
@@ -122,7 +125,7 @@ class CRMClient:
             if db:
                 await db.commit()
 
-            logger.error("crm.webhook_error", event_type=event_type, error=str(e))
+            logger.exception("crm.webhook_error", event_type=event_type, error=str(e))
             return False
 
     async def handle_inbound_webhook(
@@ -133,12 +136,12 @@ class CRMClient:
         account_id: str | None = None,
     ) -> dict:
         """Handle inbound webhook from KeyedIn CRM.
-        
+
         Events from KeyedIn:
         - project.created: New project created in KeyedIn
         - project.updated: Project updated in KeyedIn
         - project.deleted: Project deleted in KeyedIn
-        
+
         Returns:
             Processing result
 
@@ -194,7 +197,7 @@ class CRMClient:
             webhook_record.processed_at = datetime.now(UTC)
             await db.commit()
 
-            logger.error("crm.webhook_processing_failed", event_type=payload.event_type, error=str(e))
+            logger.exception("crm.webhook_processing_failed", event_type=payload.event_type, error=str(e))
             raise
 
     async def _create_project_from_keyedin(

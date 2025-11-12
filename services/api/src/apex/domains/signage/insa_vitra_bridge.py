@@ -1,4 +1,4 @@
-"""VITRA-INSA Integration Bridge
+"""VITRA-INSA Integration Bridge.
 
 Connects VITRA vision analysis with INSA knowledge base for:
 1. Real-time knowledge updates from vision inspections
@@ -33,7 +33,7 @@ logger = structlog.get_logger(__name__)
 class VITRAINSABridge:
     """Bridge between VITRA vision analysis and INSA knowledge base."""
 
-    def __init__(self, kb: INSAKnowledgeBase):
+    def __init__(self, kb: INSAKnowledgeBase) -> None:
         self.kb = kb
         self.update_count = 0
 

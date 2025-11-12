@@ -39,7 +39,7 @@ async def get_db_connection():
 async def get_section_properties(conn: asyncpg.Connection, designation: str) -> SectionProperties | None:
     """Get AISC section properties from database."""
     result = await conn.fetchrow("""
-        SELECT 
+        SELECT
             aisc_manual_label as designation,
             type,
             w as weight_plf,
@@ -72,7 +72,7 @@ async def get_section_properties(conn: asyncpg.Connection, designation: str) -> 
 @router.post("/analyze", response_model=ResponseEnvelope)
 async def analyze_monument(req: dict) -> ResponseEnvelope:
     """Analyze monument sign with specified pole section.
-    
+
     Body: {
         project_id: str,
         pole_height_ft: float,
@@ -213,14 +213,14 @@ async def analyze_monument(req: dict) -> ResponseEnvelope:
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
-        logger.error("monument.analyze.error", error=str(e))
+        logger.exception("monument.analyze.error", error=str(e))
         raise HTTPException(status_code=500, detail=f"Analysis failed: {e!s}")
 
 
 @router.post("/optimize", response_model=ResponseEnvelope)
 async def optimize_monument(req: dict) -> ResponseEnvelope:
     """Find optimal monument pole section for given requirements.
-    
+
     Body: {
         pole_height_ft: float,
         sign_width_ft: float,
@@ -341,7 +341,7 @@ async def optimize_monument(req: dict) -> ResponseEnvelope:
             await conn.close()
 
     except Exception as e:
-        logger.error("monument.optimize.error", error=str(e))
+        logger.exception("monument.optimize.error", error=str(e))
         raise HTTPException(status_code=500, detail=f"Optimization failed: {e!s}")
 
 
@@ -352,10 +352,10 @@ async def get_monument_sections(
     prefer_a1085: bool = False,
 ) -> ResponseEnvelope:
     """Get available monument pole sections from AISC database.
-    
+
     Query params:
     - max_diameter: Maximum diameter in inches (default 14)
-    - min_diameter: Minimum diameter in inches (default 6)  
+    - min_diameter: Minimum diameter in inches (default 6)
     - prefer_a1085: Show only A1085 sections (default false)
     """
     assumptions: list[str] = []
@@ -366,7 +366,7 @@ async def get_monument_sections(
         try:
             # Query monument-suitable sections
             query = """
-            SELECT 
+            SELECT
                 designation,
                 type,
                 diameter_in,
@@ -432,14 +432,14 @@ async def get_monument_sections(
             await conn.close()
 
     except Exception as e:
-        logger.error("monument.sections.error", error=str(e))
+        logger.exception("monument.sections.error", error=str(e))
         raise HTTPException(status_code=500, detail=f"Query failed: {e!s}")
 
 
 @router.post("/foundation", response_model=ResponseEnvelope)
 async def design_foundation(req: dict) -> ResponseEnvelope:
     """Design foundation for monument sign.
-    
+
     Body: {
         overturning_moment_kipft: float,
         dead_load_lbs: float,
@@ -537,5 +537,5 @@ async def design_foundation(req: dict) -> ResponseEnvelope:
         )
 
     except Exception as e:
-        logger.error("monument.foundation.error", error=str(e))
+        logger.exception("monument.foundation.error", error=str(e))
         raise HTTPException(status_code=500, detail=f"Foundation design failed: {e!s}")

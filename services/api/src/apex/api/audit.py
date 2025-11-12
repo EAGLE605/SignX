@@ -9,7 +9,6 @@ import structlog
 from fastapi import Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .auth import TokenData
 from .models_audit import AuditLog
 
 logger = structlog.get_logger(__name__)

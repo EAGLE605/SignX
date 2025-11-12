@@ -52,7 +52,7 @@ async def generate_pe_stamped_report(
         result = await db.execute(
             select(PEStamp)
             .where(PEStamp.project_id == project_id)
-            .where(PEStamp.is_revoked == False)
+            .where(not PEStamp.is_revoked)
             .order_by(PEStamp.stamped_at.desc())
         )
         pe_stamp = result.scalar_one_or_none()

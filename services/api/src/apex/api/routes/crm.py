@@ -42,8 +42,7 @@ async def receive_keyedin_webhook(
     No authentication required (validated via webhook signature/secret)
     """
     # Extract IP and user agent
-    ip_address = request.client.host if request.client else None
-    user_agent = request.headers.get("user-agent")
+    request.headers.get("user-agent")
     
     # Validate webhook (in production, verify signature)
     # TODO: Add webhook signature validation

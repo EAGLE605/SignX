@@ -136,7 +136,7 @@ class EdgeCaseDetector:
         worst_case = None
         min_load_factor = float("inf")
         
-        for i, cab in enumerate(cabinets):
+        for i, _cab in enumerate(cabinets):
             # Remove this cabinet, recalculate loads
             remaining = [c for j, c in enumerate(cabinets) if j != i]
             if not remaining:

@@ -143,21 +143,20 @@ def pareto_optimize_poles(
     
     # Evaluate initial population
     fitnesses = list(map(toolbox.evaluate, population))
-    for ind, fit in zip(population, fitnesses):
+    for ind, fit in zip(population, fitnesses, strict=False):
         ind.fitness.values = fit
     
     # Adaptive stopping and elitism
     from .performance import AdaptiveStopping
     
     stopping = AdaptiveStopping(improvement_threshold=0.01, patience=5)
-    best_fitness_history = []
     
     # Evolve with adaptive stopping
     max_generations = 20
     for generation in range(max_generations):
         offspring = algorithms.varAnd(population, toolbox, cxpb=0.7, mutpb=0.3)
         fits = toolbox.map(toolbox.evaluate, offspring)
-        for ind, fit in zip(offspring, fits):
+        for ind, fit in zip(offspring, fits, strict=False):
             ind.fitness.values = fit
         
         # Elitism: Keep top 10% (5 best)
@@ -370,7 +369,7 @@ def baseplate_optimize_ga(
     
     # Evaluate initial population
     fitnesses = list(map(toolbox.evaluate, population))
-    for ind, fit in zip(population, fitnesses):
+    for ind, fit in zip(population, fitnesses, strict=False):
         ind.fitness.values = fit
     
     best_fitness = min(ind.fitness.values[0] for ind in population)
@@ -380,7 +379,6 @@ def baseplate_optimize_ga(
     stagnant_generations = 0
     
     # Diversity preservation: track solution diversity
-    previous_population_diversity = None
     
     for generation in range(max_generations):
         # Adaptive mutation: increase if stagnant
@@ -396,7 +394,7 @@ def baseplate_optimize_ga(
         
         offspring = algorithms.varAnd(population, toolbox, cxpb=0.7, mutpb=mutpb)
         fits = toolbox.map(toolbox.evaluate, offspring)
-        for ind, fit in zip(offspring, fits):
+        for ind, fit in zip(offspring, fits, strict=False):
             ind.fitness.values = fit
         
         # Elitism: Always keep top 10% (5 best)

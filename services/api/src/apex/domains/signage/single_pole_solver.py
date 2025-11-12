@@ -226,7 +226,7 @@ def analyze_single_pole_sign(config: SinglePoleConfig) -> SinglePoleResults:
 
     # Dead load moment at base (very small for typical signs)
     # Conservative assumption: dead load acts at sign centroid
-    sign_centroid_height = config.pole_height_ft + (config.sign_height_ft / 2.0)
+    config.pole_height_ft + (config.sign_height_ft / 2.0)
     dead_load_moment_kipft = (total_dead_load / 1000.0) * 0.0  # Zero for vertical load, no eccentricity
 
     # Evaluate all 7 IBC 2024 load combinations

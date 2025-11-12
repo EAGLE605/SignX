@@ -25,7 +25,7 @@ async def _proxy(
     url = f"{base}/{path.lstrip('/')}"
     async with httpx.AsyncClient(timeout=15) as cx:
         resp = await cx.request(method, url, json=body)
-        content_type = resp.headers.get("content-type", "application/json")
+        resp.headers.get("content-type", "application/json")
         try:
             return resp.status_code, resp.json()
         except Exception:

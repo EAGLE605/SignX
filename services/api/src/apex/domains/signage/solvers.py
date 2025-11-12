@@ -183,7 +183,7 @@ async def get_section_properties_async(
             warnings.warn(
                 f"AISC section '{shape}' not found in database. Using approximate values. "
                 f"Verify designation format (e.g., 'HSS8X8X1/4', 'PIPE8STD').",
-                UserWarning
+                UserWarning, stacklevel=2
             )
             return _get_section_properties_sync(shape, steel_grade)
             
@@ -192,7 +192,7 @@ async def get_section_properties_async(
         import warnings
         warnings.warn(
             f"Database query failed for AISC section '{shape}': {e}. Using fallback values.",
-            UserWarning
+            UserWarning, stacklevel=2
         )
         return _get_section_properties_sync(shape, steel_grade)
 
@@ -422,7 +422,6 @@ def derive_loads(
         kz = exposure_factor
         kzt = 1.0
         kd = 0.85
-        g = 0.85  # Gust effect factor (used in design pressure, NOT velocity pressure)
         v_basic = site.wind_speed_mph
 
         # Velocity pressure per ASCE 7-22 Equation 26.10-1 (WITHOUT G factor)

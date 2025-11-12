@@ -168,7 +168,7 @@ def connection_design(
         AISC Table J3.2: Available Strength of Bolts
     """
     # Bolt capacities per AISC Table J3.2
-    fy_bolt = {"A325": 90.0, "A490": 113.0}.get(bolt_grade, 90.0)
+    {"A325": 90.0, "A490": 113.0}.get(bolt_grade, 90.0)
     fu_bolt = {"A325": 120.0, "A490": 150.0}.get(bolt_grade, 120.0)
     
     # Bolt area

@@ -181,7 +181,7 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
     
     height_ft = float(req.get("height_ft", 30))
     moment_kipft = float(req.get("moment_kipft", 50))
-    lateral_kip = float(req.get("lateral_kip", 2))
+    float(req.get("lateral_kip", 2))
     shape_types = req.get("shape_types", ["HSS", "PIPE"])
     num_options = int(req.get("num_options", 10))
     
@@ -192,7 +192,6 @@ async def get_single_pole_options(req: dict) -> ResponseEnvelope:
         # Calculate requirements
         fy_ksi = 50
         phi_b = 0.9  # Flexure
-        phi_c = 0.9  # Compression
         
         # Slenderness check: L/r <= 200
         min_r = height_ft * 12 / 200

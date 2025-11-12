@@ -44,6 +44,7 @@ from .routes.submission import router as submission_router
 from .routes.tasks import router as tasks_router
 from .routes.uploads import router as uploads_router
 from .routes.vitra import router as vitra_router
+from .routes.insa import router as insa_router
 from .schemas import (  # Must import first for forward refs
     ResponseEnvelope,
 )
@@ -300,6 +301,9 @@ app.include_router(tasks_router, tags=["tasks"])
 
 # Include VITRA vision analysis router
 app.include_router(vitra_router, tags=["vitra-vision"])
+
+# Include INSA neuro-symbolic scheduling router
+app.include_router(insa_router, tags=["insa-scheduling"])
 
 
 # Tracing last to ensure provider in place

@@ -11,7 +11,7 @@ dependencies = [
     "orjson==3.10.7",
     "pyyaml==6.0.2",
     "reportlab==4.0.0",
-    "pillow==10.0.0",
+    "pillow==10.3.0",
 ]
 
 [tool.uv]

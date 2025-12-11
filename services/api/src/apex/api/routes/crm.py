@@ -2,21 +2,62 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import hashlib
+import hmac
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import get_db
-from ..auth import get_current_user_optional, TokenData
-from ..crm_integration import crm_client, CRMWebhookPayload
-from ..schemas import ResponseEnvelope
+from ..auth import TokenData, get_current_user_optional
 from ..common.models import make_envelope
-from ..deps import get_code_version, get_model_config
+from ..crm_integration import CRMWebhookPayload, crm_client
+from ..db import get_db
+from ..deps import get_code_version, get_model_config, settings
+from ..schemas import ResponseEnvelope
 
 logger = structlog.get_logger(__name__)
+
+
+def verify_webhook_signature(
+    payload_body: bytes,
+    signature_header: str | None,
+    secret: str | None,
+) -> bool:
+    """Verify HMAC-SHA256 webhook signature.
+
+    Args:
+        payload_body: Raw request body bytes
+        signature_header: Value of X-Webhook-Signature header
+        secret: Webhook secret key
+
+    Returns:
+        True if signature is valid or if secret is not configured (dev mode)
+    """
+    # Skip validation if no secret configured (dev mode)
+    if not secret:
+        logger.warning("webhook.signature.skipped", reason="No KEYEDIN_API_KEY configured")
+        return True
+
+    if not signature_header:
+        logger.warning("webhook.signature.missing")
+        return False
+
+    # Compute expected signature
+    expected_sig = hmac.new(
+        key=secret.encode("utf-8"),
+        msg=payload_body,
+        digestmod=hashlib.sha256,
+    ).hexdigest()
+
+    # Compare signatures (timing-safe)
+    is_valid = hmac.compare_digest(f"sha256={expected_sig}", signature_header)
+
+    if not is_valid:
+        logger.warning("webhook.signature.invalid")
+
+    return is_valid
 
 router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 
@@ -24,7 +65,7 @@ router = APIRouter(prefix="/api/v1/crm", tags=["crm"])
 class WebhookPayload(BaseModel):
     """Inbound webhook payload from KeyedIn."""
     event_type: str
-    project_id: Optional[str] = None
+    project_id: str | None = None
     data: dict
 
 
@@ -33,22 +74,29 @@ async def receive_keyedin_webhook(
     payload: WebhookPayload,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    x_webhook_signature: str | None = Header(None, alias="X-Webhook-Signature"),
 ) -> ResponseEnvelope:
     """Receive webhook from KeyedIn CRM.
-    
+
     Events handled:
     - project.created: Create project in Calcusign
     - project.updated: Update project in Calcusign
     - project.deleted: Soft delete project
-    
-    No authentication required (validated via webhook signature/secret)
+
+    Security: Validates HMAC-SHA256 signature when KEYEDIN_API_KEY is configured.
     """
-    # Extract IP and user agent
-    ip_address = request.client.host if request.client else None
-    user_agent = request.headers.get("user-agent")
-    
-    # Validate webhook (in production, verify signature)
-    # TODO: Add webhook signature validation
+    # Validate webhook signature
+    body = await request.body()
+    if not verify_webhook_signature(body, x_webhook_signature, settings.KEYEDIN_API_KEY):
+        logger.warning(
+            "webhook.rejected",
+            event_type=payload.event_type,
+            ip=request.client.host if request.client else None,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid webhook signature",
+        )
     
     # Convert to CRMWebhookPayload
     crm_payload = CRMWebhookPayload(
@@ -81,7 +129,7 @@ async def receive_keyedin_webhook(
 async def send_webhook_to_keyedin(
     event_type: str,
     data: dict,
-    current_user: Optional[TokenData] = Depends(get_current_user_optional),
+    current_user: TokenData | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """Send webhook to KeyedIn CRM.
@@ -92,7 +140,10 @@ async def send_webhook_to_keyedin(
     - project.submitted: Project submitted for approval
     """
     if not current_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
     
     success = await crm_client.send_webhook(
         event_type=event_type,

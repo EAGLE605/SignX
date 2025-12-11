@@ -123,7 +123,9 @@ async def main() -> None:
     print("Starting synthetic data generation...")
     start_time = datetime.now()
     
-    conn = await asyncpg.connect("postgresql://apex:apex@localhost:5432/apex")
+    import os
+    database_url = os.getenv("DATABASE_URL", "postgresql://apex:apex@localhost:5432/apex")
+    conn = await asyncpg.connect(database_url)
     try:
         await generate_projects(conn, args.projects)
         await generate_payloads(conn, args.payloads)

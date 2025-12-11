@@ -4,26 +4,21 @@ from __future__ import annotations
 
 import asyncpg
 import structlog
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
+from fastapi import APIRouter, HTTPException
 
-from ..common.models import make_envelope
-from ..common.caching import cache_result
 from ..common.envelope import calc_confidence
-from ..deps import get_code_version, get_model_config
+from ..common.models import make_envelope
+from ..deps import settings
 from ..schemas import ResponseEnvelope, add_assumption
 
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/signage/poles", tags=["poles-aisc"])
 
-# Database connection
-DATABASE_URL = "postgresql://apex:apex@localhost:5432/apex"
-
 
 async def get_aisc_connection():
     """Get database connection for AISC data"""
-    return await asyncpg.connect(DATABASE_URL)
+    return await asyncpg.connect(settings.DATABASE_URL)
 
 
 @router.post("/cantilever-options", response_model=ResponseEnvelope)
@@ -442,7 +437,7 @@ async def get_shape_properties(designation: str) -> ResponseEnvelope:
             elif isinstance(value, float):
                 properties[key] = round(value, 3)
         
-        add_assumption(assumptions, f"Properties from AISC v16.0 database")
+        add_assumption(assumptions, "Properties from AISC v16.0 database")
         if properties.get('is_astm_a1085'):
             add_assumption(assumptions, "ASTM A1085 - Superior tolerances")
         

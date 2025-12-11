@@ -3,19 +3,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 import structlog
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import get_db
-from ..auth import get_current_user, TokenData
-from ..rbac import require_permission
 from ..audit import query_audit_logs
-from ..schemas import ResponseEnvelope
-from ..common.models import make_envelope
+from ..auth import TokenData, get_current_user
 from ..common.helpers import get_code_version, get_model_config
+from ..common.models import make_envelope
+from ..db import get_db
+from ..rbac import require_permission
+from ..schemas import ResponseEnvelope
 
 logger = structlog.get_logger(__name__)
 
@@ -25,13 +24,13 @@ router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
 @router.get("/logs", response_model=ResponseEnvelope)
 @require_permission("audit.read")
 async def get_audit_logs(
-    user_id: Optional[str] = Query(None, description="Filter by user ID"),
-    account_id: Optional[str] = Query(None, description="Filter by account ID"),
-    action: Optional[str] = Query(None, description="Filter by action"),
-    resource_type: Optional[str] = Query(None, description="Filter by resource type"),
-    resource_id: Optional[str] = Query(None, description="Filter by resource ID"),
-    start_date: Optional[datetime] = Query(None, description="Start date (ISO format)"),
-    end_date: Optional[datetime] = Query(None, description="End date (ISO format)"),
+    user_id: str | None = Query(None, description="Filter by user ID"),
+    account_id: str | None = Query(None, description="Filter by account ID"),
+    action: str | None = Query(None, description="Filter by action"),
+    resource_type: str | None = Query(None, description="Filter by resource type"),
+    resource_id: str | None = Query(None, description="Filter by resource ID"),
+    start_date: datetime | None = Query(None, description="Start date (ISO format)"),
+    end_date: datetime | None = Query(None, description="End date (ISO format)"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum results"),
     offset: int = Query(0, ge=0, description="Offset for pagination"),
     current_user: TokenData = Depends(get_current_user),

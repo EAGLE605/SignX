@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
-from typing import Optional
 
 import aiohttp
-import logging
 
 logger = logging.getLogger(__name__)
 
 
-async def geocode_address(address: str, api_key: Optional[str] = None) -> Optional[dict[str, float]]:
+async def geocode_address(address: str, api_key: str | None = None) -> dict[str, float] | None:
     """Geocode address to lat/lon.
     
     Returns: {"lat": float, "lon": float} or None if failed.

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 import structlog
 
@@ -38,7 +39,7 @@ class CircuitBreaker:
     to failing services.
     """
     
-    def __init__(self, name: str, config: Optional[CircuitBreakerConfig] = None):
+    def __init__(self, name: str, config: CircuitBreakerConfig | None = None):
         """Initialize circuit breaker.
         
         Args:
@@ -50,7 +51,7 @@ class CircuitBreaker:
         self.state = CircuitState.CLOSED
         self.failure_count = 0
         self.success_count = 0
-        self.last_failure_time: Optional[float] = None
+        self.last_failure_time: float | None = None
         self.half_open_attempts = 0
         self._lock = asyncio.Lock()
     
@@ -91,7 +92,7 @@ class CircuitBreaker:
             
             return result
             
-        except Exception as e:
+        except Exception:
             # Record failure
             async with self._lock:
                 await self._record_failure()
@@ -161,7 +162,7 @@ class CircuitBreakerOpen(Exception):
 _circuit_breakers: dict[str, CircuitBreaker] = {}
 
 
-def get_circuit_breaker(name: str, config: Optional[CircuitBreakerConfig] = None) -> CircuitBreaker:
+def get_circuit_breaker(name: str, config: CircuitBreakerConfig | None = None) -> CircuitBreaker:
     """Get or create circuit breaker for a service.
     
     Args:

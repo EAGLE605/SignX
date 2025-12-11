@@ -5,11 +5,9 @@ Shared primitives for sign structure design
 
 from __future__ import annotations
 
-from enum import Enum
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
-from pydantic import BaseModel, Field, ConfigDict
-
+from pydantic import BaseModel, ConfigDict, Field
 
 # Type Aliases
 Unit = float  # JSON floats; wrap with pint.Quantity at service boundary
@@ -29,7 +27,7 @@ class SiteLoads(BaseModel):
     """Wind and snow load data for a specific location."""
 
     wind_speed_mph: Unit
-    snow_load_psf: Optional[Unit] = None
+    snow_load_psf: Unit | None = None
     exposure: Exposure = "C"
 
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -81,9 +79,9 @@ class FootingConfig(BaseModel):
 
     shape: Literal["round", "square"] = "round"
     diameter_ft: Unit
-    min_depth_ft: Optional[Unit] = None
+    min_depth_ft: Unit | None = None
     spread_required: bool = False
-    footing_type: Optional[Literal["single", "per_support"]] = None  # multi-pole only
+    footing_type: Literal["single", "per_support"] | None = None  # multi-pole only
 
 
 class FootingResult(BaseModel):
@@ -122,7 +120,7 @@ class CheckResult(BaseModel):
     capacity: Unit
     unit: str
     pass_: bool = Field(alias="pass")  # noqa: A003
-    governing: Optional[str] = None
+    governing: str | None = None
     
     model_config = ConfigDict(populate_by_name=True)
 
@@ -131,7 +129,7 @@ class BasePlateChecks(BaseModel):
     """Complete base plate check set."""
 
     all_pass: bool
-    checks: List[CheckResult]
+    checks: list[CheckResult]
 
 
 class BasePlateSolution(BaseModel):
@@ -140,7 +138,7 @@ class BasePlateSolution(BaseModel):
     input: BasePlateInput
     checks: BasePlateChecks
     cost_proxy: Unit
-    governing_constraints: List[str]
+    governing_constraints: list[str]
 
 
 # ========== Multi-Pole Support Models ==========
@@ -163,12 +161,12 @@ class SignageConfig(BaseModel):
     module: ModuleType
     site: SiteLoads
     overall_height_ft: Unit
-    cabinets: List[Cabinet]
+    cabinets: list[Cabinet]
     supports: SupportConfig
     pole_prefs: PolePrefs
-    pole_size: Optional[str] = None  # From filtered options
-    footing: Optional[FootingConfig] = None
-    baseplate: Optional[BasePlateInput] = None
+    pole_size: str | None = None  # From filtered options
+    footing: FootingConfig | None = None
+    baseplate: BasePlateInput | None = None
 
     model_config = ConfigDict(extra="forbid")
 

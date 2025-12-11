@@ -7,27 +7,26 @@ in multiple formats (DXF, DWG, AI, CDR).
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from ..common.models import make_envelope
-from ..deps import get_code_version, get_model_config
-from ..schemas import ResponseEnvelope, add_assumption
 from ...domains.signage.services.cad_export_service import (
-    CADExportService,
     CADExportOptions,
+    CADExportService,
     CADFormat,
     DrawingScale,
 )
 from ...domains.signage.services.concrete_rebar_service import (
     ConcreteRebarService,
-    RebarScheduleInput,
     FoundationType,
+    RebarScheduleInput,
 )
+from ..common.models import make_envelope
+from ..deps import get_code_version, get_model_config
+from ..schemas import ResponseEnvelope, add_assumption
 
 logger = structlog.get_logger(__name__)
 
@@ -73,7 +72,7 @@ class FoundationPlanRequest(BaseModel):
     cover_in: float = Field(3.0, gt=0, description="Concrete cover (inches)")
 
     # Anchor bolts (optional)
-    anchor_layout: Optional[AnchorBoltLayoutRequest] = Field(None, description="Anchor bolt layout")
+    anchor_layout: AnchorBoltLayoutRequest | None = Field(None, description="Anchor bolt layout")
 
     # Export options
     format: CADFormatEnum = Field(CADFormatEnum.DXF, description="Export format (DXF only)")
@@ -82,7 +81,7 @@ class FoundationPlanRequest(BaseModel):
     # Title block
     project_name: str = Field("Untitled Project", description="Project name for title block")
     drawing_number: str = Field("FND-001", description="Drawing number")
-    engineer: Optional[str] = Field(None, description="Engineer name/stamp")
+    engineer: str | None = Field(None, description="Engineer name/stamp")
 
 
 class CADExportResponse(BaseModel):

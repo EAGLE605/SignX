@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import bcrypt
 import structlog
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +178,7 @@ class AccountLockoutManager:
             del self.locked_until[email]
         logger.debug("account.unlocked", email=email)
     
-    def is_locked(self, email: str) -> tuple[bool, Optional[float]]:
+    def is_locked(self, email: str) -> tuple[bool, float | None]:
         """Check if account is locked.
         
         Args:
@@ -225,7 +223,7 @@ class AccountLockoutManager:
 
 
 # Global lockout manager instance
-_lockout_manager: Optional[AccountLockoutManager] = None
+_lockout_manager: AccountLockoutManager | None = None
 
 
 def get_lockout_manager() -> AccountLockoutManager:

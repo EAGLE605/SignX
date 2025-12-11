@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import structlog
-from typing import Optional
 
 try:
     import redis.asyncio as aioredis
@@ -14,10 +13,10 @@ from ..deps import settings
 
 logger = structlog.get_logger(__name__)
 
-_client: Optional[aioredis.Redis] = None
+_client: aioredis.Redis | None = None
 
 
-async def get_redis_client() -> Optional[aioredis.Redis]:
+async def get_redis_client() -> aioredis.Redis | None:
     """Get singleton Redis client.
     
     Returns None if Redis unavailable or not configured.

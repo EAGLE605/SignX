@@ -6,7 +6,7 @@ Defines project lifecycle, payloads, and event tracking.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -27,10 +27,10 @@ class ProjectMeta(BaseModel):
     project_id: str = Field(..., description="Unique project identifier")
     account_id: str = Field(..., description="Account/tenant identifier")
     name: str = Field(..., description="Project name")
-    customer: Optional[str] = Field(None, description="Customer name")
-    description: Optional[str] = Field(None, description="Project description")
-    site_name: Optional[str] = Field(None, description="Site name")
-    street: Optional[str] = Field(None, description="Street address")
+    customer: str | None = Field(None, description="Customer name")
+    description: str | None = Field(None, description="Project description")
+    site_name: str | None = Field(None, description="Site name")
+    street: str | None = Field(None, description="Street address")
     status: Literal["draft", "estimating", "submitted", "accepted", "rejected"] = Field(
         "draft", description="Project status"
     )
@@ -38,7 +38,7 @@ class ProjectMeta(BaseModel):
     updated_by: str = Field(..., description="Last updater user ID")
     created_at: str = Field(..., description="ISO 8601 creation timestamp")
     updated_at: str = Field(..., description="ISO 8601 update timestamp")
-    etag: Optional[str] = Field(None, description="Optimistic locking token")
+    etag: str | None = Field(None, description="Optimistic locking token")
 
 
 class ProjectCreateRequest(BaseModel):
@@ -46,16 +46,16 @@ class ProjectCreateRequest(BaseModel):
 
     account_id: str = Field(..., description="Account ID")
     name: str = Field(..., description="Project name")
-    customer: Optional[str] = None
-    description: Optional[str] = None
+    customer: str | None = None
+    description: str | None = None
     created_by: str = Field(..., description="Creator user ID")
 
 
 class ProjectUpdateRequest(BaseModel):
     """Request to update a project."""
 
-    name: Optional[str] = None
-    customer: Optional[str] = None
-    description: Optional[str] = None
-    site_name: Optional[str] = None
-    street: Optional[str] = None
+    name: str | None = None
+    customer: str | None = None
+    description: str | None = None
+    site_name: str | None = None
+    street: str | None = None

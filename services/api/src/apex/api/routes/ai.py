@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 # Add services/ml to path
@@ -20,7 +19,6 @@ sys.path.insert(0, str(ml_services_path))
 from cost_model import CostPredictor
 
 from ..common.models import build_response_envelope
-from ..deps import get_code_version, get_model_config
 from ..schemas import ResponseEnvelope
 
 logger = structlog.get_logger(__name__)
@@ -28,7 +26,7 @@ logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai-predictions"])
 
 # Load model at startup (singleton)
-_cost_model: Optional[CostPredictor] = None
+_cost_model: CostPredictor | None = None
 
 
 def get_cost_model() -> CostPredictor:
@@ -67,12 +65,12 @@ class CostPredictionRequest(BaseModel):
     pole_size: float = Field(8.0, gt=0, le=24, description="Pole size in inches")
     pole_type: str = Field("round_hss", description="Pole type")
     foundation_type: str = Field("direct_burial", description="Foundation type")
-    embedment_depth_ft: Optional[float] = Field(None, description="Foundation depth in feet")
+    embedment_depth_ft: float | None = Field(None, description="Foundation depth in feet")
     
     # Optional fields
     importance_factor: float = Field(1.0, ge=0.85, le=1.15)
     pole_thickness_in: float = Field(0.25, gt=0)
-    concrete_volume_cuyd: Optional[float] = None
+    concrete_volume_cuyd: float | None = None
     soil_bearing_psf: float = Field(3000.0, gt=0)
     snow_load_psf: float = Field(0.0, ge=0)
 

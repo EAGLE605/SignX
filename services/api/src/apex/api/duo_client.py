@@ -5,8 +5,9 @@ Provides Duo authentication services with graceful fallback if not configured.
 
 from __future__ import annotations
 
+from typing import Any
+
 import structlog
-from typing import Any, Optional
 
 logger = structlog.get_logger(__name__)
 
@@ -25,7 +26,7 @@ class DuoService:
     Gracefully handles missing configuration (2FA optional).
     """
     
-    def __init__(self, ikey: Optional[str], skey: Optional[str], host: Optional[str]):
+    def __init__(self, ikey: str | None, skey: str | None, host: str | None):
         """Initialize Duo service.
         
         Args:
@@ -36,7 +37,7 @@ class DuoService:
         self.ikey = ikey
         self.skey = skey
         self.host = host
-        self._client: Optional[Auth] = None
+        self._client: Auth | None = None
         
         if DUO_AVAILABLE and ikey and skey and host:
             try:
@@ -58,8 +59,8 @@ class DuoService:
         username: str, 
         factor: str = "push",
         device: str = "auto",
-        passcode: Optional[str] = None
-    ) -> tuple[bool, Optional[str]]:
+        passcode: str | None = None
+    ) -> tuple[bool, str | None]:
         """Verify user with Duo 2FA.
         
         Args:
@@ -150,7 +151,7 @@ class DuoService:
             return {"error": str(e)}
 
 
-def get_duo_service() -> Optional[DuoService]:
+def get_duo_service() -> DuoService | None:
     """Get configured Duo service instance.
     
     Returns:

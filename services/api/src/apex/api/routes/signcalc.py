@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+import logging
+from typing import Any
 
 import httpx
 from fastapi import APIRouter, Depends, Request
 
 from ..common.models import make_envelope
 from ..deps import get_code_version, get_model_config
-from ..security_config import get_global_limiter, get_rate_limit
 from ..metrics import ABSTAIN_TOTAL
 from ..schemas import ResponseEnvelope
-import logging
+from ..security_config import get_global_limiter, get_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/v1/signcalc")
 
 
 async def _proxy(
-    method: str, path: str, body: Optional[dict[str, Any]]
+    method: str, path: str, body: dict[str, Any] | None
 ) -> tuple[int, dict[str, Any] | str]:
     base = "http://signcalc:8002"
     url = f"{base}/{path.lstrip('/')}"

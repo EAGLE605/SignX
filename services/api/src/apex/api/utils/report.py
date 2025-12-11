@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 import structlog
 
@@ -29,7 +28,7 @@ from ..common.hashing import compute_payload_sha256
 async def generate_report_from_payload(
     project_id: str,
     payload: dict,
-    root_path: Optional[Path] = None,
+    root_path: Path | None = None,
 ) -> dict[str, str]:
     """Generate PDF report from project payload with deterministic caching.
     

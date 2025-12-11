@@ -6,12 +6,11 @@ import hashlib
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Optional
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add domain path for imports
 _domains_path = Path(__file__).parent.parent.parent / "domains" / "signage"
@@ -24,15 +23,14 @@ from cantilever_solver import (
     CantileverType,
     ConnectionType,
     analyze_cantilever_sign,
-    optimize_cantilever_design,
     calculate_cantilever_foundation_loads,
+    optimize_cantilever_design,
 )
 
-from ..common.models import make_envelope
 from ..common.envelope import calc_confidence
-from ..common.transactions import with_transaction
+from ..common.models import make_envelope
+from ..db import Project, get_db
 from ..deps import get_code_version, get_model_config
-from ..db import get_db, Project
 from ..schemas import ResponseEnvelope, add_assumption
 
 logger = structlog.get_logger(__name__)
@@ -254,8 +252,8 @@ async def optimize_cantilever(req: dict) -> ResponseEnvelope:
 
 @router.get("/sections", response_model=ResponseEnvelope)
 async def get_cantilever_sections(
-    max_span_ft: Optional[float] = None,
-    shape_type: Optional[str] = None,
+    max_span_ft: float | None = None,
+    shape_type: str | None = None,
     db: AsyncSession = Depends(get_db),
 ) -> ResponseEnvelope:
     """

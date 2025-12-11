@@ -10,7 +10,6 @@ Standards: AISC 360-22, AISC Shapes Database v16.0
 from __future__ import annotations
 
 import functools
-from typing import Optional
 
 import structlog
 from pydantic import BaseModel, Field
@@ -40,15 +39,15 @@ class AISCSectionProperties(BaseModel):
     rx_in: float = Field(gt=0, description="Radius of gyration about x-axis (in)")
 
     # Section properties for minor axis (if applicable)
-    iy_in4: Optional[float] = Field(None, ge=0, description="Moment of inertia about y-axis (in⁴)")
-    sy_in3: Optional[float] = Field(None, ge=0, description="Section modulus about y-axis (in³)")
-    ry_in: Optional[float] = Field(None, ge=0, description="Radius of gyration about y-axis (in)")
+    iy_in4: float | None = Field(None, ge=0, description="Moment of inertia about y-axis (in⁴)")
+    sy_in3: float | None = Field(None, ge=0, description="Section modulus about y-axis (in³)")
+    ry_in: float | None = Field(None, ge=0, description="Radius of gyration about y-axis (in)")
 
     # Material properties
     fy_ksi: float = Field(gt=0, description="Yield strength (ksi)")
 
     # Torsional properties (for hollow sections)
-    j_in4: Optional[float] = Field(None, ge=0, description="Torsional constant (in⁴)")
+    j_in4: float | None = Field(None, ge=0, description="Torsional constant (in⁴)")
 
     class Config:
         frozen = True  # Immutable for caching

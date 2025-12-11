@@ -99,7 +99,7 @@ def _format_activity(event: Event) -> str:
         customer = event.data.get("customer", "Unknown")
         return f"New quote from {customer}"
     elif event.type == "file.organized":
-        return f"Files organized for project"
+        return "Files organized for project"
     return event.type
 
 

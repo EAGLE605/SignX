@@ -45,6 +45,8 @@ from .routes.site import router as site_router
 from .routes.submission import router as submission_router
 from .routes.tasks import router as tasks_router
 from .routes.uploads import router as uploads_router
+from .estimator import router as estimator_router
+from .estimator import work_codes_router, materials_router as estimator_materials_router
 from .schemas import (  # Must import first for forward refs
     ResponseEnvelope,
 )
@@ -309,6 +311,11 @@ app.include_router(cad_export_router, tags=["cad-export"])
 
 # Include AI/ML prediction router
 app.include_router(ai_router, tags=["ai-ml"])
+
+# Include estimator routers
+app.include_router(estimator_router, tags=["estimator"])
+app.include_router(work_codes_router, tags=["catalog"])
+app.include_router(estimator_materials_router, tags=["catalog"])
 
 
 # Tracing last to ensure provider in place

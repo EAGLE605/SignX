@@ -33,11 +33,20 @@ def verify_webhook_signature(
         secret: Webhook secret key
 
     Returns:
-        True if signature is valid or if secret is not configured (dev mode)
+        True if signature is valid. In dev mode (ENV != 'production'),
+        returns True with warning if secret not configured. In production,
+        fails closed if secret is missing.
     """
-    # Skip validation if no secret configured (dev mode)
+    # Fail closed in production if no secret configured
     if not secret:
-        logger.warning("webhook.signature.skipped", reason="No KEYEDIN_API_KEY configured")
+        if settings.ENV == "production":
+            logger.error(
+                "webhook.signature.missing_secret",
+                reason="KEYEDIN_API_KEY not configured in production - rejecting request",
+            )
+            return False
+        # Dev mode: allow bypass with warning
+        logger.warning("webhook.signature.skipped", reason="No KEYEDIN_API_KEY configured (dev mode)")
         return True
 
     if not signature_header:
